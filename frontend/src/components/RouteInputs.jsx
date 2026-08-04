@@ -1,7 +1,7 @@
 import React from "react";
 import { Target, ArrowRight, Flag, Plus } from "lucide-react";
 
-export default function RouteInputs() {
+export default function RouteInputs({nodes, start, end, setStart, setEnd}) {
   return (
     <section className="mb-6">
       <h2 className="text-sm font-semibold text-gray-900 mb-3">Route Inputs</h2>
@@ -11,8 +11,10 @@ export default function RouteInputs() {
         <div className="flex items-center gap-2 rounded-full border border-gray-300 px-3 py-2 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400">
           <Target className="w-4 h-4 text-gray-400 shrink-0" />
           <input
-            type="text"
-            placeholder="Enter starting point"
+            type="number"
+            value={start ?? ""}
+            onChange={(e)=>setStart(Number(e.target.value))}
+            placeholder="Node ID"
             className="w-full text-sm text-gray-700 placeholder-gray-400 outline-none bg-transparent"
           />
         </div>
@@ -23,8 +25,10 @@ export default function RouteInputs() {
         <div className="flex items-center gap-2 rounded-full border border-gray-300 px-3 py-2 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400">
           <ArrowRight className="w-4 h-4 text-gray-400 shrink-0" />
           <input
-            type="text"
-            placeholder="Enter destination"
+            type="number"
+            value={end ?? ""}
+            onChange={(e)=>setEnd(Number(e.target.value))}
+            placeholder="Node ID"
             className="w-full text-sm text-gray-700 placeholder-gray-400 outline-none bg-transparent"
           />
           <Flag className="w-4 h-4 text-gray-400 shrink-0" />
