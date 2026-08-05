@@ -41,14 +41,12 @@ def generate_traffic_dataset():
                 elif 'shop' in row and pd.notna(row['shop']):
                     if row['shop'] in ['mall', 'supermarket']: poi_type = "mall"
                 
-                # ---------------------------------------------------------
-                # THUẬT TOÁN EDGE SPLITTING (CẮT CẠNH CHÈN ĐỈNH)
-                # ---------------------------------------------------------
+                #Edge splitting
                 try:
                     # Tìm đoạn đường (cạnh) gần địa điểm này nhất
                     u, v, key = ox.distance.nearest_edges(G, X=lng, Y=lat)
                     
-                    # Thêm Node mới vào đồ thị (Đóng vai trò là địa điểm)
+                    # Thêm Node mới vào đồ thị
                     poi_id = poi_id_counter
                     poi_id_counter += 1
                     G.add_node(poi_id, y=lat, x=lng, name=str(name), type=poi_type)
@@ -118,7 +116,7 @@ def generate_traffic_dataset():
             node_name = data['name']
             node_type = data['type']
         else:
-            # Logic cũ: Gom tên đường để tạo tên ngã tư
+            # Gom tên đường để tạo tên ngã tư
             street_names = set()
             for u, v, key, edge_data in G.edges(node_id, keys=True, data=True):
                 if 'name' in edge_data:
