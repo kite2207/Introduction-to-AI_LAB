@@ -85,9 +85,9 @@ export default function HCMMap({
               [to.lat, to.lng],
             ]}
             pathOptions={{
-              color: "#999",
+              color: "#5795ff",
               weight: 1,
-              opacity: 0.35,
+              opacity: 0.4,
             }}
           />
         );
