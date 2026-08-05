@@ -8,7 +8,11 @@ def generate_traffic_dataset():
     print("1. Đang tải dữ liệu mạng lưới đường từ OpenStreetMap...")
     center_point = (10.768123, 106.666421) # Khu vực Quận 5 / Quận 10
     dist = 800
-    G = ox.graph_from_point(center_point, dist=dist, network_type='drive')
+    # Tạo bộ lọc: Chỉ lấy đường trục chính, đại lộ, và đường cấp 1, 2, 3
+    cf = '["highway"~"primary|secondary|tertiary|trunk|motorway|primary_link|secondary_link|tertiary_link"]'
+
+    # Tải đồ thị áp dụng bộ lọc (không cần dùng network_type='drive' nữa)
+    G = ox.graph_from_point(center_point, dist=dist, custom_filter=cf)
     
     # Định nghĩa các loại địa điểm muốn lấy
     tags = {

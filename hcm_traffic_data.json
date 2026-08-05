@@ -1,0 +1,2957 @@
+{
+    "366372448": {
+        "name": "Ngã giao Đường Sư Vạn Hạnh - Bà Hạt",
+        "lat": 10.7666685,
+        "lng": 106.6717951,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "5757841593",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 3,
+                "estimated_time": 100,
+                "distance": 222.3
+            },
+            {
+                "target_node": "366412106",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 94,
+                "distance": 125.08
+            },
+            {
+                "target_node": "11998294099",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 164,
+                "distance": 219.11
+            }
+        ]
+    },
+    "366379977": {
+        "name": "Ngã giao Nguyễn Ngọc Lộc - Ngô Quyền",
+        "lat": 10.7659541,
+        "lng": 106.6640381,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2433653225",
+                "direction": "two-way",
+                "risk_factors": "flooding",
+                "congestion_level": 4,
+                "estimated_time": 6,
+                "distance": 10.52
+            },
+            {
+                "target_node": "5462344912",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 4,
+                "estimated_time": 86,
+                "distance": 143.69
+            },
+            {
+                "target_node": "5780574617",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 53,
+                "distance": 118.81
+            }
+        ]
+    },
+    "366412106": {
+        "name": "Ngã giao Đường Sư Vạn Hạnh - Sư Vạn Hạnh",
+        "lat": 10.7677675,
+        "lng": 106.6715514,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2498090051",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 3,
+                "distance": 10.8
+            },
+            {
+                "target_node": "366372448",
+                "direction": "two-way",
+                "risk_factors": "flooding",
+                "congestion_level": 5,
+                "estimated_time": 94,
+                "distance": 125.08
+            }
+        ]
+    },
+    "366424502": {
+        "name": "Ngã giao Lý Thường Kiệt - Vĩnh Viễn",
+        "lat": 10.7620274,
+        "lng": 106.660487,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "5778688800",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 77,
+                "distance": 170.81
+            },
+            {
+                "target_node": "2302074153",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 2,
+                "estimated_time": 51,
+                "distance": 169.28
+            }
+        ]
+    },
+    "366463743": {
+        "name": "Ngã giao Bà Hạt - Nguyễn Tri Phương",
+        "lat": 10.7656666,
+        "lng": 106.6675063,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "5757841608",
+                "direction": "two-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 4,
+                "estimated_time": 8,
+                "distance": 13.34
+            },
+            {
+                "target_node": "5780574570",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 162,
+                "distance": 216.23
+            },
+            {
+                "target_node": "5780574617",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 271,
+                "distance": 361.72
+            }
+        ]
+    },
+    "698217134": {
+        "name": "Ngã giao Lê Hồng Phong - Hoàng Dư Khương",
+        "lat": 10.7736509,
+        "lng": 106.6716326,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2433281093",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 3,
+                "estimated_time": 74,
+                "distance": 165.26
+            },
+            {
+                "target_node": "9000014",
+                "direction": "one-way",
+                "risk_factors": "flooding",
+                "congestion_level": 1,
+                "estimated_time": 5,
+                "distance": 34.63
+            }
+        ]
+    },
+    "1997154462": {
+        "name": "Đường Vĩnh Viễn",
+        "lat": 10.7625511,
+        "lng": 106.6627723,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "5778688800",
+                "direction": "two-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 5,
+                "estimated_time": 64,
+                "distance": 85.53
+            }
+        ]
+    },
+    "1997154488": {
+        "name": "Đường Vĩnh Viễn",
+        "lat": 10.7628801,
+        "lng": 106.6641426,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "5780574607",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 29,
+                "distance": 64.9
+            }
+        ]
+    },
+    "2302073743": {
+        "name": "Ngã giao Lý Thường Kiệt - Đường 3 Tháng 2",
+        "lat": 10.7638243,
+        "lng": 106.6600501,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2433653211",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 5,
+                "distance": 10.92
+            },
+            {
+                "target_node": "4629359725",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 28,
+                "distance": 187.03
+            }
+        ]
+    },
+    "2302074153": {
+        "name": "Đường Lý Thường Kiệt",
+        "lat": 10.7634939,
+        "lng": 106.6600713,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "366424502",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 25,
+                "distance": 169.28
+            },
+            {
+                "target_node": "2302073743",
+                "direction": "one-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 2,
+                "estimated_time": 11,
+                "distance": 36.92
+            }
+        ]
+    },
+    "2433276952": {
+        "name": "Ngã giao Sư Vạn Hạnh - Đường 3 Tháng 2",
+        "lat": 10.7697582,
+        "lng": 106.6710494,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4629145035",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 7,
+                "distance": 9.97
+            },
+            {
+                "target_node": "4646816753",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 188,
+                "distance": 250.89
+            },
+            {
+                "target_node": "2498090051",
+                "direction": "two-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 2,
+                "estimated_time": 65,
+                "distance": 217.45
+            }
+        ]
+    },
+    "2433281093": {
+        "name": "Đường Hoàng Dư Khương",
+        "lat": 10.7750907,
+        "lng": 106.671928,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "698217134",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 1,
+                "estimated_time": 25,
+                "distance": 165.26
+            }
+        ]
+    },
+    "2433653211": {
+        "name": "Ngã giao Lý Thường Kiệt - Đường 3 Tháng 2",
+        "lat": 10.7639171,
+        "lng": 106.6600174,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4628048104",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 2,
+                "distance": 11.73
+            },
+            {
+                "target_node": "6712570972",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 13,
+                "distance": 22.38
+            }
+        ]
+    },
+    "2433653213": {
+        "name": "Điểm nút 2433653213",
+        "lat": 10.7680525,
+        "lng": 106.6678494,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6739847137",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 1,
+                "distance": 2.51
+            }
+        ]
+    },
+    "2433653223": {
+        "name": "Ngã giao Thành Thái - Đường 3 Tháng 2",
+        "lat": 10.767804,
+        "lng": 106.6671227,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2999030270",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 1,
+                "estimated_time": 2,
+                "distance": 12.5
+            },
+            {
+                "target_node": "6791343229",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 15,
+                "distance": 33.91
+            }
+        ]
+    },
+    "2433653225": {
+        "name": "Ngã giao Nguyễn Ngọc Lộc - Đường 3 Tháng 2",
+        "lat": 10.7660373,
+        "lng": 106.6639922,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "366379977",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 8,
+                "distance": 10.52
+            },
+            {
+                "target_node": "2433653232",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 143,
+                "distance": 317.96
+            }
+        ]
+    },
+    "2433653232": {
+        "name": "Đường Ba Tháng Hai",
+        "lat": 10.7646732,
+        "lng": 106.6614341,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4629359725",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 2,
+                "estimated_time": 4,
+                "distance": 14.03
+            },
+            {
+                "target_node": "6712570977",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 1,
+                "estimated_time": 22,
+                "distance": 146.85
+            }
+        ]
+    },
+    "2498090048": {
+        "name": "Đường Lý Thái Tổ",
+        "lat": 10.7679568,
+        "lng": 106.6694933,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2498090062",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 2,
+                "estimated_time": 3,
+                "distance": 10.56
+            },
+            {
+                "target_node": "6789163889",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 106,
+                "distance": 141.67
+            }
+        ]
+    },
+    "2498090051": {
+        "name": "Ngã giao Lý Thái Tổ - Sư Vạn Hạnh",
+        "lat": 10.7678613,
+        "lng": 106.6715256,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "366412106",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 5,
+                "distance": 10.8
+            },
+            {
+                "target_node": "2433276952",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 65,
+                "distance": 217.45
+            },
+            {
+                "target_node": "2498090048",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 133,
+                "distance": 222.26
+            }
+        ]
+    },
+    "2498090062": {
+        "name": "Đường Lý Thái Tổ",
+        "lat": 10.7678619,
+        "lng": 106.6694908,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2498090048",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 2,
+                "estimated_time": 3,
+                "distance": 10.56
+            },
+            {
+                "target_node": "366412106",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 34,
+                "distance": 225.34
+            }
+        ]
+    },
+    "2841264942": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.766667,
+        "lng": 106.6651426,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2433653225",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 3,
+                "estimated_time": 65,
+                "distance": 143.87
+            }
+        ]
+    },
+    "2934006866": {
+        "name": "Ngã giao Nguyễn Tri Phương - Đường 3 Tháng 2",
+        "lat": 10.7676811,
+        "lng": 106.6671687,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2433653223",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 7,
+                "distance": 14.56
+            },
+            {
+                "target_node": "2433653213",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 38,
+                "distance": 85.06
+            }
+        ]
+    },
+    "2934006871": {
+        "name": "Đường Nguyễn Tri Phương",
+        "lat": 10.7630706,
+        "lng": 106.668211,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4623078280",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 37,
+                "distance": 82.84
+            },
+            {
+                "target_node": "9000019",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 1,
+                "distance": 6.16
+            }
+        ]
+    },
+    "2999030270": {
+        "name": "Ngã giao Nguyễn Tri Phương - Đường 3 Tháng 2",
+        "lat": 10.767749,
+        "lng": 106.6670229,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4629703848",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 4,
+                "distance": 14.66
+            },
+            {
+                "target_node": "4629703859",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 21,
+                "distance": 34.34
+            }
+        ]
+    },
+    "2999030272": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7679393,
+        "lng": 106.6673908,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6791343229",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 21,
+                "distance": 47.06
+            },
+            {
+                "target_node": "2433653223",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 1,
+                "estimated_time": 5,
+                "distance": 32.93
+            }
+        ]
+    },
+    "3301809364": {
+        "name": "Ngã giao Sư Vạn Hạnh - Đường 3 Tháng 2",
+        "lat": 10.7696953,
+        "lng": 106.6707494,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6346444986",
+                "direction": "two-way",
+                "risk_factors": "flooding",
+                "congestion_level": 1,
+                "estimated_time": 1,
+                "distance": 7.73
+            },
+            {
+                "target_node": "9000022",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 20,
+                "distance": 43.49
+            }
+        ]
+    },
+    "4623078280": {
+        "name": "Ngã giao Nguyễn Tri Phương - Vĩnh Viễn",
+        "lat": 10.7637981,
+        "lng": 106.6680477,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "5780574570",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 7,
+                "distance": 12.29
+            },
+            {
+                "target_node": "5757841608",
+                "direction": "one-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 3,
+                "estimated_time": 97,
+                "distance": 215.71
+            },
+            {
+                "target_node": "5780554319",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 4,
+                "estimated_time": 147,
+                "distance": 245.23
+            }
+        ]
+    },
+    "4623078287": {
+        "name": "Điểm nút 4623078287",
+        "lat": 10.763045,
+        "lng": 106.6681022,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "9000019",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 5,
+                "distance": 6.06
+            }
+        ]
+    },
+    "4628048104": {
+        "name": "Ngã giao Lý Thường Kiệt - Đường 3 Tháng 2",
+        "lat": 10.7638652,
+        "lng": 106.6599239,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4632009841",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 3,
+                "estimated_time": 5,
+                "distance": 10.47
+            },
+            {
+                "target_node": "6791442352",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 4,
+                "distance": 14.92
+            }
+        ]
+    },
+    "4629145035": {
+        "name": "Ngã giao Sư Vạn Hạnh - Đường 3 Tháng 2",
+        "lat": 10.769836,
+        "lng": 106.6710041,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2433276952",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 1,
+                "distance": 9.97
+            },
+            {
+                "target_node": "9000023",
+                "direction": "one-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 5,
+                "estimated_time": 12,
+                "distance": 15.88
+            }
+        ]
+    },
+    "4629359717": {
+        "name": "Điểm nút 4629359717",
+        "lat": 10.7682253,
+        "lng": 106.6679272,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "9000016",
+                "direction": "one-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 4,
+                "estimated_time": 6,
+                "distance": 9.47
+            }
+        ]
+    },
+    "4629359719": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7681592,
+        "lng": 106.6677939,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2999030272",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 30,
+                "distance": 50.37
+            },
+            {
+                "target_node": "2433653213",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 4,
+                "distance": 14.4
+            }
+        ]
+    },
+    "4629359725": {
+        "name": "Ngã giao Nguyễn Kim - Đường 3 Tháng 2",
+        "lat": 10.7646279,
+        "lng": 106.661554,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2433653232",
+                "direction": "two-way",
+                "risk_factors": "flooding",
+                "congestion_level": 5,
+                "estimated_time": 11,
+                "distance": 14.03
+            },
+            {
+                "target_node": "5778688813",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 22,
+                "distance": 29.49
+            },
+            {
+                "target_node": "366379977",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 185,
+                "distance": 308.85
+            }
+        ]
+    },
+    "4629359730": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7667954,
+        "lng": 106.6656006,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520152",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 6,
+                "distance": 38.08
+            },
+            {
+                "target_node": "11502520153",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 29,
+                "distance": 38.76
+            }
+        ]
+    },
+    "4629703848": {
+        "name": "Ngã giao Nguyễn Tri Phương - Đường 3 Tháng 2",
+        "lat": 10.7676224,
+        "lng": 106.6670604,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2934006866",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 2,
+                "distance": 13.51
+            },
+            {
+                "target_node": "366463743",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 67,
+                "distance": 222.86
+            }
+        ]
+    },
+    "4629703851": {
+        "name": "Điểm nút 4629703851",
+        "lat": 10.7680976,
+        "lng": 106.6679742,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6739847139",
+                "direction": "one-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 5,
+                "estimated_time": 2,
+                "distance": 2.57
+            }
+        ]
+    },
+    "4629703859": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7675953,
+        "lng": 106.6667502,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520163",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 10,
+                "distance": 16.29
+            }
+        ]
+    },
+    "4629703863": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7693306,
+        "lng": 106.6700744,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "5757841588",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 15,
+                "distance": 24.37
+            },
+            {
+                "target_node": "9000009",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 18,
+                "distance": 123.16
+            }
+        ]
+    },
+    "4629703864": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7692638,
+        "lng": 106.6701044,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6786605031",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 4,
+                "distance": 12.29
+            }
+        ]
+    },
+    "4632009841": {
+        "name": "Ngã giao Lý Thường Kiệt - Đường 3 Tháng 2",
+        "lat": 10.7637744,
+        "lng": 106.6599493,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2302073743",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 9,
+                "distance": 12.33
+            },
+            {
+                "target_node": "11499112535",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 3,
+                "distance": 19.07
+            }
+        ]
+    },
+    "4646769632": {
+        "name": "Điểm nút 4646769632",
+        "lat": 10.7712689,
+        "lng": 106.6737429,
+        "type": "intersection",
+        "connected_to": []
+    },
+    "4646816752": {
+        "name": "Ngã giao Lê Hồng Phong - Đường 3 Tháng 2",
+        "lat": 10.7709221,
+        "lng": 106.6729713,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4646816753",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 8,
+                "distance": 12.7
+            },
+            {
+                "target_node": "4629145035",
+                "direction": "one-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 3,
+                "estimated_time": 111,
+                "distance": 246.53
+            }
+        ]
+    },
+    "4646816753": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7708474,
+        "lng": 106.6730592,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6639607766",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 7,
+                "distance": 12.3
+            }
+        ]
+    },
+    "5462344911": {
+        "name": "Ngã giao Cầu vượt Nguyễn Tri Phương - Đường 3 Tháng 2",
+        "lat": 10.7667446,
+        "lng": 106.6653894,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2841264942",
+                "direction": "one-way",
+                "risk_factors": "flooding",
+                "congestion_level": 5,
+                "estimated_time": 21,
+                "distance": 28.34
+            },
+            {
+                "target_node": "5757841588",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 84,
+                "distance": 563.2
+            }
+        ]
+    },
+    "5462344912": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7665869,
+        "lng": 106.6651849,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4629359730",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 15,
+                "distance": 50.99
+            },
+            {
+                "target_node": "5462344911",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 5,
+                "estimated_time": 21,
+                "distance": 28.5
+            }
+        ]
+    },
+    "5757841588": {
+        "name": "Ngã giao Cầu vượt Nguyễn Tri Phương - Đường 3 Tháng 2",
+        "lat": 10.7691896,
+        "lng": 106.6699036,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4629703864",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 7,
+                "distance": 23.44
+            },
+            {
+                "target_node": "5462344911",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 4,
+                "estimated_time": 338,
+                "distance": 563.2
+            }
+        ]
+    },
+    "5757841593": {
+        "name": "Ngã giao Bà Hạt - Đường Nguyễn Duy Dương",
+        "lat": 10.7662022,
+        "lng": 106.6698165,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "366372448",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 167,
+                "distance": 222.3
+            },
+            {
+                "target_node": "5757841608",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 111,
+                "distance": 245.96
+            },
+            {
+                "target_node": "9000021",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 86,
+                "distance": 114.36
+            }
+        ]
+    },
+    "5757841608": {
+        "name": "Ngã giao Bà Hạt - Nguyễn Tri Phương",
+        "lat": 10.7656931,
+        "lng": 106.6676254,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "366463743",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 2,
+                "distance": 13.34
+            },
+            {
+                "target_node": "2934006866",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 102,
+                "distance": 226.63
+            },
+            {
+                "target_node": "5757841593",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 184,
+                "distance": 245.96
+            }
+        ]
+    },
+    "5778688800": {
+        "name": "Ngã giao Nguyễn Kim - Vĩnh Viễn",
+        "lat": 10.7623738,
+        "lng": 106.6620104,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "1997154462",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 38,
+                "distance": 85.53
+            },
+            {
+                "target_node": "366424502",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 26,
+                "distance": 170.81
+            },
+            {
+                "target_node": "5778688813",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 102,
+                "distance": 226.07
+            }
+        ]
+    },
+    "5778688813": {
+        "name": "Ngã giao Bà Hạt - Nguyễn Kim",
+        "lat": 10.7643678,
+        "lng": 106.6616067,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "5778688800",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 136,
+                "distance": 226.07
+            },
+            {
+                "target_node": "4629359725",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 3,
+                "estimated_time": 13,
+                "distance": 29.49
+            },
+            {
+                "target_node": "9000015",
+                "direction": "two-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 3,
+                "estimated_time": 100,
+                "distance": 221.63
+            }
+        ]
+    },
+    "5778872966": {
+        "name": "Đường Thành Thái",
+        "lat": 10.7681721,
+        "lng": 106.666908,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6791343230",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 10,
+                "distance": 12.97
+            }
+        ]
+    },
+    "5780554319": {
+        "name": "Ngã giao Đường Nguyễn Duy Dương - Vĩnh Viễn",
+        "lat": 10.7642965,
+        "lng": 106.6702345,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4623078280",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 74,
+                "distance": 245.23
+            },
+            {
+                "target_node": "11998294099",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 69,
+                "distance": 230.1
+            },
+            {
+                "target_node": "9000000",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 3,
+                "estimated_time": 77,
+                "distance": 171.63
+            },
+            {
+                "target_node": "9000021",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 61,
+                "distance": 102.41
+            }
+        ]
+    },
+    "5780574570": {
+        "name": "Ngã giao Nguyễn Tri Phương - Vĩnh Viễn",
+        "lat": 10.7637691,
+        "lng": 106.6679391,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4623078280",
+                "direction": "two-way",
+                "risk_factors": "flooding",
+                "congestion_level": 1,
+                "estimated_time": 2,
+                "distance": 12.29
+            },
+            {
+                "target_node": "5780574607",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 5,
+                "estimated_time": 271,
+                "distance": 361.47
+            },
+            {
+                "target_node": "4623078287",
+                "direction": "one-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 4,
+                "estimated_time": 49,
+                "distance": 82.46
+            }
+        ]
+    },
+    "5780574607": {
+        "name": "Ngã giao Ngô Quyền - Vĩnh Viễn",
+        "lat": 10.7630155,
+        "lng": 106.6647205,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "5780574570",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 217,
+                "distance": 361.47
+            },
+            {
+                "target_node": "1997154488",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 2,
+                "estimated_time": 19,
+                "distance": 64.9
+            },
+            {
+                "target_node": "9000001",
+                "direction": "two-way",
+                "risk_factors": "flooding",
+                "congestion_level": 1,
+                "estimated_time": 16,
+                "distance": 107.99
+            }
+        ]
+    },
+    "5780574617": {
+        "name": "Ngã giao Ngô Quyền - Bà Hạt",
+        "lat": 10.7649135,
+        "lng": 106.664285,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "366463743",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 109,
+                "distance": 361.72
+            },
+            {
+                "target_node": "366379977",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 71,
+                "distance": 118.81
+            },
+            {
+                "target_node": "9000001",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 5,
+                "estimated_time": 81,
+                "distance": 108.36
+            },
+            {
+                "target_node": "9000015",
+                "direction": "two-way",
+                "risk_factors": "flooding",
+                "congestion_level": 3,
+                "estimated_time": 35,
+                "distance": 77.2
+            }
+        ]
+    },
+    "6346444986": {
+        "name": "Ngã giao Sư Vạn Hạnh - Đường 3 Tháng 2",
+        "lat": 10.7696326,
+        "lng": 106.67078,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "3301809364",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 6,
+                "distance": 7.73
+            },
+            {
+                "target_node": "6770374400",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 4,
+                "estimated_time": 13,
+                "distance": 21.64
+            },
+            {
+                "target_node": "10945131853",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 5,
+                "distance": 6.49
+            }
+        ]
+    },
+    "6639607755": {
+        "name": "Ngã giao Lê Hồng Phong - Đường 3 Tháng 2",
+        "lat": 10.770973,
+        "lng": 106.673064,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4646816752",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 2,
+                "distance": 11.6
+            },
+            {
+                "target_node": "698217134",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 5,
+                "estimated_time": 253,
+                "distance": 337.51
+            }
+        ]
+    },
+    "6639607766": {
+        "name": "Ngã giao Lê Hồng Phong - Đường 3 Tháng 2",
+        "lat": 10.7709034,
+        "lng": 106.6731563,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6639607755",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 2,
+                "distance": 12.71
+            },
+            {
+                "target_node": "4646769632",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 23,
+                "distance": 75.88
+            }
+        ]
+    },
+    "6712570972": {
+        "name": "Điểm nút 6712570972",
+        "lat": 10.7641063,
+        "lng": 106.6599523,
+        "type": "intersection",
+        "connected_to": []
+    },
+    "6712570977": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7640425,
+        "lng": 106.6602531,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2433653211",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 4,
+                "distance": 29.28
+            },
+            {
+                "target_node": "6712570972",
+                "direction": "one-way",
+                "risk_factors": "flooding",
+                "congestion_level": 4,
+                "estimated_time": 21,
+                "distance": 35.29
+            }
+        ]
+    },
+    "6739847137": {
+        "name": "Đường Lý Thái Tổ",
+        "lat": 10.7680461,
+        "lng": 106.6678714,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4629703851",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 4,
+                "distance": 13.47
+            },
+            {
+                "target_node": "9000004",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 20,
+                "distance": 65.46
+            }
+        ]
+    },
+    "6739847139": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7681194,
+        "lng": 106.6679819,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6770374405",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 2,
+                "distance": 3.86
+            },
+            {
+                "target_node": "4629359717",
+                "direction": "one-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 2,
+                "estimated_time": 4,
+                "distance": 14.25
+            }
+        ]
+    },
+    "6770374400": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7697234,
+        "lng": 106.6709552,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2433276952",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 4,
+                "estimated_time": 7,
+                "distance": 10.99
+            }
+        ]
+    },
+    "6770374405": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7681356,
+        "lng": 106.6680132,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6789162684",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 22,
+                "distance": 29.45
+            },
+            {
+                "target_node": "6789163885",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 16,
+                "distance": 25.91
+            }
+        ]
+    },
+    "6777780484": {
+        "name": "Đường Vĩnh Viễn",
+        "lat": 10.7648788,
+        "lng": 106.6727106,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6783825162",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 20,
+                "distance": 26.7
+            },
+            {
+                "target_node": "9000020",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 5,
+                "estimated_time": 15,
+                "distance": 19.61
+            }
+        ]
+    },
+    "6783825162": {
+        "name": "Điểm nút 6783825162",
+        "lat": 10.7650636,
+        "lng": 106.6725817,
+        "type": "intersection",
+        "connected_to": []
+    },
+    "6786605027": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7694461,
+        "lng": 106.6704447,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6786605028",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 3,
+                "estimated_time": 3,
+                "distance": 6.01
+            },
+            {
+                "target_node": "6346444986",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 13,
+                "distance": 42.09
+            }
+        ]
+    },
+    "6786605028": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7694,
+        "lng": 106.6704735,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6786605027",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 5,
+                "distance": 6.01
+            },
+            {
+                "target_node": "10945131853",
+                "direction": "one-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 4,
+                "estimated_time": 25,
+                "distance": 41.66
+            }
+        ]
+    },
+    "6786605031": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7693154,
+        "lng": 106.6702039,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6786605027",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 14,
+                "distance": 30.05
+            },
+            {
+                "target_node": "6786605032",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 1,
+                "estimated_time": 1,
+                "distance": 6.01
+            }
+        ]
+    },
+    "6786605032": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7692693,
+        "lng": 106.6702326,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6786605028",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 5,
+                "estimated_time": 23,
+                "distance": 30.06
+            },
+            {
+                "target_node": "6786605031",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 4,
+                "distance": 6.01
+            }
+        ]
+    },
+    "6786605036": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7687864,
+        "lng": 106.6692561,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6786605037",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 1,
+                "distance": 4.33
+            },
+            {
+                "target_node": "4629703864",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 48,
+                "distance": 106.84
+            }
+        ]
+    },
+    "6786605037": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7687521,
+        "lng": 106.6692749,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6786605036",
+                "direction": "two-way",
+                "risk_factors": "flooding",
+                "congestion_level": 3,
+                "estimated_time": 2,
+                "distance": 4.33
+            },
+            {
+                "target_node": "9000013",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 52,
+                "distance": 69.15
+            }
+        ]
+    },
+    "6786605039": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7686573,
+        "lng": 106.6690207,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6786605036",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 18,
+                "distance": 29.45
+            },
+            {
+                "target_node": "6786605040",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 2,
+                "distance": 4.12
+            }
+        ]
+    },
+    "6786605040": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7686256,
+        "lng": 106.6690402,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6786605037",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 13,
+                "distance": 29.24
+            },
+            {
+                "target_node": "6786605039",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 2,
+                "distance": 4.12
+            }
+        ]
+    },
+    "6786605041": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7685163,
+        "lng": 106.6687552,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6786605039",
+                "direction": "one-way",
+                "risk_factors": "flooding",
+                "congestion_level": 1,
+                "estimated_time": 5,
+                "distance": 32.97
+            },
+            {
+                "target_node": "6786605042",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 1,
+                "distance": 4.32
+            }
+        ]
+    },
+    "6786605042": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7684833,
+        "lng": 106.668776,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6786605040",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 15,
+                "distance": 32.91
+            },
+            {
+                "target_node": "6786605041",
+                "direction": "two-way",
+                "risk_factors": "flooding",
+                "congestion_level": 2,
+                "estimated_time": 1,
+                "distance": 4.32
+            }
+        ]
+    },
+    "6789162684": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7682585,
+        "lng": 106.668252,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6786605041",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 28,
+                "distance": 61.99
+            }
+        ]
+    },
+    "6789163885": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7681958,
+        "lng": 106.6682284,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6789162684",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 1,
+                "estimated_time": 1,
+                "distance": 7.43
+            },
+            {
+                "target_node": "6786605042",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 3,
+                "estimated_time": 31,
+                "distance": 67.82
+            }
+        ]
+    },
+    "6789163889": {
+        "name": "Đường Lý Thái Tổ",
+        "lat": 10.7680416,
+        "lng": 106.6682008,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4629703851",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 2,
+                "estimated_time": 8,
+                "distance": 25.52
+            },
+            {
+                "target_node": "6789163885",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 8,
+                "distance": 17.63
+            }
+        ]
+    },
+    "6791343229": {
+        "name": "Đường Thành Thái",
+        "lat": 10.7680815,
+        "lng": 106.6669954,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "5778872966",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 6,
+                "distance": 13.95
+            }
+        ]
+    },
+    "6791343230": {
+        "name": "Đường Thành Thái",
+        "lat": 10.7680558,
+        "lng": 106.6669062,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2999030270",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 22,
+                "distance": 36.43
+            },
+            {
+                "target_node": "4629703859",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 5,
+                "estimated_time": 40,
+                "distance": 53.98
+            }
+        ]
+    },
+    "6791442352": {
+        "name": "Điểm nút 6791442352",
+        "lat": 10.763801,
+        "lng": 106.659804,
+        "type": "intersection",
+        "connected_to": []
+    },
+    "6791442358": {
+        "name": "Đường Lý Thường Kiệt",
+        "lat": 10.7639964,
+        "lng": 106.6598871,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4628048104",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 7,
+                "distance": 15.14
+            },
+            {
+                "target_node": "6791442352",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 14,
+                "distance": 23.73
+            }
+        ]
+    },
+    "10945131853": {
+        "name": "Ngã giao Sư Vạn Hạnh - Đường 3 Tháng 2",
+        "lat": 10.7695809,
+        "lng": 106.6708075,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "6346444986",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 3,
+                "distance": 6.49
+            },
+            {
+                "target_node": "6770374400",
+                "direction": "one-way",
+                "risk_factors": "flooding",
+                "congestion_level": 4,
+                "estimated_time": 15,
+                "distance": 25.53
+            }
+        ]
+    },
+    "11499112534": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7637037,
+        "lng": 106.6598151,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4632009841",
+                "direction": "one-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 2,
+                "estimated_time": 5,
+                "distance": 16.64
+            },
+            {
+                "target_node": "11499112535",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 4,
+                "estimated_time": 13,
+                "distance": 22.17
+            }
+        ]
+    },
+    "11499112535": {
+        "name": "Đường Lý Thường Kiệt",
+        "lat": 10.7636101,
+        "lng": 106.6599942,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "2302074153",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 1,
+                "estimated_time": 2,
+                "distance": 15.42
+            }
+        ]
+    },
+    "11502520152": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7669662,
+        "lng": 106.6659028,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520154",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 20,
+                "distance": 26.24
+            },
+            {
+                "target_node": "11502520153",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 5,
+                "estimated_time": 3,
+                "distance": 3.66
+            }
+        ]
+    },
+    "11502520153": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7669374,
+        "lng": 106.6659191,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520155",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 4,
+                "estimated_time": 16,
+                "distance": 26.46
+            },
+            {
+                "target_node": "11502520152",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 2,
+                "distance": 3.66
+            }
+        ]
+    },
+    "11502520154": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7670838,
+        "lng": 106.6661111,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520157",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 5,
+                "distance": 16.92
+            },
+            {
+                "target_node": "11502520155",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 2,
+                "distance": 4.16
+            }
+        ]
+    },
+    "11502520155": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7670521,
+        "lng": 106.6661313,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520158",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 3,
+                "distance": 16.94
+            },
+            {
+                "target_node": "11502520154",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 1,
+                "distance": 4.16
+            }
+        ]
+    },
+    "11502520157": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7671597,
+        "lng": 106.6662453,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520158",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 2,
+                "distance": 4.48
+            },
+            {
+                "target_node": "11502520159",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 7,
+                "distance": 48.63
+            }
+        ]
+    },
+    "11502520158": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7671256,
+        "lng": 106.6662671,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520157",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 3,
+                "distance": 4.48
+            },
+            {
+                "target_node": "11502520160",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 4,
+                "estimated_time": 29,
+                "distance": 48.44
+            }
+        ]
+    },
+    "11502520159": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.767378,
+        "lng": 106.666631,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520162",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 24,
+                "distance": 39.25
+            },
+            {
+                "target_node": "11502520160",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 2,
+                "distance": 5.15
+            }
+        ]
+    },
+    "11502520160": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7673378,
+        "lng": 106.6666544,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520159",
+                "direction": "two-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 4,
+                "estimated_time": 3,
+                "distance": 5.15
+            },
+            {
+                "target_node": "11502520162",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 1,
+                "estimated_time": 6,
+                "distance": 40.85
+            }
+        ]
+    },
+    "11502520162": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.767555,
+        "lng": 106.6669419,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "4629703848",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 4,
+                "estimated_time": 9,
+                "distance": 14.96
+            }
+        ]
+    },
+    "11502520163": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7675185,
+        "lng": 106.6666232,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520168",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 10,
+                "distance": 34.66
+            },
+            {
+                "target_node": "11502520167",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 1,
+                "estimated_time": 5,
+                "distance": 35.62
+            }
+        ]
+    },
+    "11502520167": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.767397,
+        "lng": 106.6663301,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520168",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 2,
+                "distance": 4.44
+            },
+            {
+                "target_node": "11502544670",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 5,
+                "estimated_time": 68,
+                "distance": 91.31
+            }
+        ]
+    },
+    "11502520168": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7673616,
+        "lng": 106.666349,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502520167",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 4,
+                "estimated_time": 3,
+                "distance": 4.44
+            },
+            {
+                "target_node": "11502544671",
+                "direction": "one-way",
+                "risk_factors": "flooding",
+                "congestion_level": 1,
+                "estimated_time": 14,
+                "distance": 91.05
+            }
+        ]
+    },
+    "11502544669": {
+        "name": "Điểm nút 11502544669",
+        "lat": 10.7668058,
+        "lng": 106.665261,
+        "type": "intersection",
+        "connected_to": []
+    },
+    "11502544670": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.7669958,
+        "lng": 106.6656008,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502544671",
+                "direction": "two-way",
+                "risk_factors": "flooding",
+                "congestion_level": 2,
+                "estimated_time": 2,
+                "distance": 5.54
+            },
+            {
+                "target_node": "9000005",
+                "direction": "one-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 1,
+                "estimated_time": 3,
+                "distance": 21.38
+            }
+        ]
+    },
+    "11502544671": {
+        "name": "Đường Đường 3 Tháng 2",
+        "lat": 10.766953,
+        "lng": 106.6656267,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11502544670",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 2,
+                "estimated_time": 2,
+                "distance": 5.54
+            },
+            {
+                "target_node": "2841264942",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 9,
+                "distance": 61.75
+            }
+        ]
+    },
+    "11998294099": {
+        "name": "Ngã giao Đường Sư Vạn Hạnh - Ngô Gia Tự",
+        "lat": 10.7647627,
+        "lng": 106.6722858,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "12724813740",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 5,
+                "distance": 10.11
+            },
+            {
+                "target_node": "5780554319",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 3,
+                "estimated_time": 104,
+                "distance": 230.1
+            },
+            {
+                "target_node": "366372448",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 164,
+                "distance": 219.11
+            },
+            {
+                "target_node": "9000020",
+                "direction": "two-way",
+                "risk_factors": "flooding",
+                "congestion_level": 1,
+                "estimated_time": 4,
+                "distance": 28.56
+            },
+            {
+                "target_node": "9000024",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 5,
+                "estimated_time": 177,
+                "distance": 235.36
+            }
+        ]
+    },
+    "11998476551": {
+        "name": "Ngã giao Đường Nguyễn Duy Dương - Ngô Gia Tự",
+        "lat": 10.7623584,
+        "lng": 106.6706597,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "9000002",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 12,
+                "distance": 39.15
+            },
+            {
+                "target_node": "9000024",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 3,
+                "estimated_time": 39,
+                "distance": 85.91
+            }
+        ]
+    },
+    "12724813740": {
+        "name": "Đường Ngô Gia Tự",
+        "lat": 10.7648362,
+        "lng": 106.6723403,
+        "type": "intersection",
+        "connected_to": [
+            {
+                "target_node": "11998294099",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 8,
+                "distance": 10.11
+            },
+            {
+                "target_node": "6783825162",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 28,
+                "distance": 37.65
+            }
+        ]
+    },
+    "9000000": {
+        "name": "Trung Tâm Chẩn Đoán Y Khoa Medic - BV Hòa Hảo",
+        "lat": 10.762528,
+        "lng": 106.6701859,
+        "type": "hospital",
+        "connected_to": [
+            {
+                "target_node": "5780554319",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 26,
+                "distance": 171.63
+            },
+            {
+                "target_node": "9000002",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 3,
+                "distance": 9.67
+            }
+        ]
+    },
+    "9000001": {
+        "name": "Chợ Nhật Tảo",
+        "lat": 10.7641455,
+        "lng": 106.6653042,
+        "type": "landmark",
+        "connected_to": [
+            {
+                "target_node": "5780574607",
+                "direction": "two-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 5,
+                "estimated_time": 81,
+                "distance": 107.99
+            },
+            {
+                "target_node": "5780574617",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 16,
+                "distance": 108.36
+            }
+        ]
+    },
+    "9000002": {
+        "name": "Bệnh Viện Hòa Hảo",
+        "lat": 10.7626193,
+        "lng": 106.6702604,
+        "type": "hospital",
+        "connected_to": [
+            {
+                "target_node": "11998476551",
+                "direction": "two-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 1,
+                "estimated_time": 6,
+                "distance": 39.15
+            },
+            {
+                "target_node": "9000000",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 4,
+                "estimated_time": 6,
+                "distance": 9.67
+            }
+        ]
+    },
+    "9000003": {
+        "name": "Co.op Xtra",
+        "lat": 10.7705491,
+        "lng": 106.6695387,
+        "type": "mall",
+        "connected_to": [
+            {
+                "target_node": "4629703863",
+                "direction": "one-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 3,
+                "estimated_time": 18,
+                "distance": 39.83
+            }
+        ]
+    },
+    "9000004": {
+        "name": "Tổng Hội Y Học Bác Sĩ Trung Quốc",
+        "lat": 10.7675718,
+        "lng": 106.6683486,
+        "type": "hospital",
+        "connected_to": [
+            {
+                "target_node": "2498090062",
+                "direction": "one-way",
+                "risk_factors": "flooding",
+                "congestion_level": 3,
+                "estimated_time": 52,
+                "distance": 114.65
+            }
+        ]
+    },
+    "9000005": {
+        "name": "Của Hàng Tạp Hóa TA",
+        "lat": 10.7684286,
+        "lng": 106.6645542,
+        "type": "mall",
+        "connected_to": [
+            {
+                "target_node": "9000007",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 0,
+                "distance": 0.36
+            }
+        ]
+    },
+    "9000006": {
+        "name": "VinMart+",
+        "lat": 10.7694496,
+        "lng": 106.6636118,
+        "type": "mall",
+        "connected_to": [
+            {
+                "target_node": "9000011",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 1,
+                "distance": 2.96
+            }
+        ]
+    },
+    "9000007": {
+        "name": "Co.opmart Mini",
+        "lat": 10.7684799,
+        "lng": 106.664498,
+        "type": "mall",
+        "connected_to": [
+            {
+                "target_node": "9000027",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 0,
+                "distance": 0.46
+            }
+        ]
+    },
+    "9000008": {
+        "name": "Khu chợ nhỏ",
+        "lat": 10.767958,
+        "lng": 106.6637171,
+        "type": "landmark",
+        "connected_to": [
+            {
+                "target_node": "11502544669",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 4,
+                "distance": 8.31
+            }
+        ]
+    },
+    "9000009": {
+        "name": "Chọ mini",
+        "lat": 10.7707859,
+        "lng": 106.6683517,
+        "type": "landmark",
+        "connected_to": [
+            {
+                "target_node": "4629359717",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 106,
+                "distance": 141.75
+            }
+        ]
+    },
+    "9000010": {
+        "name": "Bệnh viện Nhân dân 115",
+        "lat": 10.774654725385266,
+        "lng": 106.66662418469417,
+        "type": "hospital",
+        "connected_to": [
+            {
+                "target_node": "4646816752",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 5,
+                "estimated_time": 149,
+                "distance": 199.24
+            }
+        ]
+    },
+    "9000011": {
+        "name": "Bệnh viện Trưng Vương",
+        "lat": 10.770774517008505,
+        "lng": 106.65958348140188,
+        "type": "hospital",
+        "connected_to": [
+            {
+                "target_node": "9000012",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 0,
+                "distance": 0.99
+            }
+        ]
+    },
+    "9000012": {
+        "name": "Trường Đại học Bách khoa, Đại học Quốc gia Thành phố Hồ Chí Minh",
+        "lat": 10.773517624626363,
+        "lng": 106.659578286298,
+        "type": "university",
+        "connected_to": [
+            {
+                "target_node": "9000008",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 2,
+                "estimated_time": 1,
+                "distance": 2.5
+            }
+        ]
+    },
+    "9000013": {
+        "name": "Bệnh viện Nhi đồng 1",
+        "lat": 10.768582821256409,
+        "lng": 106.67020537957256,
+        "type": "hospital",
+        "connected_to": [
+            {
+                "target_node": "6786605032",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 2,
+                "estimated_time": 15,
+                "distance": 50.23
+            }
+        ]
+    },
+    "9000014": {
+        "name": "Bệnh viện Vạn Hạnh",
+        "lat": 10.771818899999998,
+        "lng": 106.67137524999998,
+        "type": "hospital",
+        "connected_to": [
+            {
+                "target_node": "9000010",
+                "direction": "one-way",
+                "risk_factors": "construction",
+                "congestion_level": 3,
+                "estimated_time": 47,
+                "distance": 103.58
+            }
+        ]
+    },
+    "9000015": {
+        "name": "Chợ Nguyễn Tri Phương",
+        "lat": 10.764445557794938,
+        "lng": 106.66371728579158,
+        "type": "landmark",
+        "connected_to": [
+            {
+                "target_node": "5780574617",
+                "direction": "two-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 3,
+                "estimated_time": 35,
+                "distance": 77.2
+            },
+            {
+                "target_node": "5778688813",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 33,
+                "distance": 221.63
+            }
+        ]
+    },
+    "9000016": {
+        "name": "Siêu thị Sài Gòn (SATRA MART)",
+        "lat": 10.768667635705153,
+        "lng": 106.66753446171522,
+        "type": "mall",
+        "connected_to": [
+            {
+                "target_node": "4629359719",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 3,
+                "distance": 9.14
+            }
+        ]
+    },
+    "9000017": {
+        "name": "Trường Đại học Y khoa Phạm Ngọc Thạch",
+        "lat": 10.773067321225408,
+        "lng": 106.66611436123918,
+        "type": "university",
+        "connected_to": [
+            {
+                "target_node": "9000026",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 1,
+                "estimated_time": 0,
+                "distance": 0.37
+            }
+        ]
+    },
+    "9000018": {
+        "name": "Viện Tim Thành phố Hồ Chí Minh",
+        "lat": 10.773205978616652,
+        "lng": 106.66696004683355,
+        "type": "hospital",
+        "connected_to": [
+            {
+                "target_node": "9000017",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 0,
+                "distance": 0.45
+            }
+        ]
+    },
+    "9000019": {
+        "name": "Đại học Kinh tế Thành phố Hồ Chí Minh - cơ sở B",
+        "lat": 10.760938772310725,
+        "lng": 106.6679656040253,
+        "type": "university",
+        "connected_to": [
+            {
+                "target_node": "4623078287",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 3,
+                "distance": 6.06
+            },
+            {
+                "target_node": "2934006871",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 3,
+                "estimated_time": 3,
+                "distance": 6.16
+            }
+        ]
+    },
+    "9000020": {
+        "name": "Trường Cao đẳng Kinh tế Thành phố Hồ Chí Minh",
+        "lat": 10.764569512770032,
+        "lng": 106.67348536130116,
+        "type": "university",
+        "connected_to": [
+            {
+                "target_node": "11998294099",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 13,
+                "distance": 28.56
+            },
+            {
+                "target_node": "6777780484",
+                "direction": "two-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 3,
+                "estimated_time": 9,
+                "distance": 19.61
+            }
+        ]
+    },
+    "9000021": {
+        "name": "Chợ Nhật Tảo",
+        "lat": 10.76516371176891,
+        "lng": 106.66989188797534,
+        "type": "landmark",
+        "connected_to": [
+            {
+                "target_node": "5757841593",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 4,
+                "estimated_time": 69,
+                "distance": 114.36
+            },
+            {
+                "target_node": "5780554319",
+                "direction": "two-way",
+                "risk_factors": "narrow_road",
+                "congestion_level": 1,
+                "estimated_time": 15,
+                "distance": 102.41
+            }
+        ]
+    },
+    "9000022": {
+        "name": "Vạn Hạnh Mall",
+        "lat": 10.770536333114904,
+        "lng": 106.66956369988071,
+        "type": "mall",
+        "connected_to": [
+            {
+                "target_node": "9000003",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 0,
+                "distance": 0.84
+            }
+        ]
+    },
+    "9000023": {
+        "name": "Bệnh viện Đa Khoa Vạn Hạnh",
+        "lat": 10.771353146186364,
+        "lng": 106.67011701298954,
+        "type": "hospital",
+        "connected_to": [
+            {
+                "target_node": "3301809364",
+                "direction": "one-way",
+                "risk_factors": "complex_intersection",
+                "congestion_level": 3,
+                "estimated_time": 7,
+                "distance": 16.04
+            }
+        ]
+    },
+    "9000024": {
+        "name": "Trường Cao đẳng Sư phạm Trung ương Thành phố Hồ Chí Minh",
+        "lat": 10.76076946291066,
+        "lng": 106.67049392580293,
+        "type": "university",
+        "connected_to": [
+            {
+                "target_node": "11998294099",
+                "direction": "two-way",
+                "risk_factors": "construction",
+                "congestion_level": 1,
+                "estimated_time": 35,
+                "distance": 235.36
+            },
+            {
+                "target_node": "11998476551",
+                "direction": "two-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 26,
+                "distance": 85.91
+            }
+        ]
+    },
+    "9000025": {
+        "name": "Trường Cao đẳng nghề số 7 - Bộ Quốc phòng",
+        "lat": 10.772292210454632,
+        "lng": 106.66360549470255,
+        "type": "university",
+        "connected_to": [
+            {
+                "target_node": "9000006",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 1,
+                "estimated_time": 0,
+                "distance": 1.53
+            }
+        ]
+    },
+    "9000026": {
+        "name": "Hoc viện Quân y - Phân hiệu phía Nam",
+        "lat": 10.772865248752408,
+        "lng": 106.66546545613176,
+        "type": "university",
+        "connected_to": [
+            {
+                "target_node": "9000025",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 2,
+                "estimated_time": 0,
+                "distance": 1.05
+            }
+        ]
+    },
+    "9000027": {
+        "name": "Trường Đại học Hoa Sen - Cơ sở Thành Thái",
+        "lat": 10.769287643602986,
+        "lng": 106.66484669515721,
+        "type": "university",
+        "connected_to": [
+            {
+                "target_node": "9000018",
+                "direction": "one-way",
+                "risk_factors": "none",
+                "congestion_level": 3,
+                "estimated_time": 1,
+                "distance": 2.35
+            }
+        ]
+    }
+}
