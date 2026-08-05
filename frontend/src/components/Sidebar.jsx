@@ -1,13 +1,19 @@
-import React from "react";
+import React, { useMemo } from "react";
 import RouteSettings from "./RouteSettings";
 import RouteResults from "./RouteResults";
+import Select from "react-select";
 
 export default function Sidebar({
+  nodeMap,
+  nodeOptions,
   start,
   end,
+  setStart,
+  setEnd,
   addingStop,
   setAddingStop,
   waypoints,
+  setWaypoints,
   removeWaypoint,
   loading,
   optimization,
@@ -39,19 +45,37 @@ export default function Sidebar({
       <h1 className="text-xl font-bold text-gray-900 mb-6">Route Dashboard</h1>
       <div className="mb-5">
         <p>
-          Start:
-          <span className="text-green-600 ml-2">
-            {start ?? "Bấm vào node để chọn điểm bắt đầu"}
-          </span>
+          <div className="mb-4">
+            <p className="font-semibold mb-1">Start</p>
+
+            <Select
+              options={nodeOptions}
+              value={
+                nodeOptions.find((option) => option.value === start) ?? null
+              }
+              onChange={(option) => {
+                setStart(option?.value ?? null);
+              }}
+              placeholder="Chọn điểm bắt đầu"
+              isSearchable
+            />
+          </div>
         </p>
 
         <p>
-          End:
-          <span className="text-red-600 ml-2">
-            {start ?
-            end ?? "Bấm vào node để chọn điểm tiếp theo" : ""
-            }
-          </span>
+          <div className="mb-4">
+            <p className="font-semibold mb-1">End</p>
+
+            <Select
+              options={nodeOptions}
+              value={nodeOptions.find((option) => option.value === end) ?? null}
+              onChange={(option) => {
+                setEnd(option?.value ?? null);
+              }}
+              placeholder="Chọn điểm kết thúc"
+              isSearchable
+            />
+          </div>
         </p>
         <h3 className="font-bold">Điểm dừng</h3>
 
@@ -61,7 +85,7 @@ export default function Sidebar({
           waypoints.map((node, index) => (
             <div key={node} className="flex justify-between items-center">
               <span>
-                📍 {index + 1}: {node}
+                📍 {index + 1}: {nodeMap[node]?.name ?? node}
               </span>
 
               <button
@@ -74,14 +98,36 @@ export default function Sidebar({
           ))
         )}
       </div>
+
       <button
         onClick={() => setAddingStop(!addingStop)}
         className="w-full border rounded p-2 mt-3"
       >
-        {addingStop
-          ? "Bấm vào node trên bản đồ để thêm điểm dừng... (Bấm lại để hủy)"
-          : "+ Thêm điểm dừng"}
+        {addingStop ? "Hủy thêm điểm dừng" : "+ Thêm điểm dừng"}
       </button>
+
+      {addingStop && (
+        <div className="mt-3">
+          <Select
+            options={nodeOptions.filter(
+              (option) =>
+                option.value !== start &&
+                option.value !== end &&
+                !waypoints.includes(option.value),
+            )}
+            placeholder="Chọn điểm dừng..."
+            isSearchable
+            onChange={(option) => {
+              if (!option) return;
+
+              setWaypoints((prev) => [...prev, option.value]);
+
+              // Ẩn select
+              setAddingStop(false);
+            }}
+          />
+        </div>
+      )}
 
       <RouteSettings
         optimization={optimization}

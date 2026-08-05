@@ -1,31 +1,64 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import nodesData from "./data/nodes.json";
+import trafficData from "./data/hcm_traffic_data.json";
 
 import Sidebar from "./components/Sidebar";
 import HCMMap from "./components/HCMMap";
 
-export default function App() {
-  // Convert nodes.json
-  // [
-  //   {
-  //     node_id:"N01",
-  //     lat:...
-  //   }
-  // ]
-  //
-  // thành:
-  // [
-  //   {
-  //     id:"N01",
-  //     lat:...
-  //   }
-  // ]
 
-  const nodes = nodesData.map((node) => ({
-    id: node.node_id,
-    ...node,
-  }));
+
+export default function App() {
+  const { nodes, edges, nodeMap } = useMemo(() => {
+
+    const nodes = Object.entries(trafficData).map(([id, node]) => ({
+      id,
+      name: node.name,
+      lat: node.lat,
+      lng: node.lng,
+      type: node.type,
+    }));
+
+    const edges = [];
+    Object.entries(trafficData).forEach(([sourceId, node]) => {
+      node.connected_to.forEach((edge) => {
+        edges.push({
+          source: sourceId,
+
+          target: edge.target_node,
+
+          distance: edge.distance,
+
+          estimatedTime: edge.estimated_time,
+
+          congestion: edge.congestion_level,
+
+          direction: edge.direction,
+
+          risk: edge.risk_factors,
+        });
+      });
+    });
+
+    const nodeMap = Object.fromEntries(
+      nodes.map((node) => [node.id, node]),
+    );
+
+    return {
+      nodes,
+      edges,
+      nodeMap,
+    };
+  }, []);
+
+  const nodeOptions = useMemo(
+    () =>
+      nodes.map((node) => ({
+        value: node.id,
+        label: node.name || node.id,
+      })),
+    [nodes],
+  );
+
 
   const [start, setStart] = useState(null);
 
@@ -192,10 +225,15 @@ export default function App() {
         }}
       >
         <Sidebar
+          nodeMap={nodeMap}
+          nodeOptions={nodeOptions}
           start={start}
           end={end}
+          setStart={setStart}
+          setEnd={setEnd}
           addingStop={addingStop}
           setAddingStop={setAddingStop}
+          setWaypoints={setWaypoints}
           waypoints={waypoints}
           removeWaypoint={removeWaypoint}
           loading={loading}
@@ -231,7 +269,9 @@ export default function App() {
         }}
       >
         <HCMMap
+          nodeMap={nodeMap}
           nodes={nodes}
+          edges={edges}
           start={start}
           end={end}
           waypoints={waypoints}
