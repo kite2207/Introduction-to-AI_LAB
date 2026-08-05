@@ -1,7 +1,12 @@
 import React from "react";
 import { Check, ChevronDown } from "lucide-react";
 
-const OPTIMIZATION_OPTIONS = ["Default", "Time", "Distance", "Cost"];
+const OPTIMIZATION_OPTIONS = [
+  { label: "Default", value: "default" },
+  { label: "Time", value: "time" },
+  { label: "Distance", value: "distance" },
+  { label: "Cost", value: "cost" },
+];
 
 export default function RouteSettings({ optimization, setOptimization, algorithm, setAlgorithm }) {
   return (
@@ -12,11 +17,12 @@ export default function RouteSettings({ optimization, setOptimization, algorithm
         <label className="block text-xs text-gray-500 mb-1.5">Optimization Method</label>
         <div className="flex rounded-md border border-gray-300 overflow-hidden text-xs">
           {OPTIMIZATION_OPTIONS.map((option, idx) => {
-            const isActive = optimization === option;
+            const isActive = optimization === option.value;
+            console.log("optimization =", optimization);
             return (
               <button
-                key={option}
-                onClick={() => setOptimization(option)}
+                key={option.value}
+                onClick={() => setOptimization(option.value)}
                 className={`flex-1 flex items-center justify-center gap-1 py-1.5 px-1.5 transition-colors ${
                   isActive
                     ? "bg-gray-100 text-gray-900 font-medium"
@@ -24,7 +30,7 @@ export default function RouteSettings({ optimization, setOptimization, algorithm
                 } ${idx !== 0 ? "border-l border-gray-300" : ""}`}
               >
                 {isActive && <Check className="w-3 h-3" />}
-                {option}
+                {option.label}
               </button>
             );
           })}

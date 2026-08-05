@@ -1,0 +1,26 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Build
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.*
+
+# Docker
+Dockerfile*
+docker-compose.yml
+
+# OS
+.DS_Store
+Thumbs.db

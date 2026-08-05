@@ -1,48 +1,220 @@
-# Route Dashboard
+# Route Dashboard Frontend
 
-A small React + Tailwind + lucide-react project that recreates and enhances
-a route-planning dashboard UI, with an animated node/edge graph, a search
-flow, and a step-by-step route "visualizer."
+Frontend của đồ án **Introduction to Artificial Intelligence**.
 
-## Structure
+Ứng dụng mô phỏng hệ thống tìm đường thông minh trên bản đồ TP. Hồ Chí Minh, cho phép người dùng lựa chọn điểm bắt đầu, điểm kết thúc, thêm điểm dừng và gửi yêu cầu đến backend để tìm đường bằng các thuật toán AI.
+
+---
+
+## Features
+
+### Interactive Map
+
+- Hiển thị bản đồ TP. Hồ Chí Minh bằng OpenStreetMap.
+- Hiển thị các node giao thông từ `nodes.json`.
+- Giới hạn thao tác trong khu vực TP.HCM.
+- Zoom và pan trên bản đồ.
+
+### Route Selection
+
+- Chọn Start bằng cách click node.
+- Chọn End bằng cách click node.
+- Hỗ trợ thêm nhiều điểm dừng (Waypoint).
+- Đổi màu node:
+  - 🟢 Start
+  - 🔴 End
+  - 🟠 Waypoint
+  - 🔵 Normal Node
+
+### Search Settings
+
+Người dùng có thể lựa chọn:
+
+- Optimization Method
+  - Default
+  - Time
+  - Distance
+  - Cost
+
+- Search Algorithm
+  - Depth-first Search (DFS)
+  - (Chuẩn bị hỗ trợ BFS, UCS, A*)
+
+### Visualization
+
+- Hiển thị đường đi trả về từ backend.
+- Chuẩn bị hỗ trợ từng bước (Step Visualization).
+
+---
+
+## Technologies
+
+- React
+- Vite
+- TailwindCSS
+- React Leaflet
+- Leaflet
+- OpenStreetMap
+
+---
+
+## Project Structure
 
 ```
-src/
-├── App.jsx                  # Owns all state, wires everything together
-├── index.jsx                # Entry point (mounts <App /> into #root)
-├── index.css                # Tailwind directives
-├── hooks/
-│   └── useRouteGraph.js     # Generates the road-network graph + BFS path
-└── components/
-    ├── Sidebar.jsx          # Left panel shell (header + inputs + settings + search)
-    ├── RouteInputs.jsx      # Start / End location fields, "Add Stop"
-    ├── RouteSettings.jsx    # Optimization method toggle + algorithm dropdown
-    ├── RouteResults.jsx     # Visualizer controls, AI explanation, reset (post-search)
-    ├── StatsPanel.jsx       # Floating "Route Statistics" card (post-search)
-    ├── MapArea.jsx          # Map background + SVG graph rendering
-    └── ZoomControl.jsx      # Floating +/- zoom buttons
+frontend/
+│
+├── src/
+│   ├── components/
+│   │   ├── HCMMap.jsx
+│   │   ├── Sidebar.jsx
+│   │   └── ...
+│   │
+│   ├── data/
+│   │   └── nodes.json
+|   │   └── ...
+│   │
+│   ├── App.jsx
+│   ├── index.css
+│   └── index.jsx
+│
+├── Dockerfile
+├── nginx.conf
+├── package.json
+└── vite.config.js
+└── ...
 ```
 
-## How it works
+---
 
-- `useRouteGraph` builds a deterministic pseudo-random grid of nodes, connects
-  them with edges, guarantees the whole graph is a single connected network
-  (via union-find), then finds a long real route between two nodes using BFS.
-- `App` holds the `hasSearched` / `step` / `zoom` state and derives which
-  nodes are "revealed" (orange) based on the current step.
-- `MapArea` recolors nodes orange and edges blue only when both endpoints of
-  an edge are in the currently revealed set — everything else stays grey.
+## Installation
+### Cách 1
 
-## Running it
-
-This is written as a standard Vite/CRA-style React project. To run it
-locally:
+Di chuyển vào thư mục frontend
 
 ```bash
-npm install react react-dom lucide-react
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
+cd frontend
 ```
 
-Then make sure your `tailwind.config.js` content globs include `./src/**/*.{js,jsx}`,
-and wire `src/index.jsx` up to a Vite/CRA entry `index.html` with a `<div id="root">`.
+Cài dependencies
+
+```bash
+npm install
+```
+
+Chạy development server
+
+```bash
+npm run dev
+```
+
+Frontend sẽ chạy tại
+
+```
+http://localhost:5173
+```
+
+---
+
+Build
+
+```bash
+npm run build
+```
+
+Build output sẽ nằm trong
+
+```
+dist/
+```
+
+---
+### Cách 2
+- Docker
+
+Build image
+Từ root
+
+```bash
+docker compose build 
+```
+
+Run container
+
+```bash
+docker compose up
+```
+
+Truy cập
+
+```
+http://localhost:3000
+```
+
+---
+
+## Backend Integration
+
+Frontend được thiết kế để gọi REST API từ backend.
+
+Ví dụ request:
+
+```http
+POST /search
+```
+
+Request Body
+
+```json
+{
+    "start": "N01",
+    "end": "N15",
+    "stops": [
+        "N08",
+        "N12"
+    ],
+    "algorithm": "astar",
+    "optimization": "distance"
+}
+```
+
+Ví dụ Response
+
+```json
+{
+    "path": [
+        "N01",
+        "N08",
+        "N12",
+        "N15"
+    ],
+    "distance": 1820,
+    "time": 341
+}
+```
+
+Frontend sẽ sử dụng trường `path` để hiển thị Polyline trên bản đồ.
+
+---
+
+## Current Status
+
+- ✅ Display OpenStreetMap
+- ✅ Display traffic nodes
+- ✅ Select Start / End
+- ✅ Add Waypoints
+- ✅ Route visualization
+- ✅ Search settings
+- 🔄 Backend API integration
+- 🔄 AI Algorithms (Backend)
+- 🔄 Step-by-step visualization
+
+---
+
+## Future Improvements
+
+- [ ] Display edge network
+- [ ] Animate route traversal
+- [ ] Step-by-step visualization
+- [ ] Highlight visited nodes during search
+- [ ] Loading indicator while searching
+---
