@@ -125,29 +125,29 @@ export default function App() {
 
     setLoading(true);
 
-    /*
-    
-    SAU NÀY THAY BẰNG BACKEND API
+
+
+
 
 
     const res = await fetch(
       "http://localhost:8000/search",
       {
-        method:"POST",
+        method: "POST",
 
-        headers:{
-          "Content-Type":"application/json"
+        headers: {
+          "Content-Type": "application/json"
         },
 
-        body:JSON.stringify({
+        body: JSON.stringify({
 
-          start:start,
+          start: start,
 
-          end:end,
+          end: end,
 
-          algorithm:algorithm,
+          algorithm: algorithm,
 
-          optimization:optimization
+          optimization: optimization
 
         })
 
@@ -161,7 +161,7 @@ export default function App() {
     setPath(data.path);
 
 
-    */
+
 
     // TEST TẠM
     // nối thẳng start -> end
