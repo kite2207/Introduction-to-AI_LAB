@@ -35,6 +35,10 @@ export default function App() {
           direction: edge.direction,
 
           risk: edge.risk_factors,
+
+          geometry: edge.geometry
+            ? edge.geometry.map((point) => [point.lat, point.lng])
+            : null,
         });
       });
     });
