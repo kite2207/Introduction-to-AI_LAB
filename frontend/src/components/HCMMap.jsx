@@ -27,7 +27,9 @@ function FitHCM({ nodes }) {
 }
 
 export default function HCMMap({
+  nodeMap,
   nodes = [],
+  edges = [],
   start,
   end,
   waypoints = [],
@@ -69,9 +71,29 @@ export default function HCMMap({
       <FitHCM nodes={nodes} />
       <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-      {routePositions.length > 1 && (
-        <Polyline positions={routePositions} color="red" weight={5} />
-      )}
+      {edges.map((edge) => {
+        const from = nodeMap[edge.source];
+        const to = nodeMap[edge.target];
+
+        if (!from || !to) return null;
+
+        return (
+          <Polyline
+            key={edge.source + edge.target}
+            positions={[
+              [from.lat, from.lng],
+              [to.lat, to.lng],
+            ]}
+            pathOptions={{
+              color: "#999",
+              weight: 1,
+              opacity: 0.35,
+            }}
+          />
+        );
+      })}
+
+      <Polyline positions={routePositions} color="red" weight={6} />
 
       {nodes.map((node) => {
         let color = "blue";
@@ -112,10 +134,6 @@ border:2px solid white;
           >
             <Popup>
               {node.name}
-
-              <br />
-
-              {node.id}
             </Popup>
           </Marker>
         );
