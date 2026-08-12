@@ -97,8 +97,7 @@ def astar_search(
     graph: TrafficGraph, 
     start_id: str, 
     target_id: str, 
-    cost_evaluator: CostEvaluator,
-    heuristic_type: str = "distance" # "distance" or "time" or "zero"
+    cost_evaluator: CostEvaluator
 ) -> SearchResult:
     """
     A* Search uses f(n) = g(n) + h(n) to find the optimal path.
@@ -113,17 +112,24 @@ def astar_search(
 
     def get_heuristic(node_id: str) -> float:
         node = graph.nodes[node_id]
-        if heuristic_type == "distance":
-            # Scale raw physical distance by cost weights
-            dist = haversine_distance(node, target_node)
-            return dist * cost_evaluator.alpha
-        elif heuristic_type == "time":
-            # Scale time-based heuristic by travel time weight
-            # 60 km/h = 16.67 m/s max speed
-            time_h = get_time_scaled_heuristic(node, target_node, max_speed_mps=16.67)
-            return time_h * cost_evaluator.beta
-        else:
-            return 0.0
+        dist = haversine_distance(node, target_node)
+        
+        # Để đảm bảo heuristic là admissible (h(n) <= true_cost(n)),
+        # ta ước lượng chi phí tối thiểu để đi đến đích.
+        if cost_evaluator.optimization == "distance":
+            # distance_multiplier tối thiểu là 1.0 (khi congestion = 1)
+            # do đó true_distance_cost >= dist
+            return dist
+            
+        elif cost_evaluator.optimization == "time":
+            # Thời gian nhỏ nhất là đi bằng đường chim bay với vận tốc tối đa (16.67 m/s)
+            min_time = dist / 16.67
+            return min_time
+            
+        else: # "mixed"
+            # Kết hợp cả hai với trọng số tương đương trong calculate_cost
+            min_time = dist / 16.67
+            return dist + (min_time * 10.0)
 
     # Initialize priority queue
     counter = 0
@@ -184,7 +190,7 @@ def astar_search(
     total_cost = final_node.g_cost
 
     return SearchResult(
-        algorithm_name=f"A* ({heuristic_type})",
+        algorithm_name=f"A* ({cost_evaluator.optimization})",
         path=path_ids,
         explored_nodes=explored_nodes,
         total_cost=total_cost,
@@ -199,8 +205,7 @@ def greedy_best_first_search(
     graph: TrafficGraph, 
     start_id: str, 
     target_id: str, 
-    cost_evaluator: CostEvaluator,
-    heuristic_type: str = "distance"
+    cost_evaluator: CostEvaluator
 ) -> SearchResult:
     """
     Greedy Best-First Search expands nodes based solely on the heuristic estimate h(n).
@@ -216,11 +221,13 @@ def greedy_best_first_search(
 
     def get_heuristic(node_id: str) -> float:
         node = graph.nodes[node_id]
-        if heuristic_type == "distance":
-            return haversine_distance(node, target_node)
-        elif heuristic_type == "time":
-            return get_time_scaled_heuristic(node, target_node)
-        return 0.0
+        dist = haversine_distance(node, target_node)
+        if cost_evaluator.optimization == "distance":
+            return dist
+        elif cost_evaluator.optimization == "time":
+            return dist / 16.67
+        else:
+            return dist + (dist / 16.67) * 10.0
 
     counter = 0
     start_h = get_heuristic(start_id)
@@ -275,7 +282,7 @@ def greedy_best_first_search(
     total_cost = final_node.g_cost
 
     return SearchResult(
-        algorithm_name=f"Greedy Best-First ({heuristic_type})",
+        algorithm_name=f"Greedy Best-First ({cost_evaluator.optimization})",
         path=path_ids,
         explored_nodes=explored_nodes,
         total_cost=total_cost,
