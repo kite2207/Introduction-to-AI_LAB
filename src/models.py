@@ -82,40 +82,33 @@ class TrafficGraph:
 
 
 class CostEvaluator:
-    def __init__(self, alpha: float = 1.0, beta: float = 1.0, gamma: float = 1.0, delta: float = 1.0):
+    def __init__(self, optimization: str = "mixed"):
         """
-        Weights to prioritize different route search criteria:
-        - alpha: weight for distance (meters)
-        - beta: weight for travel time (seconds)
-        - gamma: weight for congestion level penalty
-        - delta: weight for risk penalties
+        optimization có thể là:
+        - "distance": Tối ưu khoảng cách
+        - "time": Tối ưu thời gian
+        - "mixed": Kết hợp cả hai
         """
-        self.alpha = alpha
-        self.beta = beta
-        self.gamma = gamma
-        self.delta = delta
+        self.optimization = optimization
 
     def calculate_cost(self, edge: Edge) -> float:
-        # 1. Base distance cost
-        distance_cost = edge.distance * self.alpha
-
-        # 2. Congestion multiplier on time
-        # E.g., Congestion levels 1 to 5 scale the estimated time:
-        # level 1: 1.0x time
-        # level 2: 1.3x time
-        # level 3: 1.8x time
-        # level 4: 2.4x time
-        # level 5: 3.5x time (gridlock)
+        # Hệ số nhân thời gian dựa trên mức độ kẹt xe
         congestion_multipliers = {1: 1.0, 2: 1.3, 3: 1.8, 4: 2.4, 5: 3.5}
-        multiplier = congestion_multipliers.get(edge.congestion_level, 1.0)
-        adjusted_time = edge.estimated_time * multiplier
-        time_cost = adjusted_time * self.beta
+        time_multiplier = congestion_multipliers.get(edge.congestion_level, 1.0)
+        
+        # Hệ số phạt khoảng cách dựa trên kẹt xe (để ưu tiên đường thoáng dù chọn tối ưu distance)
+        distance_multiplier = 1.0 + 0.1 * (edge.congestion_level - 1)
+        
+        effective_distance = edge.distance * distance_multiplier
+        effective_time = edge.estimated_time * time_multiplier + edge.get_risk_penalty()
 
-        # 3. Congestion flat penalty (helps avoid congested nodes)
-        congestion_flat_penalty = (edge.congestion_level ** 2) * 50.0 * self.gamma
-
-        # 4. Risk penalty cost
-        risk_cost = edge.get_risk_penalty() * self.delta
-
-        # Total Cost
-        return distance_cost + time_cost + congestion_flat_penalty + risk_cost
+        if self.optimization == "distance":
+            return effective_distance
+            
+        elif self.optimization == "time":
+            return effective_time
+            
+        else: # "mixed"
+            # Quy đổi thời gian ra khoảng cách tương đương để cộng dồn
+            # Vận tốc trung bình ~10 m/s -> 1 giây tương đương 10 mét chi phí
+            return effective_distance + (effective_time * 10.0)

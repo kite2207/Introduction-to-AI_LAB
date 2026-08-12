@@ -55,13 +55,7 @@ print(f"[API] Graph loaded: {len(graph.nodes)} nodes, "
 # Helper: build CostEvaluator từ optimization mode
 # ─────────────────────────────────────────────
 def get_cost_evaluator(optimization: str) -> CostEvaluator:
-    configs = {
-        "default":  CostEvaluator(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0),
-        "time":     CostEvaluator(alpha=0.1, beta=5.0, gamma=2.0, delta=1.0),
-        "distance": CostEvaluator(alpha=5.0, beta=0.1, gamma=0.5, delta=0.5),
-        "cost":     CostEvaluator(alpha=1.0, beta=2.0, gamma=3.0, delta=2.0),
-    }
-    return configs.get(optimization, configs["default"])
+    return CostEvaluator(optimization=optimization)
 
 
 # ─────────────────────────────────────────────
@@ -166,6 +160,9 @@ def search_route(req: SearchRequest):
 
     # Thêm tên node vào response để hiển thị trên UI
     path_names = [graph.nodes[nid].name for nid in result.path if nid in graph.nodes]
+    
+    # Thêm tọa độ để frontend vẽ bản đồ dễ dàng
+    path_coords = [{"lat": graph.nodes[nid].lat, "lng": graph.nodes[nid].lng} for nid in result.path if nid in graph.nodes]
 
     return SearchResponse(
         algorithm_name=result.algorithm_name,
@@ -177,6 +174,7 @@ def search_route(req: SearchRequest):
         explored_count=result.explored_count,
         execution_time_ms=result.execution_time_ms,
         path_node_names=path_names,
+        path_coordinates=path_coords,
         start_name=graph.nodes[req.start].name,
         end_name=graph.nodes[req.end].name,
     )

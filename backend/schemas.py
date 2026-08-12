@@ -11,7 +11,7 @@ class SearchRequest(BaseModel):
     start: str
     end: str
     algorithm: str  # Frontend gửi display name: "A*", "Depth-first Search", ...
-    optimization: Literal["default", "time", "distance", "cost"] = "default"
+    optimization: Literal["distance", "time", "mixed"] = "mixed"
 
 
 # ─── Response Schemas ───────────────────────────────────────
@@ -35,6 +35,10 @@ class EdgeResponse(BaseModel):
     risk_factors: List[str] = []
 
 
+class Coordinate(BaseModel):
+    lat: float
+    lng: float
+
 class SearchResponse(BaseModel):
     algorithm_name: str
     path: List[str]                # node IDs theo thứ tự start → end
@@ -46,6 +50,7 @@ class SearchResponse(BaseModel):
     execution_time_ms: float
     # Thông tin bổ sung cho UI
     path_node_names: List[str] = []
+    path_coordinates: List[Coordinate] = []
     start_name: str = ""
     end_name: str = ""
 
