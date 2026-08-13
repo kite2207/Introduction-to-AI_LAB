@@ -44,39 +44,35 @@ export default function Sidebar({
     >
       <h1 className="text-xl font-bold text-gray-900 mb-6">Route Dashboard</h1>
       <div className="mb-5">
-        <p>
-          <div className="mb-4">
-            <p className="font-semibold mb-1">Start</p>
+        <div className="mb-4">
+          <p className="font-semibold mb-1">Start</p>
 
-            <Select
-              options={nodeOptions}
-              value={
-                nodeOptions.find((option) => option.value === start) ?? null
-              }
-              onChange={(option) => {
-                setStart(option?.value ?? null);
-              }}
-              placeholder="Chọn điểm bắt đầu"
-              isSearchable
-            />
-          </div>
-        </p>
+          <Select
+            options={nodeOptions}
+            value={
+              nodeOptions.find((option) => option.value === start) ?? null
+            }
+            onChange={(option) => {
+              setStart(option?.value ?? null);
+            }}
+            placeholder="Chọn điểm bắt đầu"
+            isSearchable
+          />
+        </div>
 
-        <p>
-          <div className="mb-4">
-            <p className="font-semibold mb-1">End</p>
+        <div className="mb-4">
+          <p className="font-semibold mb-1">End</p>
 
-            <Select
-              options={nodeOptions}
-              value={nodeOptions.find((option) => option.value === end) ?? null}
-              onChange={(option) => {
-                setEnd(option?.value ?? null);
-              }}
-              placeholder="Chọn điểm kết thúc"
-              isSearchable
-            />
-          </div>
-        </p>
+          <Select
+            options={nodeOptions}
+            value={nodeOptions.find((option) => option.value === end) ?? null}
+            onChange={(option) => {
+              setEnd(option?.value ?? null);
+            }}
+            placeholder="Chọn điểm kết thúc"
+            isSearchable
+          />
+        </div>
         <h3 className="font-bold">Điểm dừng</h3>
 
         {waypoints.length === 0 ? (

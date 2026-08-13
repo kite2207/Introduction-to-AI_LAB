@@ -1,0 +1,54 @@
+{
+  "1": {
+    "name": "Ngã giao Đường Dương Tử Giang - Đường Tân Thành",
+    "lat": 10.7558421,
+    "lng": 106.65474570000002,
+    "type": "intersection",
+    "connected_to": [
+      {
+        "target_node": "0",
+        "direction": "two-way",
+        "risk_factors": [
+          "narrow_road",
+          "complex_intersection"
+        ],
+        "congestion_level": 2,
+        "estimated_time": 33,
+        "distance": 111.33
+      },
+      {
+        "target_node": "3",
+        "direction": "two-way",
+        "risk_factors": [
+          "narrow_road",
+          "complex_intersection"
+        ],
+        "congestion_level": 1,
+        "estimated_time": 22,
+        "distance": 145.82
+      },
+      {
+        "target_node": "0",
+        "direction": "two-way",
+        "risk_factors": [
+          "narrow_road",
+          "complex_intersection"
+        ],
+        "congestion_level": 3,
+        "estimated_time": 50,
+        "distance": 111.33
+      },
+      {
+        "target_node": "45",
+        "direction": "two-way",
+        "risk_factors": [
+          "narrow_road",
+          "complex_intersection"
+        ],
+        "congestion_level": 2,
+        "estimated_time": 65,
+        "distance": 215.44
+      }
+    ]
+  }
+}
