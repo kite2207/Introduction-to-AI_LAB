@@ -1,0 +1,42 @@
+{
+  "0": {
+    "name": "Ngã giao Đường Tạ Uyên - Đường Tân Thành",
+    "lat": 10.755680750001531,
+    "lng": 106.65374115000002,
+    "type": "intersection",
+    "connected_to": [
+      {
+        "target_node": "1",
+        "direction": "two-way",
+        "risk_factors": [
+          "narrow_road",
+          "complex_intersection"
+        ],
+        "congestion_level": 2,
+        "estimated_time": 33,
+        "distance": 111.33
+      },
+      {
+        "target_node": "144",
+        "direction": "one-way",
+        "risk_factors": [
+          "complex_intersection"
+        ],
+        "congestion_level": 3,
+        "estimated_time": 39,
+        "distance": 86.07
+      },
+      {
+        "target_node": "100",
+        "direction": "two-way",
+        "risk_factors": [
+          "narrow_road",
+          "complex_intersection"
+        ],
+        "congestion_level": 2,
+        "estimated_time": 29,
+        "distance": 95.32
+      }
+    ]
+  }
+}

@@ -5,6 +5,9 @@ Usage: python test_algorithms.py
 import sys
 import os
 
+if hasattr(sys.stdout, 'reconfigure') and sys.stdout.encoding != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
+
 # Đảm bảo import đúng từ thư mục gốc
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -50,10 +53,10 @@ print()
 # 3. Các CostEvaluator theo optimization mode
 # ──────────────────────────────────────────────
 cost_modes = {
-    "Default" : CostEvaluator(alpha=1.0, beta=1.0, gamma=1.0, delta=1.0),
-    "Time"    : CostEvaluator(alpha=0.1, beta=5.0, gamma=2.0, delta=1.0),
-    "Distance": CostEvaluator(alpha=5.0, beta=0.1, gamma=0.5, delta=0.5),
-    "Cost"    : CostEvaluator(alpha=1.0, beta=2.0, gamma=3.0, delta=2.0),
+    "Default" : CostEvaluator(optimization="mixed"),
+    "Time"    : CostEvaluator(optimization="time"),
+    "Distance": CostEvaluator(optimization="distance"),
+    "Cost"    : CostEvaluator(optimization="mixed"),
 }
 
 # ──────────────────────────────────────────────
@@ -83,8 +86,8 @@ algorithms = [
     ("DFS",    lambda: dfs_search(graph, START_ID, END_ID, evaluator)),
     ("BFS",    lambda: bfs_search(graph, START_ID, END_ID, evaluator)),
     ("Dijkstra", lambda: dijkstra_search(graph, START_ID, END_ID, evaluator)),
-    ("A* (distance)", lambda: astar_search(graph, START_ID, END_ID, evaluator, "distance")),
-    ("A* (time)",     lambda: astar_search(graph, START_ID, END_ID, evaluator, "time")),
+    ("A* (distance)", lambda: astar_search(graph, START_ID, END_ID, cost_modes["Distance"])),
+    ("A* (time)",     lambda: astar_search(graph, START_ID, END_ID, cost_modes["Time"])),
     ("Greedy Best-First", lambda: greedy_best_first_search(graph, START_ID, END_ID, evaluator)),
 ]
 
@@ -102,7 +105,7 @@ print(f"{'='*60}")
 print("  A* across optimization modes")
 print(f"{'='*60}")
 for mode_name, evaluator in cost_modes.items():
-    result = astar_search(graph, START_ID, END_ID, evaluator, "distance")
+    result = astar_search(graph, START_ID, END_ID, evaluator)
     status = "✅" if result.path else "❌"
     if result.path:
         print(f"  {status} [{mode_name:>8}]  dist={result.total_distance/1000:.2f}km  "

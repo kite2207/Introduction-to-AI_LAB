@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
-import trafficData from "./data/hcm_traffic_data.json";
+import nodesData from "./data/nodes.json";
+import edgesData from "./data/edges.json";
 
 import Sidebar from "./components/Sidebar";
 import HCMMap from "./components/HCMMap";
@@ -10,38 +11,24 @@ import HCMMap from "./components/HCMMap";
 export default function App() {
   const { nodes, edges, nodeMap } = useMemo(() => {
 
-    const nodes = Object.entries(trafficData).map(([id, node]) => ({
-      id,
+    const nodes = nodesData.map((node) => ({
+      id: node.node_id,
       name: node.name,
       lat: node.lat,
       lng: node.lng,
-      type: node.type,
+      type: node.node_type,
     }));
 
-    const edges = [];
-    Object.entries(trafficData).forEach(([sourceId, node]) => {
-      node.connected_to.forEach((edge) => {
-        edges.push({
-          source: sourceId,
-
-          target: edge.target_node,
-
-          distance: edge.distance,
-
-          estimatedTime: edge.estimated_time,
-
-          congestion: edge.congestion_level,
-
-          direction: edge.direction,
-
-          risk: edge.risk_factors,
-
-          geometry: edge.geometry
-            ? edge.geometry.map((point) => [point.lat, point.lng])
-            : null,
-        });
-      });
-    });
+    const edges = edgesData.map((edge) => ({
+      source: edge.source_id,
+      target: edge.target_id,
+      distance: edge.distance,
+      estimatedTime: edge.estimated_time,
+      congestion: edge.congestion_level,
+      direction: edge.direction,
+      risk: edge.risk_factors,
+      geometry: null,
+    }));
 
     const nodeMap = Object.fromEntries(
       nodes.map((node) => [node.id, node]),
