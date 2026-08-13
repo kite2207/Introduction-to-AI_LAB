@@ -1,20 +1,19 @@
 """
-Pydantic schemas cho FastAPI request/response validation
+Pydantic schemas for FastAPI request/response validation.
 """
+
+from typing import List, Optional, Union
+
 from pydantic import BaseModel
-from typing import List, Optional, Literal
 
-
-# ─── Request Schemas ────────────────────────────────────────
 
 class SearchRequest(BaseModel):
     start: str
     end: str
-    algorithm: str  # Frontend gửi display name: "A*", "Depth-first Search", ...
-    optimization: Literal["distance", "time", "mixed"] = "mixed"
+    algorithm: str = "A*"
+    # Frontend starts with "default"; api.py maps it to "mixed".
+    optimization: str = "default"
 
-
-# ─── Response Schemas ───────────────────────────────────────
 
 class NodeResponse(BaseModel):
     node_id: str
@@ -30,25 +29,26 @@ class EdgeResponse(BaseModel):
     distance: float
     estimated_time: float
     congestion_level: int
-    road_type: str
+    road_type: Optional[str] = None
     direction: str
-    risk_factors: List[str] = []
+    # hcm_traffic_data stores risk_factors as strings such as "none".
+    risk_factors: Union[str, List[str]] = "none"
 
 
 class Coordinate(BaseModel):
     lat: float
     lng: float
 
+
 class SearchResponse(BaseModel):
     algorithm_name: str
-    path: List[str]                # node IDs theo thứ tự start → end
-    explored_nodes: List[str]      # thứ tự node được khám phá
-    total_cost: float
-    total_distance: float          # meters
-    total_time: float              # seconds
+    path: List[str]
+    explored_nodes: List[str]
+    total_cost: Optional[float] = None
+    total_distance: float
+    total_time: float
     explored_count: int
     execution_time_ms: float
-    # Thông tin bổ sung cho UI
     path_node_names: List[str] = []
     path_coordinates: List[Coordinate] = []
     start_name: str = ""
