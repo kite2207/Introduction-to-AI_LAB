@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
-import trafficData from "./data/hcm_traffic_data.json";
+import nodesData from "./data/nodes.json";
+import edgesData from "./data/edges.json";
 
 import Sidebar from "./components/Sidebar";
 import HCMMap from "./components/HCMMap";
@@ -15,7 +16,7 @@ export default function App() {
       name: node.name,
       lat: node.lat,
       lng: node.lng,
-      type: node.type,
+      type: node.node_type,
     }));
 
     const edges = [];
