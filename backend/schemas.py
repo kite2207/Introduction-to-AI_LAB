@@ -1,18 +1,20 @@
 """
-Pydantic schemas for FastAPI.
+Pydantic schemas cho FastAPI request/response validation
 """
+from pydantic import BaseModel
+from typing import List, Optional, Literal
 
-from typing import Any, List, Optional, Union
 
-from pydantic import BaseModel, Field
-
+# ─── Request Schemas ────────────────────────────────────────
 
 class SearchRequest(BaseModel):
     start: str
     end: str
-    algorithm: str = Field(default="astar")
-    optimization: str = Field(default="mixed")
+    algorithm: str  # Frontend gửi display name: "A*", "Depth-first Search", ...
+    optimization: Literal["distance", "time", "mixed"] = "mixed"
 
+
+# ─── Response Schemas ───────────────────────────────────────
 
 class NodeResponse(BaseModel):
     node_id: str
@@ -28,38 +30,31 @@ class EdgeResponse(BaseModel):
     distance: float
     estimated_time: float
     congestion_level: int
-    road_type: Optional[str] = None
+    road_type: str
     direction: str
-    risk_factors: Union[str, List[str]] = "none"
+    risk_factors: List[str] = []
 
 
 class Coordinate(BaseModel):
     lat: float
     lng: float
 
-
 class SearchResponse(BaseModel):
     algorithm_name: str
-    path: List[str]
-    explored_nodes: List[str]
-
-    total_cost: Optional[float] = None
-    total_distance: float
-    total_time: float
-
+    path: List[str]                # node IDs theo thứ tự start → end
+    explored_nodes: List[str]      # thứ tự node được khám phá
+    total_cost: float
+    total_distance: float          # meters
+    total_time: float              # seconds
     explored_count: int
     execution_time_ms: float
-
+    # Thông tin bổ sung cho UI
     path_node_names: List[str] = []
     path_coordinates: List[Coordinate] = []
     start_name: str = ""
     end_name: str = ""
-
-    # Simulation trace from informed.py.
-    # Each item contains:
-    # step, current, exploredNodes, frontierNodes,
-    # exploredEdges, pathSoFar, metrics.
-    steps: List[dict[str, Any]] = Field(default_factory=list)
+    steps: list[dict] = []
+    explanation: dict = {}
 
 
 class GraphInfoResponse(BaseModel):

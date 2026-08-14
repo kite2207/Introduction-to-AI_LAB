@@ -29,10 +29,6 @@ const ALGORITHM_OPTIONS = [
 
 const OPTIMIZATION_OPTIONS = [
   {
-    value: "default",
-    label: "Default",
-  },
-  {
     value: "time",
     label: "Time",
   },
@@ -54,7 +50,9 @@ export default function RouteSettings({
 }) {
   return (
     <div className="mt-5">
-      <h3 className="font-semibold text-gray-900 mb-3">Settings</h3>
+      <h3 className="font-semibold text-gray-900 mb-3">
+        Settings
+      </h3>
 
       <div className="mb-4">
         <label className="block text-xs text-gray-500 mb-1">
@@ -74,7 +72,9 @@ export default function RouteSettings({
                   active
                     ? "bg-gray-100 text-gray-900 font-medium"
                     : "bg-white text-gray-500 hover:bg-gray-50"
-                } ${index > 0 ? "border-l border-gray-300" : ""}`}
+                } ${
+                  index > 0 ? "border-l border-gray-300" : ""
+                }`}
               >
                 {active && <span className="mr-1">✓</span>}
                 {option.label}
@@ -85,11 +85,15 @@ export default function RouteSettings({
       </div>
 
       <div>
-        <label className="block text-xs text-gray-500 mb-1">Algorithm</label>
+        <label className="block text-xs text-gray-500 mb-1">
+          Algorithm
+        </label>
 
         <select
           value={algorithm}
-          onChange={(event) => setAlgorithm(event.target.value)}
+          onChange={(event) =>
+            setAlgorithm(event.target.value)
+          }
           className="
             w-full
             h-10
@@ -107,7 +111,10 @@ export default function RouteSettings({
           "
         >
           {ALGORITHM_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option
+              key={option.value}
+              value={option.value}
+            >
               {option.label}
             </option>
           ))}

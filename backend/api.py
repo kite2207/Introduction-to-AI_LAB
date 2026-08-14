@@ -5,6 +5,8 @@ Run from the project root:
     python -m uvicorn backend.api:app --reload --port 8000
 
 The graph source is data/hcm_traffic_data.json.
+The existing TrafficGraph/search algorithms are kept unchanged by adapting
+hcm_traffic_data.json to the existing TrafficGraph.load_from_json() interface.
 """
 
 from __future__ import annotations
@@ -85,7 +87,6 @@ def make_legacy_graph_files(data: dict[str, Any]) -> tuple[Path, Path]:
             target = c.get("target_node")
             if target is None:
                 continue
-
             edges.append(
                 {
                     "source_id": str(node_id),
@@ -102,16 +103,8 @@ def make_legacy_graph_files(data: dict[str, Any]) -> tuple[Path, Path]:
     temp_dir = Path(tempfile.mkdtemp(prefix="route_hcm_"))
     nodes_path = temp_dir / "nodes.json"
     edges_path = temp_dir / "edges.json"
-
-    nodes_path.write_text(
-        json.dumps(nodes, ensure_ascii=False),
-        encoding="utf-8",
-    )
-    edges_path.write_text(
-        json.dumps(edges, ensure_ascii=False),
-        encoding="utf-8",
-    )
-
+    nodes_path.write_text(json.dumps(nodes, ensure_ascii=False), encoding="utf-8")
+    edges_path.write_text(json.dumps(edges, ensure_ascii=False), encoding="utf-8")
     return nodes_path, edges_path
 
 
@@ -119,65 +112,38 @@ hcm_data = load_hcm_data()
 GENERATED_NODES_PATH, GENERATED_EDGES_PATH = make_legacy_graph_files(hcm_data)
 
 graph = TrafficGraph()
-graph.load_from_json(
-    str(GENERATED_NODES_PATH),
-    str(GENERATED_EDGES_PATH),
-)
+graph.load_from_json(str(GENERATED_NODES_PATH), str(GENERATED_EDGES_PATH))
 
-print(
-    f"[API] HCM graph loaded: "
-    f"{len(graph.nodes)} nodes, "
-    f"{sum(len(v) for v in graph.adjacency_list.values())} edges"
-)
+print(f"[API] HCM graph loaded: {len(graph.nodes)} nodes, {sum(len(v) for v in graph.adjacency_list.values())} edges")
 
 
 def get_cost_evaluator(optimization: str) -> CostEvaluator:
     return CostEvaluator(optimization=optimization)
 
 
-def normalize_optimization(value: str) -> str:
-    raw = " ".join(str(value).strip().lower().split())
-
-    aliases = {
-        "default": "mixed",
-        "mixed": "mixed",
-        "distance": "distance",
-        "time": "time",
-    }
-
-    return aliases.get(raw, raw)
-
-
 def normalize_algorithm(value: str) -> str:
     raw = " ".join(str(value).strip().lower().split())
-
     aliases = {
         "depth-first search": "dfs",
         "depth first search": "dfs",
         "dfs": "dfs",
-
         "breadth-first search": "bfs",
         "breadth first search": "bfs",
         "bfs": "bfs",
-
         "dijkstra's algorithm": "dijkstra",
         "dijkstra algorithm": "dijkstra",
         "dijkstra": "dijkstra",
-
         "uniform-cost search": "ucs",
         "uniform cost search": "ucs",
         "ucs": "ucs",
-
         "a* search": "astar",
         "a*": "astar",
         "a-star": "astar",
         "astar": "astar",
-
         "greedy best-first search": "greedy",
         "greedy best first search": "greedy",
         "greedy": "greedy",
     }
-
     return aliases.get(raw, raw)
 
 
@@ -199,15 +165,12 @@ def get_nodes():
 def get_edges():
     seen = set()
     result = []
-
     for edge_list in graph.adjacency_list.values():
         for e in edge_list:
             key = tuple(sorted([e.source_id, e.target_id]))
             if key in seen:
                 continue
-
             seen.add(key)
-
             result.append(
                 EdgeResponse(
                     source_id=e.source_id,
@@ -220,7 +183,6 @@ def get_edges():
                     risk_factors=e.risk_factors,
                 )
             )
-
     return result
 
 
@@ -228,10 +190,207 @@ def get_edges():
 def get_graph_info():
     return GraphInfoResponse(
         node_count=len(graph.nodes),
-        edge_count=sum(
-            len(v) for v in graph.adjacency_list.values()
-        ),
+        edge_count=sum(len(v) for v in graph.adjacency_list.values()),
     )
+
+
+
+def _reference_route(start_id: str, end_id: str, optimization: str):
+    evaluator = get_cost_evaluator(optimization)
+    ref = dijkstra_search(
+        graph,
+        start_id,
+        end_id,
+        evaluator,
+    )
+
+    if not ref.path:
+        return None
+
+    return {
+        "algorithm": "Dijkstra",
+        "optimization": optimization,
+        "path": list(ref.path),
+        "route_names": [
+            graph.nodes[nid].name
+            for nid in ref.path
+            if nid in graph.nodes
+        ],
+        "distance": ref.total_distance,
+        "time": ref.total_time,
+        "cost": ref.total_cost,
+    }
+
+
+def build_route_explanation(
+    *,
+    algo: str,
+    algorithm_name: str,
+    optimization: str,
+    start_id: str,
+    end_id: str,
+    path: list[str],
+    path_names: list[str],
+    total_cost: float | None,
+    total_distance: float,
+    total_time: float,
+):
+    mode = optimization
+
+    # Same-objective Dijkstra = optimality reference.
+    optimality_ref = _reference_route(
+        start_id,
+        end_id,
+        mode,
+    )
+
+    # Actual alternatives.
+    shortest_ref = _reference_route(
+        start_id,
+        end_id,
+        "distance",
+    )
+    fastest_ref = _reference_route(
+        start_id,
+        end_id,
+        "time",
+    )
+
+    def compare(ref):
+        if ref is None:
+            return None
+
+        return {
+            **ref,
+            "distance_difference": (
+                total_distance - ref["distance"]
+            ),
+            "time_difference": (
+                total_time - ref["time"]
+            ),
+            "cost_difference": (
+                None
+                if total_cost is None
+                else total_cost - ref["cost"]
+            ),
+        }
+
+    criterion = {
+        "ucs": "lowest accumulated cost g(n)",
+        "dijkstra": "lowest accumulated cost g(n)",
+        "astar": "lowest estimated cost f(n) = g(n) + h(n)",
+        "greedy": "lowest heuristic h(n)",
+        "bfs": "FIFO expansion order",
+        "dfs": "LIFO expansion order",
+    }.get(algo, "its search rule")
+
+    objective = {
+        "distance": "minimum distance",
+        "time": "minimum estimated travel time",
+        "mixed": "minimum traffic-aware mixed cost",
+    }.get(mode, "the selected cost objective")
+
+    if algo in {"ucs", "dijkstra"}:
+        optimality = (
+            "UCS/Dijkstra is optimal for non-negative edge costs "
+            f"under the {mode} objective."
+        )
+    elif algo == "astar":
+        optimality = (
+            "A* is optimal when its heuristic is admissible "
+            "(and consistent for graph search)."
+        )
+    elif algo == "bfs":
+        optimality = (
+            "BFS is optimal for minimum hop count, not necessarily "
+            "for distance, time, or traffic cost."
+        )
+    else:
+        optimality = (
+            f"{algorithm_name} does not guarantee an optimal route "
+            f"under the {mode} traffic cost."
+        )
+
+    congested = []
+    for source_id, target_id in zip(path, path[1:]):
+        edge = next(
+            (
+                e
+                for e in graph.get_neighbors(source_id)
+                if str(e.target_id) == str(target_id)
+            ),
+            None,
+        )
+
+        if edge is None or edge.congestion_level < 4:
+            continue
+
+        risk = getattr(edge, "risk_factors", "none")
+        if isinstance(risk, list):
+            risk = ", ".join(str(v) for v in risk)
+
+        congested.append({
+            "from": graph.nodes[source_id].name,
+            "to": graph.nodes[target_id].name,
+            "congestion": edge.congestion_level,
+            "risk": risk,
+        })
+
+    same_reference = (
+        optimality_ref is not None
+        and total_cost is not None
+        and abs(total_cost - optimality_ref["cost"]) < 1e-9
+    )
+
+    return {
+        "headline": (
+            f"The selected route is optimized for {objective}."
+        ),
+        "why_selected": (
+            f"{algorithm_name} selected this route using {criterion} "
+            f"under the '{mode}' objective."
+        ),
+        "optimality": optimality,
+        "optimality_reference": {
+            "algorithm": "Dijkstra",
+            "optimization": mode,
+            "route_names": (
+                optimality_ref["route_names"]
+                if optimality_ref else []
+            ),
+            "distance": (
+                optimality_ref["distance"]
+                if optimality_ref else None
+            ),
+            "time": (
+                optimality_ref["time"]
+                if optimality_ref else None
+            ),
+            "cost": (
+                optimality_ref["cost"]
+                if optimality_ref else None
+            ),
+            "same_cost_as_selected": same_reference,
+        },
+        "route_comparison": {
+            "selected": {
+                "route_names": list(path_names),
+                "distance": total_distance,
+                "time": total_time,
+                "cost": total_cost,
+            },
+            "shortest_distance": compare(shortest_ref),
+            "fastest_time": compare(fastest_ref),
+        },
+        "congested_segments": congested,
+        "optimization": mode,
+        "algorithm": algorithm_name,
+        "comparison_note": (
+            "Dijkstra with the same objective is an optimality reference. "
+            "The shortest-distance and fastest-time routes are actual "
+            "alternative routes."
+        ),
+    }
 
 
 @app.post("/api/search", response_model=SearchResponse, tags=["Search"])
@@ -240,25 +399,13 @@ def search_route(req: SearchRequest):
     end_id = str(req.end)
 
     if start_id not in graph.nodes:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Node '{start_id}' không tồn tại",
-        )
-
+        raise HTTPException(404, f"Node '{start_id}' không tồn tại")
     if end_id not in graph.nodes:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Node '{end_id}' không tồn tại",
-        )
-
+        raise HTTPException(404, f"Node '{end_id}' không tồn tại")
     if start_id == end_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Start và End phải khác nhau",
-        )
+        raise HTTPException(400, "Start và End phải khác nhau")
 
-    optimization = normalize_optimization(req.optimization)
-    evaluator = get_cost_evaluator(optimization)
+    evaluator = get_cost_evaluator(req.optimization)
     algo = normalize_algorithm(req.algorithm)
 
     if algo == "dfs":
@@ -272,43 +419,28 @@ def search_route(req: SearchRequest):
     elif algo == "astar":
         result = astar_search(graph, start_id, end_id, evaluator)
     elif algo == "greedy":
-        result = greedy_best_first_search(
-            graph,
-            start_id,
-            end_id,
-            evaluator,
-        )
+        result = greedy_best_first_search(graph, start_id, end_id, evaluator)
     else:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Thuật toán '{req.algorithm}' không hợp lệ",
-        )
+        raise HTTPException(400, f"Thuật toán '{req.algorithm}' không hợp lệ")
 
     if not result.path:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Không tìm thấy đường từ {start_id} đến {end_id}",
-        )
+        raise HTTPException(404, f"Không tìm thấy đường từ {start_id} đến {end_id}")
 
-    path_names = [
-        graph.nodes[nid].name
-        for nid in result.path
-        if nid in graph.nodes
-    ]
+    path_names = [graph.nodes[nid].name for nid in result.path if nid in graph.nodes]
+    path_coords = [{"lat": graph.nodes[nid].lat, "lng": graph.nodes[nid].lng} for nid in result.path if nid in graph.nodes]
 
-    path_coords = [
-        {
-            "lat": graph.nodes[nid].lat,
-            "lng": graph.nodes[nid].lng,
-        }
-        for nid in result.path
-        if nid in graph.nodes
-    ]
-
-    # informed.py now attaches result.steps dynamically.
-    # Uninformed algorithms can be updated later to use the same format;
-    # an empty list keeps the API backward-compatible for now.
-    steps = getattr(result, "steps", [])
+    explanation = build_route_explanation(
+        algo=algo,
+        algorithm_name=result.algorithm_name,
+        optimization=req.optimization,
+        start_id=start_id,
+        end_id=end_id,
+        path=result.path,
+        path_names=path_names,
+        total_cost=result.total_cost,
+        total_distance=result.total_distance,
+        total_time=result.total_time,
+    )
 
     return SearchResponse(
         algorithm_name=result.algorithm_name,
@@ -323,7 +455,8 @@ def search_route(req: SearchRequest):
         path_coordinates=path_coords,
         start_name=graph.nodes[start_id].name,
         end_name=graph.nodes[end_id].name,
-        steps=steps,
+        steps=getattr(result, "steps", []),
+        explanation=explanation,
     )
 
 

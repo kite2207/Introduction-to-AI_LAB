@@ -67,10 +67,11 @@ export default function App() {
   const [pathNodeNames, setPathNodeNames] = useState([]);
   const [exploredNodes, setExploredNodes] = useState([]);
   const [simulationSteps, setSimulationSteps] = useState([]);
+  const [routeExplanation, setRouteExplanation] = useState(null);
 
   const [algorithm, setAlgorithm] = useState("astar");
   const [algorithmName, setAlgorithmName] = useState("");
-  const [optimization, setOptimization] = useState("default");
+  const [optimization, setOptimization] = useState("mixed");
 
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -93,7 +94,7 @@ export default function App() {
     setPathNodeNames([]);
     setExploredNodes([]);
     setSimulationSteps([]);
-    setAlgorithmName("");
+    setRouteExplanation(null);
     setStep(0);
     setRouteStats({
       distance: null,
@@ -188,6 +189,7 @@ export default function App() {
       const combinedNames = [];
       const explored = [];
       const combinedSteps = [];
+      const explanations = [];
 
       let totalDistance = 0;
       let totalTime = 0;
@@ -227,21 +229,26 @@ export default function App() {
 
         explored.push(...(result.explored_nodes || []));
 
+        if (result.explanation) {
+          explanations.push(result.explanation);
+        }
+
         const segmentSteps = result.steps || [];
         const stepOffset = combinedSteps.length;
-        let previousEdgesForSegment = [];
 
         segmentSteps.forEach((traceStep, index) => {
-          const currentEdges =
-            traceStep.exploredEdges || [];
+          const previousExploredEdges =
+            index > 0
+              ? segmentSteps[index - 1]?.exploredEdges || []
+              : combinedSteps.length > 0
+                ? combinedSteps[combinedSteps.length - 1]?.exploredEdges || []
+                : [];
 
           combinedSteps.push({
             ...traceStep,
             step: stepOffset + index,
-            previousExploredEdges: previousEdgesForSegment,
+            previousExploredEdges,
           });
-
-          previousEdgesForSegment = currentEdges;
         });
 
         totalDistance += Number(result.total_distance || 0);
@@ -268,8 +275,38 @@ export default function App() {
       setRoutePositions(combinedCoordinates);
       setPathNodeNames(combinedNames);
       setExploredNodes([...new Set(explored)]);
-      setSimulationSteps(combinedSteps || []);
+      setSimulationSteps(combinedSteps);
       setStep(0);
+
+      setRouteExplanation(
+        explanations.length === 1
+          ? explanations[0]
+          : explanations.length > 1
+            ? {
+                headline: "Optimization across multiple route legs.",
+                why_selected: explanations
+                  .map(
+                    (item, index) =>
+                      `Leg ${index + 1}: ${item?.why_selected || ""}`
+                  )
+                  .join(" "),
+                optimality: explanations
+                  .map(
+                    (item, index) =>
+                      `Leg ${index + 1}: ${item?.optimality || ""}`
+                  )
+                  .join(" "),
+                congested_segments: explanations.flatMap(
+                  (item) => item?.congested_segments || []
+                ),
+                comparison: null,
+                comparison_note:
+                  "Multiple legs were searched because waypoints were selected.",
+                algorithm:
+                  explanations[0]?.algorithm || algorithm,
+              }
+            : null
+      );
 
       setRouteStats({
         distance: totalDistance,
@@ -301,7 +338,7 @@ export default function App() {
     setAddingStop(false);
     setAlgorithm("astar");
     setAlgorithmName("");
-    setOptimization("default");
+    setOptimization("mixed");
     resetSearchResult();
   };
 
@@ -345,6 +382,7 @@ export default function App() {
           algorithm={algorithm}
           setAlgorithm={handleSettingChange(setAlgorithm)}
           algorithmName={algorithmName}
+          routeExplanation={routeExplanation}
           hasSearched={hasSearched}
           onSearch={searchRoute}
           step={step}
@@ -382,7 +420,6 @@ export default function App() {
             exploredCount={routeStats.exploredCount}
             executionTimeMs={routeStats.executionTimeMs}
             pathNodeNames={pathNodeNames}
-            graphEdges={edges}
           />
         </div>
       )}
@@ -403,7 +440,11 @@ export default function App() {
           end={end}
           waypoints={waypoints}
           path={path}
-          simulation={simulationSteps[step - 1] || null}
+          // Chỉ hiển thị explored nodes khi người dùng đang xem lại thuật toán.
+          // step = 0 => không hiển thị explored nodes.
+          exploredNodes={
+            step > 0 ? exploredNodes.slice(0, step) : []
+          }
           onNodeClick={handleNodeClick}
         />
       </div>
