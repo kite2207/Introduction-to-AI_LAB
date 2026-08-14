@@ -25,6 +25,8 @@ class SearchResult:
     total_time: float           # Total travel time (seconds, adjusted for congestion)
     explored_count: int         # Number of nodes expanded
     execution_time_ms: float = 0.0
+    # Optional step-by-step trace for frontend simulation.
+    steps: List[Dict[str, Any]] = field(default_factory=list)
 
 def reconstruct_path(final_node: Optional[SearchNode]) -> List[SearchNode]:
     """

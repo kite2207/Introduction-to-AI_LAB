@@ -1,18 +1,17 @@
 """
-Pydantic schemas for FastAPI request/response validation.
+Pydantic schemas for FastAPI.
 """
 
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SearchRequest(BaseModel):
     start: str
     end: str
-    algorithm: str = "A*"
-    # Frontend starts with "default"; api.py maps it to "mixed".
-    optimization: str = "default"
+    algorithm: str = Field(default="astar")
+    optimization: str = Field(default="mixed")
 
 
 class NodeResponse(BaseModel):
@@ -31,7 +30,6 @@ class EdgeResponse(BaseModel):
     congestion_level: int
     road_type: Optional[str] = None
     direction: str
-    # hcm_traffic_data stores risk_factors as strings such as "none".
     risk_factors: Union[str, List[str]] = "none"
 
 
@@ -44,15 +42,24 @@ class SearchResponse(BaseModel):
     algorithm_name: str
     path: List[str]
     explored_nodes: List[str]
+
     total_cost: Optional[float] = None
     total_distance: float
     total_time: float
+
     explored_count: int
     execution_time_ms: float
+
     path_node_names: List[str] = []
     path_coordinates: List[Coordinate] = []
     start_name: str = ""
     end_name: str = ""
+
+    # Simulation trace from informed.py.
+    # Each item contains:
+    # step, current, exploredNodes, frontierNodes,
+    # exploredEdges, pathSoFar, metrics.
+    steps: List[dict[str, Any]] = Field(default_factory=list)
 
 
 class GraphInfoResponse(BaseModel):

@@ -1,234 +1,378 @@
+import React from "react";
 import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  Polyline,
-} from "react-leaflet";
-import { useMap } from "react-leaflet";
-import { useEffect } from "react";
+  Route,
+  Clock,
+  DollarSign,
+  Search,
+  GitBranch,
+  CircleDot,
+} from "lucide-react";
 
-import L from "leaflet";
+function formatDistance(value) {
+  if (value == null) return "—";
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "—";
 
-function FitHCM({ nodes }) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (nodes.length > 0) {
-      const bounds = nodes.map((node) => [node.lat, node.lng]);
-
-      map.fitBounds(bounds, {
-        padding: [50, 50],
-      });
-    }
-  }, [nodes, map]);
-
-  return null;
+  return Math.abs(n) >= 1000
+    ? `${(n / 1000).toFixed(2)} km`
+    : `${n.toFixed(0)} m`;
 }
 
-const normalizePoint = (point) =>
-  Array.isArray(point) ? [point[0], point[1]] : [point.lat, point.lng];
+function formatTime(value) {
+  if (value == null) return "—";
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "—";
 
-const getExploredEdgeSegments = (exploredPath, edges, nodeMap) => {
-  if (!exploredPath || exploredPath.length < 2) {
-    return [];
+  return n >= 60
+    ? `${(n / 60).toFixed(1)} min`
+    : `${n.toFixed(0)} s`;
+}
+
+function formatNumber(value) {
+  if (value == null) return "—";
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "—";
+  return n.toFixed(2);
+}
+
+function getAlgorithmKind(
+  algorithm = "",
+  algorithmName = ""
+) {
+  const raw =
+    `${algorithm} ${algorithmName}`.toLowerCase();
+
+  if (
+    raw.includes("dijkstra") ||
+    raw.includes("uniform") ||
+    raw.includes("ucs")
+  ) {
+    return "ucs";
   }
 
-  const segments = [];
-  const seen = new Set();
-
-  for (let i = 0; i < exploredPath.length - 1; i += 1) {
-    const fromId = exploredPath[i];
-    const toId = exploredPath[i + 1];
-
-    // Only draw a line when the two explored nodes are actually connected
-    // by an edge in the graph. This prevents the previous "spider web"
-    // effect caused by connecting arbitrary exploration-order nodes.
-    const edge = edges.find(
-      (candidate) =>
-        (candidate.source === fromId && candidate.target === toId) ||
-        (candidate.source === toId && candidate.target === fromId),
-    );
-
-    if (!edge) {
-      continue;
-    }
-
-    const key = [edge.source, edge.target].sort().join("::");
-
-    if (seen.has(key)) {
-      continue;
-    }
-
-    const positions = getEdgePositions(edge, nodeMap);
-
-    if (positions && positions.length > 1) {
-      seen.add(key);
-      segments.push({
-        key: `explored-${key}`,
-        positions,
-      });
-    }
+  if (
+    raw.includes("a*") ||
+    raw.includes("astar")
+  ) {
+    return "astar";
   }
 
-  return segments;
-};
-
-const getEdgePositions = (edge, nodeMap) => {
-  if (Array.isArray(edge?.geometry) && edge.geometry.length > 1) {
-    return edge.geometry.map(normalizePoint);
+  if (raw.includes("greedy")) {
+    return "greedy";
   }
 
-  const from = nodeMap[edge.source];
-  const to = nodeMap[edge.target];
-
-  if (!from || !to) {
-    return null;
+  if (
+    raw.includes("breadth") ||
+    raw.includes("bfs")
+  ) {
+    return "bfs";
   }
 
-  return [
-    [from.lat, from.lng],
-    [to.lat, to.lng],
-  ];
-};
+  if (
+    raw.includes("depth") ||
+    raw.includes("dfs")
+  ) {
+    return "dfs";
+  }
 
-export default function HCMMap({
-  nodeMap,
-  nodes = [],
-  edges = [],
-  routePositions = [],
-  start,
-  end,
-  waypoints = [],
-  path = [],
-  exploredNodes = [],
-  onNodeClick,
+  return "unknown";
+}
+
+function CandidateComparison({
+  candidates,
+  kind,
+  nextSelected,
+  selectionMetric,
 }) {
-  const hcmBounds = [
-    [10.35, 106.35],
-    [11.15, 107.05],
-  ];
+  const metricLabel = {
+    ucs: "g(n)",
+    astar: "f(n)",
+    greedy: "h(n)",
+    bfs: "FIFO",
+    dfs: "LIFO",
+  }[kind] || selectionMetric || "priority";
 
   return (
-    <MapContainer
-      center={[10.7769, 106.7009]}
-      zoom={13}
-      minZoom={11}
-      maxZoom={18}
-      maxBounds={hcmBounds}
-      maxBoundsViscosity={1}
-      whenReady={(e) => {
-        setTimeout(() => {
-          e.target.invalidateSize();
-        }, 300);
-      }}
-      style={{
-        height: "100%",
-        width: "100%",
-      }}
-    >
-      <FitHCM nodes={nodes} />
+    <div>
+      <div className="mb-2 text-[11px] text-gray-500">
+        {kind === "bfs"
+          ? "Chọn node đầu tiên trong queue (FIFO)."
+          : kind === "dfs"
+            ? "Chọn node cuối cùng trong stack (LIFO)."
+            : (
+              <>
+                Chọn node có{" "}
+                <strong className="text-gray-700">
+                  {metricLabel}
+                </strong>{" "}
+                nhỏ nhất.
+              </>
+            )}
+      </div>
 
-      <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      {!candidates?.length ? (
+        <div className="text-xs text-gray-400 py-2">
+          Không còn node chưa đi qua.
+        </div>
+      ) : (
+        <div className="space-y-2 max-h-72 overflow-y-auto">
+          {candidates.map((candidate, index) => {
+            const isNext =
+              nextSelected != null &&
+              String(candidate.node_id) ===
+                String(nextSelected);
 
-      {edges.map((edge) => {
-        const positions = getEdgePositions(edge, nodeMap);
+            return (
+              <div
+                key={`${candidate.node_id}-${index}`}
+                className={`rounded-md border p-2 ${
+                  isNext
+                    ? "border-violet-400 bg-violet-50"
+                    : "border-gray-100 bg-gray-50"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-gray-800">
+                    → {candidate.node_id}
+                  </span>
 
-        if (!positions) {
-          return null;
-        }
+                  {isNext && (
+                    <span className="text-[10px] font-bold text-violet-700">
+                      NEXT
+                    </span>
+                  )}
+                </div>
 
-        return (
-          <Polyline
-            key={`${edge.source}-${edge.target}`}
-            positions={positions}
-            pathOptions={{
-              color: "#5795ff",
-              weight: 3,
-              opacity: 0.4,
-            }}
-          />
-        );
-      })}
+                {kind === "bfs" || kind === "dfs" ? (
+                  <div className="mt-1 text-[10px] text-gray-500">
+                    {kind === "bfs"
+                      ? `Queue position: ${index + 1}`
+                      : `Stack position: ${index + 1}`}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-1.5 text-[11px]">
+                    <span className="text-gray-500">
+                      g(n)
+                    </span>
+                    <span className="text-right font-medium">
+                      {formatNumber(candidate.g)}
+                    </span>
 
-      {/* Chỉ vẽ explored bằng các EDGE thực sự tồn tại trong graph.
-          Không nối trực tiếp hai node chỉ vì chúng đứng cạnh nhau trong
-          explored_nodes, nên sẽ không còn đường chéo chằng chịt. */}
-      {getExploredEdgeSegments(exploredNodes, edges, nodeMap).map((segment) => (
-        <Polyline
-          key={segment.key}
-          positions={segment.positions}
-          pathOptions={{
-            color: "#2563eb",
-            weight: 5,
-            opacity: 0.9,
-          }}
-        />
-      ))}
+                    {(kind === "astar" ||
+                      kind === "greedy") && (
+                      <>
+                        <span className="text-gray-500">
+                          h(n)
+                        </span>
+                        <span className="text-right font-medium">
+                          {formatNumber(candidate.h)}
+                        </span>
+                      </>
+                    )}
 
-      {routePositions.length > 1 && (
-        <Polyline
-          positions={routePositions.map((point) => normalizePoint(point))}
-          pathOptions={{
-            color: "red",
-            weight: 10,
-            opacity: 0.95,
-          }}
-        />
+                    {kind === "astar" && (
+                      <>
+                        <span className="text-gray-500">
+                          f(n)
+                        </span>
+                        <span className="text-right font-semibold">
+                          {formatNumber(candidate.f)}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function StatsPanel({
+  algorithm = "",
+  algorithmName = "",
+  distance,
+  time,
+  cost,
+  exploredCount,
+  executionTimeMs,
+  simulation,
+}) {
+  const kind = getAlgorithmKind(
+    algorithm,
+    algorithmName
+  );
+
+  const metrics = simulation?.metrics || {};
+  const frontierNodes =
+    simulation?.frontierNodes || [];
+
+  return (
+    <div className="w-full min-h-full bg-white p-4">
+      <h3 className="text-sm font-semibold text-gray-900 mb-3">
+        Route Statistics
+      </h3>
+
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2">
+          <Route className="w-3.5 h-3.5 text-blue-600" />
+          <span className="text-xs text-gray-500 flex-1">
+            Distance
+          </span>
+          <span className="text-xs font-semibold">
+            {formatDistance(distance)}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Clock className="w-3.5 h-3.5 text-emerald-600" />
+          <span className="text-xs text-gray-500 flex-1">
+            Time
+          </span>
+          <span className="text-xs font-semibold">
+            {formatTime(time)}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <DollarSign className="w-3.5 h-3.5 text-amber-600" />
+          <span className="text-xs text-gray-500 flex-1">
+            Cost
+          </span>
+          <span className="text-xs font-semibold">
+            {cost == null
+              ? "N/A"
+              : formatNumber(cost)}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Search className="w-3.5 h-3.5 text-purple-600" />
+          <span className="text-xs text-gray-500 flex-1">
+            Explored
+          </span>
+          <span className="text-xs font-semibold">
+            {exploredCount ?? 0}
+          </span>
+        </div>
+      </div>
+
+      <div className="mt-4 pt-3 border-t border-gray-100">
+        <div className="text-[11px] text-gray-500">
+          Algorithm
+        </div>
+        <div className="text-sm font-semibold text-gray-900">
+          {algorithmName || algorithm || "—"}
+        </div>
+      </div>
+
+      {simulation && (
+        <div className="mt-4 pt-3 border-t border-gray-100">
+          <div className="flex items-center gap-2 mb-2">
+            <CircleDot className="w-3.5 h-3.5 text-violet-600" />
+            <h4 className="text-xs font-semibold text-gray-900">
+              Simulation
+            </h4>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-md bg-gray-50 p-2">
+              <div className="text-[10px] text-gray-500">
+                Current
+              </div>
+              <div className="text-[11px] font-semibold truncate">
+                {simulation.current || "—"}
+              </div>
+            </div>
+
+            <div className="rounded-md bg-gray-50 p-2">
+              <div className="text-[10px] text-gray-500">
+                Frontier
+              </div>
+              <div className="text-[11px] font-semibold">
+                {frontierNodes.length}
+              </div>
+            </div>
+          </div>
+
+          {(kind === "ucs" ||
+            kind === "astar" ||
+            kind === "greedy") &&
+            Object.keys(metrics).length > 0 && (
+              <div className="mt-2 grid grid-cols-3 gap-1">
+                {metrics.g != null && (
+                  <div className="rounded bg-blue-50 p-1.5 text-center">
+                    <div className="text-[9px] text-gray-500">
+                      g
+                    </div>
+                    <div className="text-[10px] font-semibold">
+                      {formatNumber(metrics.g)}
+                    </div>
+                  </div>
+                )}
+
+                {(kind === "astar" ||
+                  kind === "greedy") &&
+                  metrics.h != null && (
+                    <div className="rounded bg-violet-50 p-1.5 text-center">
+                      <div className="text-[9px] text-gray-500">
+                        h
+                      </div>
+                      <div className="text-[10px] font-semibold">
+                        {formatNumber(metrics.h)}
+                      </div>
+                    </div>
+                  )}
+
+                {kind === "astar" &&
+                  metrics.f != null && (
+                    <div className="rounded bg-red-50 p-1.5 text-center">
+                      <div className="text-[9px] text-gray-500">
+                        f
+                      </div>
+                      <div className="text-[10px] font-semibold">
+                        {formatNumber(metrics.f)}
+                      </div>
+                    </div>
+                  )}
+              </div>
+            )}
+
+          <div className="mt-3">
+            <div className="flex items-center gap-2 mb-2">
+              <GitBranch className="w-3.5 h-3.5 text-violet-600" />
+              <h4 className="text-xs font-semibold text-gray-900">
+                Candidate Comparison
+              </h4>
+            </div>
+
+            <CandidateComparison
+              candidates={simulation.candidates || []}
+              kind={kind}
+              nextSelected={simulation.nextSelected}
+              selectionMetric={
+                simulation.selectionMetric
+              }
+            />
+          </div>
+        </div>
       )}
 
-      {nodes.map((node) => {
-        let color = "#9ca3af";
-
-        // App chỉ truyền exploredNodes khi step > 0.
-        // Vì vậy map mặc định sẽ không tô toàn bộ node đã explored.
-        if (exploredNodes.includes(node.id)) {
-          color = "#2563eb";
-        }
-
-        if (waypoints.includes(node.id)) {
-          color = "orange";
-        }
-
-        if (node.id === start) {
-          color = "green";
-        }
-
-        if (node.id === end) {
-          color = "red";
-        }
-
-        const icon = new L.DivIcon({
-          html: `
-            <div style="
-              background:${color};
-              width:15px;
-              height:15px;
-              border-radius:50%;
-              border:2px solid white;
-              box-shadow:0 1px 3px rgba(0,0,0,.35);
-            "></div>
-          `,
-          className: "",
-        });
-
-        return (
-          <Marker
-            key={node.id}
-            position={[node.lat, node.lng]}
-            icon={icon}
-            eventHandlers={{
-              click: () => onNodeClick(node.id),
-            }}
-          >
-            <Popup>
-              <strong>{node.name}</strong>
-              <br />
-              ID: {node.id}
-            </Popup>
-          </Marker>
-        );
-      })}
-    </MapContainer>
+      <div className="mt-4 pt-3 border-t border-gray-100">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-gray-500">
+            Search time
+          </span>
+          <span className="text-xs font-semibold">
+            {executionTimeMs != null
+              ? `${Number(executionTimeMs).toFixed(2)} ms`
+              : "—"}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }

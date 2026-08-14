@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 
-import nodesData from "./data/nodes.json";
-import edgesData from "./data/edges.json";
+import trafficData from "./data/hcm_traffic_data.json";
 
 import Sidebar from "./components/Sidebar";
 import HCMMap from "./components/HCMMap";
@@ -16,7 +15,7 @@ export default function App() {
       name: node.name,
       lat: node.lat,
       lng: node.lng,
-      type: node.node_type,
+      type: node.type,
     }));
 
     const edges = [];
@@ -35,14 +34,16 @@ export default function App() {
             ? edge.geometry.map((point) =>
                 Array.isArray(point)
                   ? [point[0], point[1]]
-                  : [point.lat, point.lng],
+                  : [point.lat, point.lng]
               )
             : null,
         });
       });
     });
 
-    const nodeMap = Object.fromEntries(nodes.map((node) => [node.id, node]));
+    const nodeMap = Object.fromEntries(
+      nodes.map((node) => [node.id, node])
+    );
 
     return { nodes, edges, nodeMap };
   }, []);
@@ -53,7 +54,7 @@ export default function App() {
         value: node.id,
         label: node.name || node.id,
       })),
-    [nodes],
+    [nodes]
   );
 
   const [start, setStart] = useState(null);
@@ -65,6 +66,7 @@ export default function App() {
   const [routePositions, setRoutePositions] = useState([]);
   const [pathNodeNames, setPathNodeNames] = useState([]);
   const [exploredNodes, setExploredNodes] = useState([]);
+  const [simulationSteps, setSimulationSteps] = useState([]);
 
   const [algorithm, setAlgorithm] = useState("astar");
   const [algorithmName, setAlgorithmName] = useState("");
@@ -82,7 +84,7 @@ export default function App() {
     executionTimeMs: 0,
   });
 
-  const totalSteps = exploredNodes.length;
+  const totalSteps = simulationSteps.length;
 
   const resetSearchResult = () => {
     setHasSearched(false);
@@ -90,6 +92,8 @@ export default function App() {
     setRoutePositions([]);
     setPathNodeNames([]);
     setExploredNodes([]);
+    setSimulationSteps([]);
+    setAlgorithmName("");
     setStep(0);
     setRouteStats({
       distance: null,
@@ -102,7 +106,11 @@ export default function App() {
 
   const handleNodeClick = (id) => {
     if (addingStop) {
-      if (id !== start && id !== end && !waypoints.includes(id)) {
+      if (
+        id !== start &&
+        id !== end &&
+        !waypoints.includes(id)
+      ) {
         setWaypoints((prev) => [...prev, id]);
       }
 
@@ -145,7 +153,9 @@ export default function App() {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data?.detail || `Search failed (${response.status})`);
+      throw new Error(
+        data?.detail || `Search failed (${response.status})`
+      );
     }
 
     return data;
@@ -168,13 +178,16 @@ export default function App() {
       const results = [];
 
       for (let i = 0; i < stops.length - 1; i += 1) {
-        results.push(await callSearchApi(stops[i], stops[i + 1]));
+        results.push(
+          await callSearchApi(stops[i], stops[i + 1])
+        );
       }
 
       const combinedPath = [];
       const combinedCoordinates = [];
       const combinedNames = [];
       const explored = [];
+      const combinedSteps = [];
 
       let totalDistance = 0;
       let totalTime = 0;
@@ -189,20 +202,47 @@ export default function App() {
         const segmentNames = result.path_node_names || [];
 
         combinedPath.push(
-          ...(combinedPath.length > 0 ? segmentPath.slice(1) : segmentPath),
+          ...(
+            combinedPath.length > 0
+              ? segmentPath.slice(1)
+              : segmentPath
+          )
         );
 
         combinedCoordinates.push(
-          ...(combinedCoordinates.length > 0
-            ? segmentCoordinates.slice(1)
-            : segmentCoordinates),
+          ...(
+            combinedCoordinates.length > 0
+              ? segmentCoordinates.slice(1)
+              : segmentCoordinates
+          )
         );
 
         combinedNames.push(
-          ...(combinedNames.length > 0 ? segmentNames.slice(1) : segmentNames),
+          ...(
+            combinedNames.length > 0
+              ? segmentNames.slice(1)
+              : segmentNames
+          )
         );
 
         explored.push(...(result.explored_nodes || []));
+
+        const segmentSteps = result.steps || [];
+        const stepOffset = combinedSteps.length;
+        let previousEdgesForSegment = [];
+
+        segmentSteps.forEach((traceStep, index) => {
+          const currentEdges =
+            traceStep.exploredEdges || [];
+
+          combinedSteps.push({
+            ...traceStep,
+            step: stepOffset + index,
+            previousExploredEdges: previousEdgesForSegment,
+          });
+
+          previousEdgesForSegment = currentEdges;
+        });
 
         totalDistance += Number(result.total_distance || 0);
         totalTime += Number(result.total_time || 0);
@@ -214,13 +254,21 @@ export default function App() {
         }
 
         totalExploredCount += Number(result.explored_count || 0);
-        totalExecutionTime += Number(result.execution_time_ms || 0);
+        totalExecutionTime += Number(
+          result.execution_time_ms || 0
+        );
       });
+
+      setAlgorithmName(
+        results[results.length - 1]?.algorithm_name ||
+          algorithm
+      );
 
       setPath(combinedPath);
       setRoutePositions(combinedCoordinates);
       setPathNodeNames(combinedNames);
       setExploredNodes([...new Set(explored)]);
+      setSimulationSteps(combinedSteps || []);
       setStep(0);
 
       setRouteStats({
@@ -325,12 +373,16 @@ export default function App() {
           }}
         >
           <StatsPanel
+            algorithm={algorithm}
+            algorithmName={algorithmName}
+            simulation={simulationSteps[step - 1] || null}
             distance={routeStats.distance}
             time={routeStats.time}
             cost={routeStats.cost}
             exploredCount={routeStats.exploredCount}
             executionTimeMs={routeStats.executionTimeMs}
             pathNodeNames={pathNodeNames}
+            graphEdges={edges}
           />
         </div>
       )}
@@ -351,9 +403,7 @@ export default function App() {
           end={end}
           waypoints={waypoints}
           path={path}
-          // Chỉ hiển thị explored nodes khi người dùng đang xem lại thuật toán.
-          // step = 0 => không hiển thị explored nodes.
-          exploredNodes={step > 0 ? exploredNodes.slice(0, step) : []}
+          simulation={simulationSteps[step - 1] || null}
           onNodeClick={handleNodeClick}
         />
       </div>

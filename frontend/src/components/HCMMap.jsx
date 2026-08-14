@@ -6,7 +6,7 @@ import {
   Polyline,
 } from "react-leaflet";
 import { useMap } from "react-leaflet";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import L from "leaflet";
 
@@ -27,87 +27,236 @@ function FitHCM({ nodes }) {
 }
 
 const normalizePoint = (point) =>
-  Array.isArray(point) ? [point[0], point[1]] : [point.lat, point.lng];
+  Array.isArray(point)
+    ? [point[0], point[1]]
+    : [point.lat, point.lng];
 
-const getExploredEdgeSegments = (exploredPath, edges, nodeMap) => {
-  if (!exploredPath || exploredPath.length < 2) {
+const edgeKey = (source, target) => {
+  const a = String(source);
+  const b = String(target);
+
+  return a < b ? `${a}::${b}` : `${b}::${a}`;
+};
+
+const findGraphEdge = (edges, source, target) =>
+  edges.find(
+    (edge) =>
+      String(edge.source) === String(source) &&
+      String(edge.target) === String(target)
+  ) ||
+  edges.find(
+    (edge) =>
+      String(edge.source) === String(target) &&
+      String(edge.target) === String(source)
+  );
+
+const getEdgePositions = (
+  edge,
+  nodeMap,
+  source = edge.source,
+  target = edge.target
+) => {
+  let positions;
+
+  if (
+    Array.isArray(edge?.geometry) &&
+    edge.geometry.length > 1
+  ) {
+    positions = edge.geometry.map(normalizePoint);
+  } else {
+    const from = nodeMap[source];
+    const to = nodeMap[target];
+
+    if (!from || !to) {
+      return null;
+    }
+
+    positions = [
+      [from.lat, from.lng],
+      [to.lat, to.lng],
+    ];
+  }
+
+  // Keep the geometry direction consistent with the traversal.
+  if (String(edge.source) !== String(source)) {
+    positions = [...positions].reverse();
+  }
+
+  return positions;
+};
+
+const buildSegmentsFromTraceEdges = (
+  traceEdges,
+  edges,
+  nodeMap
+) =>
+  (traceEdges || [])
+    .map((traceEdge, index) => {
+      const source = traceEdge.source;
+      const target = traceEdge.target;
+      const edge = findGraphEdge(
+        edges,
+        source,
+        target
+      );
+
+      if (!edge) {
+        return null;
+      }
+
+      const positions = getEdgePositions(
+        edge,
+        nodeMap,
+        source,
+        target
+      );
+
+      if (!positions || positions.length < 2) {
+        return null;
+      }
+
+      return {
+        key: `trace-${index}-${edgeKey(source, target)}`,
+        source,
+        target,
+        edge,
+        positions,
+      };
+    })
+    .filter(Boolean);
+
+const buildRouteSegments = (
+  path,
+  edges,
+  nodeMap
+) => {
+  if (!path || path.length < 2) {
     return [];
   }
 
-  const segments = [];
-  const seen = new Set();
+  const result = [];
 
-  for (let i = 0; i < exploredPath.length - 1; i += 1) {
-    const fromId = exploredPath[i];
-    const toId = exploredPath[i + 1];
+  for (let i = 0; i < path.length - 1; i += 1) {
+    const source = path[i];
+    const target = path[i + 1];
 
-    // Only draw a line when the two explored nodes are actually connected
-    // by an edge in the graph. This prevents the previous "spider web"
-    // effect caused by connecting arbitrary exploration-order nodes.
-    const edge = edges.find(
-      (candidate) =>
-        (candidate.source === fromId && candidate.target === toId) ||
-        (candidate.source === toId && candidate.target === fromId),
+    const edge = findGraphEdge(
+      edges,
+      source,
+      target
     );
 
     if (!edge) {
       continue;
     }
 
-    const key = [edge.source, edge.target].sort().join("::");
+    const positions = getEdgePositions(
+      edge,
+      nodeMap,
+      source,
+      target
+    );
 
-    if (seen.has(key)) {
+    if (!positions || positions.length < 2) {
       continue;
     }
 
-    const positions = getEdgePositions(edge, nodeMap);
-
-    if (positions && positions.length > 1) {
-      seen.add(key);
-      segments.push({
-        key: `explored-${key}`,
-        positions,
-      });
-    }
+    result.push({
+      key: `route-${i}-${edgeKey(source, target)}`,
+      source,
+      target,
+      edge,
+      positions,
+    });
   }
 
-  return segments;
-};
-
-const getEdgePositions = (edge, nodeMap) => {
-  if (Array.isArray(edge?.geometry) && edge.geometry.length > 1) {
-    return edge.geometry.map(normalizePoint);
-  }
-
-  const from = nodeMap[edge.source];
-  const to = nodeMap[edge.target];
-
-  if (!from || !to) {
-    return null;
-  }
-
-  return [
-    [from.lat, from.lng],
-    [to.lat, to.lng],
-  ];
+  return result;
 };
 
 export default function HCMMap({
   nodeMap,
   nodes = [],
   edges = [],
-  routePositions = [],
   start,
   end,
   waypoints = [],
   path = [],
-  exploredNodes = [],
+  simulation = null,
   onNodeClick,
 }) {
   const hcmBounds = [
     [10.35, 106.35],
     [11.15, 107.05],
   ];
+
+  const exploredEdges =
+    simulation?.exploredEdges || [];
+
+  const previousExploredEdges =
+    simulation?.previousExploredEdges || [];
+
+  const currentNode =
+    simulation?.current || null;
+
+  const previousKeys = useMemo(
+    () =>
+      new Set(
+        previousExploredEdges.map((edge) =>
+          edgeKey(edge.source, edge.target)
+        )
+      ),
+    [previousExploredEdges]
+  );
+
+  const newEdgeTrace = exploredEdges.filter(
+    (traceEdge) =>
+      !previousKeys.has(
+        edgeKey(traceEdge.source, traceEdge.target)
+      )
+  );
+
+  const oldEdgeTrace = exploredEdges.filter(
+    (traceEdge) =>
+      previousKeys.has(
+        edgeKey(traceEdge.source, traceEdge.target)
+      )
+  );
+
+  const oldEdgeSegments = useMemo(
+    () =>
+      buildSegmentsFromTraceEdges(
+        oldEdgeTrace,
+        edges,
+        nodeMap
+      ),
+    [oldEdgeTrace, edges, nodeMap]
+  );
+
+  const newEdgeSegments = useMemo(
+    () =>
+      buildSegmentsFromTraceEdges(
+        newEdgeTrace,
+        edges,
+        nodeMap
+      ),
+    [newEdgeTrace, edges, nodeMap]
+  );
+
+  const routeSegments = useMemo(
+    () =>
+      buildRouteSegments(
+        path,
+        edges,
+        nodeMap
+      ),
+    [path, edges, nodeMap]
+  );
+
+  const exploredNodeIds =
+    simulation?.exploredNodes || [];
+
+  const frontierNodeIds =
+    simulation?.frontierNodes || [];
 
   return (
     <MapContainer
@@ -129,10 +278,16 @@ export default function HCMMap({
     >
       <FitHCM nodes={nodes} />
 
-      <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer
+        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
 
+      {/* Base graph: always remains visible underneath. */}
       {edges.map((edge) => {
-        const positions = getEdgePositions(edge, nodeMap);
+        const positions = getEdgePositions(
+          edge,
+          nodeMap
+        );
 
         if (!positions) {
           return null;
@@ -140,62 +295,81 @@ export default function HCMMap({
 
         return (
           <Polyline
-            key={`${edge.source}-${edge.target}`}
+            key={`base-${edge.source}-${edge.target}`}
             positions={positions}
             pathOptions={{
-              color: "#5795ff",
-              weight: 3,
-              opacity: 0.4,
+              color: "#94a3b8",
+              weight: 2,
+              opacity: 0.28,
             }}
           />
         );
       })}
 
-      {/* Chỉ vẽ explored bằng các EDGE thực sự tồn tại trong graph.
-          Không nối trực tiếp hai node chỉ vì chúng đứng cạnh nhau trong
-          explored_nodes, nên sẽ không còn đường chéo chằng chịt. */}
-      {getExploredEdgeSegments(exploredNodes, edges, nodeMap).map((segment) => (
+      {/* Edges explored in previous steps: BLUE. */}
+      {oldEdgeSegments.map((segment) => (
         <Polyline
           key={segment.key}
           positions={segment.positions}
           pathOptions={{
             color: "#2563eb",
-            weight: 5,
+            weight: 6,
             opacity: 0.9,
           }}
         />
       ))}
 
-      {routePositions.length > 1 && (
+      {/* Edge(s) newly discovered at the CURRENT step: PURPLE. */}
+      {newEdgeSegments.map((segment) => (
         <Polyline
-          positions={routePositions.map((point) => normalizePoint(point))}
+          key={segment.key}
+          positions={segment.positions}
           pathOptions={{
-            color: "red",
-            weight: 10,
-            opacity: 0.95,
+            color: "#7c3aed",
+            weight: 8,
+            opacity: 0.98,
           }}
         />
-      )}
+      ))}
+
+      {/* Final selected route: RED. */}
+      {routeSegments.map((segment) => (
+        <Polyline
+          key={segment.key}
+          positions={segment.positions}
+          pathOptions={{
+            color: "#dc2626",
+            weight: 9,
+            opacity: 0.96,
+          }}
+        />
+      ))}
 
       {nodes.map((node) => {
         let color = "#9ca3af";
 
-        // App chỉ truyền exploredNodes khi step > 0.
-        // Vì vậy map mặc định sẽ không tô toàn bộ node đã explored.
-        if (exploredNodes.includes(node.id)) {
+        if (frontierNodeIds.includes(node.id)) {
+          color = "#f59e0b";
+        }
+
+        if (exploredNodeIds.includes(node.id)) {
           color = "#2563eb";
         }
 
+        if (node.id === currentNode) {
+          color = "#7c3aed";
+        }
+
         if (waypoints.includes(node.id)) {
-          color = "orange";
+          color = "#f97316";
         }
 
         if (node.id === start) {
-          color = "green";
+          color = "#16a34a";
         }
 
         if (node.id === end) {
-          color = "red";
+          color = "#dc2626";
         }
 
         const icon = new L.DivIcon({

@@ -49,9 +49,7 @@ export default function Sidebar({
 
           <Select
             options={nodeOptions}
-            value={
-              nodeOptions.find((option) => option.value === start) ?? null
-            }
+            value={nodeOptions.find((option) => option.value === start) ?? null}
             onChange={(option) => {
               setStart(option?.value ?? null);
             }}
@@ -142,10 +140,11 @@ export default function Sidebar({
             ? "bg-blue-100 text-blue-400 cursor-not-allowed"
             : "bg-blue-600 hover:bg-blue-700 text-white"
         }
-        `}
+      `}
       >
         {loading ? "Searching..." : hasSearched ? "Route Found" : "Search"}
       </button>
+
 
       <RouteResults
         hasSearched={hasSearched}
