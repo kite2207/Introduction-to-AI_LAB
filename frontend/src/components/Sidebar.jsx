@@ -1,6 +1,17 @@
 import React, { useMemo } from "react";
 import RouteSettings from "./RouteSettings";
 import Select from "react-select";
+import {
+  Navigation,
+  Search,
+  RotateCcw,
+  MapPin,
+  Flag,
+  Plus,
+  X,
+  Compass,
+  Lightbulb,
+} from "lucide-react";
 
 export default function Sidebar({
   nodeMap,
@@ -40,12 +51,29 @@ export default function Sidebar({
     bg-white
     p-5
     border-r
+    border-[#363236]/10
   "
     >
-      <h1 className="text-xl font-bold text-gray-900 mb-6">Route Dashboard</h1>
+      <div className="rounded-2xl bg-[#F7B558] p-4 mb-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-[#A5D48C] flex items-center justify-center">
+            <Compass className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold leading-tight text-[#363236]">
+              Bảng điều khiển tuyến đường
+            </h1>
+            <p className="text-[11px] text-[#363236]/70">AI Tìm đường TP.HCM</p>
+          </div>
+        </div>
+      </div>
+
       <div className="mb-5">
         <div className="mb-4">
-          <p className="font-semibold mb-1">Start</p>
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[#363236] mb-1.5">
+            <MapPin className="h-3.5 w-3.5 text-[#A5D48C]" />
+            Điểm bắt đầu
+          </p>
 
           <Select
             options={nodeOptions}
@@ -59,7 +87,10 @@ export default function Sidebar({
         </div>
 
         <div className="mb-4">
-          <p className="font-semibold mb-1">End</p>
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[#363236] mb-1.5">
+            <Flag className="h-3.5 w-3.5 text-[#F7B558]" />
+            Điểm kết thúc
+          </p>
 
           <Select
             options={nodeOptions}
@@ -71,7 +102,10 @@ export default function Sidebar({
             isSearchable
           />
         </div>
-        <h3 className="font-bold">Điểm dừng</h3>
+        <h3 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[#363236] mb-1.5">
+          <Navigation className="h-3.5 w-3.5 text-[#A5D48C]" />
+          Điểm dừng
+        </h3>
 
         {waypoints.length === 0 ? (
           <p className="text-gray-400">Chưa có điểm dừng</p>
@@ -95,9 +129,21 @@ export default function Sidebar({
 
       <button
         onClick={() => setAddingStop(!addingStop)}
-        className="w-full border rounded p-2 mt-3"
+        className={`w-full flex items-center justify-center gap-1.5 rounded-lg border-2 py-2 mt-3 text-sm font-medium transition-colors ${
+          addingStop
+            ? "border-[#F7B558] bg-[#F7B558]/15 text-[#363236]"
+            : "border-[#A5D48C] bg-[#A5D48C]/15 text-[#363236] hover:bg-[#A5D48C]/30"
+        }`}
       >
-        {addingStop ? "Hủy thêm điểm dừng" : "+ Thêm điểm dừng"}
+        {addingStop ? (
+          <>
+            <X className="h-3.5 w-3.5" /> Hủy thêm điểm dừng
+          </>
+        ) : (
+          <>
+            <Plus className="h-3.5 w-3.5" /> Thêm điểm dừng
+          </>
+        )}
       </button>
 
       {addingStop && (
@@ -138,21 +184,37 @@ export default function Sidebar({
         <button
           onClick={onSearch}
           disabled={hasSearched || loading || !start || !end}
-          className={`w-full h-10 text-sm font-semibold rounded-md transition-colors ${
+          className={`w-full h-11 text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all ${
             hasSearched
-              ? "bg-blue-100 text-blue-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700 text-white"
-          }
-      `}
+              ? "bg-[#A5D48C]/40 text-[#363236]/50 cursor-not-allowed"
+              : "bg-[#F7B558] hover:bg-[#e2a244] text-[#363236] shadow-sm"
+          }`}
         >
-          {loading ? "Searching..." : hasSearched ? "Route Found" : "Search"}
+          {loading ? (
+            "Đang tìm kiếm..."
+          ) : (
+            <>
+              <Search className="h-4 w-4" />
+              {hasSearched ? "Đã tìm thấy tuyến" : "Tìm kiếm"}
+            </>
+          )}
+        </button>
+
+        {/* Reset: directly under Search, above the explanation */}
+        <button
+          type="button"
+          onClick={onReset}
+          className="w-full h-10 rounded-lg border-2 border-[#363236]/20 bg-white text-sm font-semibold text-[#363236] hover:bg-[#F7B558]/10 transition-colors flex items-center justify-center gap-1.5"
+        >
+          <RotateCcw className="h-3.5 w-3.5 text-[#363236]/60" />
+          Đặt lại
         </button>
 
         {hasSearched && (
           <>
             <div className="mt-6 pt-5 border-t border-gray-200">
               <h3 className="text-sm font-medium text-gray-900 mb-3">
-                Visualizer
+                Trình mô phỏng
               </h3>
 
               <div className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2">
@@ -165,7 +227,7 @@ export default function Sidebar({
                     className="h-10 min-w-10 px-1 rounded border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-35 flex flex-col items-center justify-center leading-none"
                   >
                     <span className="text-sm">|◀</span>
-                    <span className="text-[8px] mt-0.5">First</span>
+                    <span className="text-[8px] mt-0.5">Đầu</span>
                   </button>
 
                   <button
@@ -176,7 +238,7 @@ export default function Sidebar({
                     className="h-10 w-9 rounded border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-35 flex flex-col items-center justify-center leading-none"
                   >
                     <span className="text-base">‹</span>
-                    <span className="text-[8px] mt-0.5">Prev</span>
+                    <span className="text-[8px] mt-0.5">Trước</span>
                   </button>
 
                   <button
@@ -187,7 +249,7 @@ export default function Sidebar({
                     className="h-10 w-9 rounded border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-35 flex flex-col items-center justify-center leading-none"
                   >
                     <span className="text-base">›</span>
-                    <span className="text-[8px] mt-0.5">Next</span>
+                    <span className="text-[8px] mt-0.5">Sau</span>
                   </button>
 
                   <button
@@ -198,63 +260,61 @@ export default function Sidebar({
                     className="h-10 min-w-10 px-1 rounded border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-35 flex flex-col items-center justify-center leading-none"
                   >
                     <span className="text-sm">▶|</span>
-                    <span className="text-[8px] mt-0.5">Last</span>
+                    <span className="text-[8px] mt-0.5">Cuối</span>
                   </button>
                 </div>
 
                 <span className="text-xs text-gray-500 whitespace-nowrap">
-                  Step {step} / {totalSteps}
+                  Bước {step} / {totalSteps}
                 </span>
               </div>
             </div>
 
             {routeExplanation && (
-              <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="h-7 w-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
-                    ?
+              <div className="mt-4 rounded-2xl border border-[#363236]/10 bg-white p-4 shadow-sm">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="h-8 w-8 rounded-xl bg-[#A5D48C] text-[#363236] flex items-center justify-center">
+                    <Lightbulb className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-blue-900">
-                      Why this route?
+                    <h3 className="text-sm font-bold text-[#363236]">
+                      Vì sao tuyến đường này?
                     </h3>
-                    <p className="text-[10px] text-blue-600 mt-0.5">
-                      Route explanation
+                    <p className="text-[10px] text-[#363236]/60 mt-0.5">
+                      Giải thích tuyến đường
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-3 text-[11px] leading-5 text-blue-900">
+                <div className="space-y-3 text-[11px] leading-5 text-[#363236]">
                   <div>
-                    <div className="font-semibold mb-1">Why selected</div>
-                    <div className="text-blue-800">
+                    <div className="font-semibold mb-1">Lý do chọn</div>
+                    <div className="bg-[#A5D48C]/15 border border-[#A5D48C]/50 p-2.5 rounded-md text-[#363236]/80">
                       {routeExplanation.why_selected}
                     </div>
                   </div>
 
                   <div>
-                    <div className="font-semibold mb-1">Optimization</div>
-                    <div className="text-blue-800">
+                    <div className="font-semibold mb-1">Tối ưu hóa</div>
+                    <div className="text-[#363236]/80">
                       {routeExplanation.headline}
                     </div>
                   </div>
 
-                  <div className="border-t border-blue-200 pt-3">
-                    <div className="font-semibold mb-2">
-                      Optimality reference
-                    </div>
+                  <div className="border-t border-[#363236]/10 pt-3">
+                    <div className="font-semibold mb-2">Tham chiếu tối ưu</div>
 
-                    <div className="rounded-md bg-white/70 border border-blue-100 p-2.5 space-y-2">
-                      <div className="font-medium text-blue-900">
+                    <div className="rounded-md bg-[#F7B558]/10 border border-[#F7B558]/40 p-2.5 space-y-2">
+                      <div className="font-medium text-[#363236]">
                         Dijkstra ·{" "}
                         {routeExplanation.optimality_reference?.optimization}
                       </div>
 
                       <div>
-                        <div className="text-[10px] text-blue-600">
-                          Reference route
+                        <div className="text-[10px] text-[#363236]/60">
+                          Tuyến tham chiếu
                         </div>
-                        <div className="text-blue-900 leading-4 break-words">
+                        <div className="text-[#363236] leading-4 break-words">
                           {(
                             routeExplanation.optimality_reference
                               ?.route_names || []
@@ -263,7 +323,7 @@ export default function Sidebar({
                       </div>
 
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px]">
-                        <span className="text-blue-600">Cost</span>
+                        <span className="text-[#363236]/60">Chi phí</span>
                         <span className="text-right font-medium">
                           {routeExplanation.optimality_reference?.cost == null
                             ? "—"
@@ -271,14 +331,14 @@ export default function Sidebar({
                                 routeExplanation.optimality_reference.cost,
                               ).toFixed(2)}
                         </span>
-                        <span className="text-blue-600">Distance</span>
+                        <span className="text-[#363236]/60">Khoảng cách</span>
                         <span className="text-right font-medium">
                           {routeExplanation.optimality_reference?.distance ==
                           null
                             ? "—"
                             : `${Number(routeExplanation.optimality_reference.distance).toFixed(0)} m`}
                         </span>
-                        <span className="text-blue-600">Time</span>
+                        <span className="text-[#363236]/60">Thời gian</span>
                         <span className="text-right font-medium">
                           {routeExplanation.optimality_reference?.time == null
                             ? "—"
@@ -286,65 +346,69 @@ export default function Sidebar({
                         </span>
                       </div>
 
-                      <div className="pt-2 border-t border-blue-100 font-semibold text-blue-900">
+                      <div className="pt-2 border-t border-[#F7B558]/30 font-semibold text-[#363236]">
                         {routeExplanation.optimality_reference
                           ?.same_cost_as_selected
-                          ? "Same objective cost as the Dijkstra reference."
-                          : "Different from the Dijkstra reference."}
+                          ? "Cùng chi phí mục tiêu với tham chiếu Dijkstra."
+                          : "Khác với tham chiếu Dijkstra."}
                       </div>
                     </div>
 
-                    <div className="mt-2 text-blue-800">
+                    <div className="mt-2 text-[#363236]/80">
                       {routeExplanation.optimality}
                     </div>
                   </div>
 
-                  <div className="border-t border-blue-200 pt-3">
-                    <div className="font-semibold mb-2">Route alternatives</div>
+                  <div className="border-t border-[#363236]/10 pt-3">
+                    <div className="font-semibold mb-2">Phương án thay thế</div>
 
                     <div className="space-y-2">
                       {[
                         [
-                          "Selected route",
+                          "Tuyến đã chọn",
                           routeExplanation.route_comparison?.selected,
                         ],
                         [
-                          "Shortest-distance route",
+                          "Tuyến ngắn nhất",
                           routeExplanation.route_comparison?.shortest_distance,
                         ],
                         [
-                          "Fastest-time route",
+                          "Tuyến nhanh nhất",
                           routeExplanation.route_comparison?.fastest_time,
                         ],
                       ].map(([label, route]) =>
                         route ? (
                           <div
                             key={label}
-                            className="rounded-md bg-white/70 border border-blue-100 p-2.5"
+                            className="rounded-md bg-white border border-[#363236]/10 p-2.5"
                           >
-                            <div className="text-[10px] font-semibold text-blue-600 mb-1">
+                            <div className="text-[10px] font-semibold text-[#363236]/60 mb-1">
                               {label}
                             </div>
 
-                            <div className="text-blue-900 leading-4 break-words">
+                            <div className="text-[#363236] leading-4 break-words">
                               {(route.route_names || []).join(" → ")}
                             </div>
 
                             <div className="grid grid-cols-3 gap-1 mt-2 text-[10px]">
                               <div>
-                                <div className="text-blue-600">Distance</div>
+                                <div className="text-[#363236]/60">
+                                  Khoảng cách
+                                </div>
                                 <div className="font-medium">
                                   {Number(route.distance || 0).toFixed(0)} m
                                 </div>
                               </div>
                               <div>
-                                <div className="text-blue-600">Time</div>
+                                <div className="text-[#363236]/60">
+                                  Thời gian
+                                </div>
                                 <div className="font-medium">
                                   {Number(route.time || 0).toFixed(1)} s
                                 </div>
                               </div>
                               <div>
-                                <div className="text-blue-600">Cost</div>
+                                <div className="text-[#363236]/60">Chi phí</div>
                                 <div className="font-medium">
                                   {route.cost == null
                                     ? "—"
@@ -353,11 +417,11 @@ export default function Sidebar({
                               </div>
                             </div>
 
-                            {label !== "Selected route" && (
-                              <div className="mt-2 pt-2 border-t border-blue-100 grid grid-cols-3 gap-1 text-[9px]">
+                            {label !== "Tuyến đã chọn" && (
+                              <div className="mt-2 pt-2 border-t border-[#363236]/10 grid grid-cols-3 gap-1 text-[9px]">
                                 <div>
-                                  <div className="text-blue-600">
-                                    Δ distance
+                                  <div className="text-[#363236]/60">
+                                    Δ khoảng cách
                                   </div>
                                   <div>
                                     {Number(
@@ -367,7 +431,9 @@ export default function Sidebar({
                                   </div>
                                 </div>
                                 <div>
-                                  <div className="text-blue-600">Δ time</div>
+                                  <div className="text-[#363236]/60">
+                                    Δ thời gian
+                                  </div>
                                   <div>
                                     {Number(route.time_difference || 0).toFixed(
                                       1,
@@ -376,7 +442,9 @@ export default function Sidebar({
                                   </div>
                                 </div>
                                 <div>
-                                  <div className="text-blue-600">Δ cost</div>
+                                  <div className="text-[#363236]/60">
+                                    Δ chi phí
+                                  </div>
                                   <div>
                                     {route.cost_difference == null
                                       ? "—"
@@ -394,8 +462,10 @@ export default function Sidebar({
                   </div>
 
                   {routeExplanation.congested_segments?.length > 0 && (
-                    <div className="border-t border-blue-200 pt-3">
-                      <div className="font-semibold mb-2">High congestion</div>
+                    <div className="border-t border-[#363236]/10 pt-3">
+                      <div className="font-semibold mb-2">
+                        Kẹt xe nghiêm trọng
+                      </div>
 
                       <div className="space-y-1.5">
                         {routeExplanation.congested_segments
@@ -403,13 +473,13 @@ export default function Sidebar({
                           .map((segment, index) => (
                             <div
                               key={`${segment.from}-${segment.to}-${index}`}
-                              className="rounded bg-white/70 px-2.5 py-2 border border-blue-100"
+                              className="rounded bg-[#F7B558]/10 px-2.5 py-2 border border-[#F7B558]/30"
                             >
-                              <div className="font-medium text-blue-900">
+                              <div className="font-medium text-[#363236]">
                                 {segment.from} → {segment.to}
                               </div>
-                              <div className="text-[10px] text-blue-700">
-                                Congestion {segment.congestion}
+                              <div className="text-[10px] text-[#363236]/70">
+                                Kẹt xe {segment.congestion}
                                 {segment.risk && segment.risk !== "none"
                                   ? ` · ${segment.risk}`
                                   : ""}
@@ -420,7 +490,7 @@ export default function Sidebar({
                     </div>
                   )}
 
-                  <div className="pt-1 text-[10px] text-blue-600 leading-4">
+                  <div className="pt-1 text-[10px] text-[#363236]/60 leading-4">
                     {routeExplanation.comparison_note}
                   </div>
                 </div>
@@ -428,16 +498,6 @@ export default function Sidebar({
             )}
           </>
         )}
-
-        <div className="mt-5 pt-4 border-t border-gray-200">
-          <button
-            type="button"
-            onClick={onReset}
-            className="w-full h-10 rounded-md border border-gray-300 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            Reset
-          </button>
-        </div>
       </div>
     </aside>
   );

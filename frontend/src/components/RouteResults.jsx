@@ -28,7 +28,7 @@ export default function RouteResults({
         className="w-full flex items-center justify-center gap-1.5 text-sm font-medium text-gray-600 border border-gray-300 rounded-md py-2 hover:bg-gray-50 transition-colors"
       >
         <RotateCcw className="w-3.5 h-3.5" />
-        Reset
+        Đặt lại
       </button>
       <div
         className={`transition-all duration-500 ease-out overflow-hidden ${
@@ -40,7 +40,7 @@ export default function RouteResults({
         {/* Visualizer Controls */}
         <div className="mb-4">
           <h2 className="text-sm font-semibold text-gray-900 mb-2">
-            Visualizer
+            Trình mô phỏng
           </h2>
           <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5">
             <div className="flex items-center gap-1">
@@ -70,7 +70,7 @@ export default function RouteResults({
               </button>
             </div>
             <span className="text-xs font-medium text-gray-500 tabular-nums">
-              Step {step} / {totalSteps}
+              Bước {step} / {totalSteps}
             </span>
           </div>
         </div>
@@ -83,12 +83,12 @@ export default function RouteResults({
             </div>
             <div>
               <p className="text-xs font-semibold text-blue-900 mb-1">
-                Why this route?
+                Vì sao tuyến đường này?
               </p>
               <p className="text-xs text-blue-800 leading-relaxed">
-                This path minimizes total {optimization.toLowerCase()} cost by
-                favoring fewer intersections and avoiding congested segments,
-                based on the {algorithm} traversal.
+                Tuyến đường này tối thiểu hóa tổng chi phí{" "}
+                {optimization.toLowerCase()} bằng cách ưu tiên ít giao lộ hơn và
+                tránh các đoạn kẹt xe, dựa trên thuật toán {algorithm}.
               </p>
             </div>
           </div>

@@ -3,42 +3,42 @@ import React from "react";
 const ALGORITHM_OPTIONS = [
   {
     value: "bfs",
-    label: "Breadth-first Search",
+    label: "Tìm kiếm theo chiều rộng (BFS)",
   },
   {
     value: "dfs",
-    label: "Depth-first Search",
+    label: "Tìm kiếm theo chiều sâu (DFS)",
   },
   {
     value: "ucs",
-    label: "Uniform-cost Search",
+    label: "Tìm kiếm chi phí đồng nhất (UCS)",
   },
   {
     value: "dijkstra",
-    label: "Dijkstra's Algorithm",
+    label: "Thuật toán Dijkstra",
   },
   {
     value: "astar",
-    label: "A* Search",
+    label: "Tìm kiếm A*",
   },
   {
     value: "greedy",
-    label: "Greedy Best-first Search",
+    label: "Tìm kiếm tham lam (Greedy Best-first)",
   },
 ];
 
 const OPTIMIZATION_OPTIONS = [
   {
     value: "time",
-    label: "Time",
+    label: "Thời gian",
   },
   {
     value: "distance",
-    label: "Distance",
+    label: "Khoảng cách",
   },
   {
     value: "mixed",
-    label: "Mixed",
+    label: "Kết hợp",
   },
 ];
 
@@ -50,16 +50,16 @@ export default function RouteSettings({
 }) {
   return (
     <div className="mt-5">
-      <h3 className="font-semibold text-gray-900 mb-3">
-        Settings
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-[#363236] mb-3">
+        Cài đặt
       </h3>
 
       <div className="mb-4">
         <label className="block text-xs text-gray-500 mb-1">
-          Optimization Method
+          Phương pháp tối ưu
         </label>
 
-        <div className="flex border border-gray-300 rounded-md overflow-hidden">
+        <div className="flex border-2 border-[#363236]/15 rounded-md overflow-hidden">
           {OPTIMIZATION_OPTIONS.map((option, index) => {
             const active = optimization === option.value;
 
@@ -70,11 +70,9 @@ export default function RouteSettings({
                 onClick={() => setOptimization(option.value)}
                 className={`flex-1 py-2 text-xs transition-colors ${
                   active
-                    ? "bg-gray-100 text-gray-900 font-medium"
-                    : "bg-white text-gray-500 hover:bg-gray-50"
-                } ${
-                  index > 0 ? "border-l border-gray-300" : ""
-                }`}
+                    ? "bg-[#F7B558] text-[#363236] font-medium"
+                    : "bg-white text-[#363236]/70 hover:bg-[#A5D48C]/15"
+                } ${index > 0 ? "border-l-2 border-[#363236]/10" : ""}`}
               >
                 {active && <span className="mr-1">✓</span>}
                 {option.label}
@@ -85,36 +83,29 @@ export default function RouteSettings({
       </div>
 
       <div>
-        <label className="block text-xs text-gray-500 mb-1">
-          Algorithm
-        </label>
+        <label className="block text-xs text-gray-500 mb-1">Thuật toán</label>
 
         <select
           value={algorithm}
-          onChange={(event) =>
-            setAlgorithm(event.target.value)
-          }
+          onChange={(event) => setAlgorithm(event.target.value)}
           className="
             w-full
             h-10
             rounded-md
-            border
-            border-gray-300
+            border-2
+            border-[#363236]/15
             bg-white
             px-3
             text-sm
-            text-gray-700
+            text-[#363236]
             outline-none
-            focus:border-blue-500
-            focus:ring-1
-            focus:ring-blue-500
+            focus:border-[#F7B558]
+            focus:ring-2
+            focus:ring-[#F7B558]/30
           "
         >
           {ALGORITHM_OPTIONS.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-            >
+            <option key={option.value} value={option.value}>
               {option.label}
             </option>
           ))}

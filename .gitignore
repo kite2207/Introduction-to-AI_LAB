@@ -6,3 +6,5 @@ __pycache__/
 *.swp
 *.log
 cache/
+docker-compose.yml
+package-lock.json

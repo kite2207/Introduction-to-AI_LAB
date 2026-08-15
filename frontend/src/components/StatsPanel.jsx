@@ -1,9 +1,10 @@
 import React from "react";
 import {
-  Route,
-  Clock,
-  DollarSign,
-  Search,
+  Compass,
+  MapPin,
+  Timer,
+  Wallet,
+  Radar,
   GitBranch,
   CircleDot,
   Lightbulb,
@@ -22,9 +23,7 @@ function formatTime(value) {
   if (value == null) return "—";
   const n = Number(value);
   if (!Number.isFinite(n)) return "—";
-  return n >= 60
-    ? `${(n / 60).toFixed(1)} min`
-    : `${n.toFixed(0)} s`;
+  return n >= 60 ? `${(n / 60).toFixed(1)} min` : `${n.toFixed(0)} s`;
 }
 
 function formatNumber(value) {
@@ -34,35 +33,23 @@ function formatNumber(value) {
   return n.toFixed(2);
 }
 
-function getAlgorithmKind(
-  algorithm = "",
-  algorithmName = ""
-) {
-  const raw =
-    `${algorithm} ${algorithmName}`.toLowerCase();
+function getAlgorithmKind(algorithm = "", algorithmName = "") {
+  const raw = `${algorithm} ${algorithmName}`.toLowerCase();
 
   if (
     raw.includes("dijkstra") ||
     raw.includes("uniform") ||
     raw.includes("ucs")
-  ) return "ucs";
+  )
+    return "ucs";
 
-  if (
-    raw.includes("a*") ||
-    raw.includes("astar")
-  ) return "astar";
+  if (raw.includes("a*") || raw.includes("astar")) return "astar";
 
   if (raw.includes("greedy")) return "greedy";
 
-  if (
-    raw.includes("breadth") ||
-    raw.includes("bfs")
-  ) return "bfs";
+  if (raw.includes("breadth") || raw.includes("bfs")) return "bfs";
 
-  if (
-    raw.includes("depth") ||
-    raw.includes("dfs")
-  ) return "dfs";
+  if (raw.includes("depth") || raw.includes("dfs")) return "dfs";
 
   return "unknown";
 }
@@ -73,13 +60,16 @@ function CandidateComparison({
   nextSelected,
   selectionMetric,
 }) {
-  const metricLabel = {
-    ucs: "g(n)",
-    astar: "f(n)",
-    greedy: "h(n)",
-    bfs: "FIFO",
-    dfs: "LIFO",
-  }[kind] || selectionMetric || "priority";
+  const metricLabel =
+    {
+      ucs: "g(n)",
+      astar: "f(n)",
+      greedy: "h(n)",
+      bfs: "FIFO",
+      dfs: "LIFO",
+    }[kind] ||
+    selectionMetric ||
+    "priority";
 
   if (!candidates?.length) {
     return (
@@ -91,33 +81,30 @@ function CandidateComparison({
 
   return (
     <div className="space-y-2 max-h-64 overflow-y-auto">
-      <div className="text-[10px] text-gray-400">
-        Chọn theo {metricLabel}
-      </div>
+      <div className="text-[10px] text-gray-400">Chọn theo {metricLabel}</div>
 
       {candidates.map((candidate, index) => {
         const isNext =
           nextSelected != null &&
-          String(candidate.node_id) ===
-            String(nextSelected);
+          String(candidate.node_id) === String(nextSelected);
 
         return (
           <div
             key={`${candidate.node_id}-${index}`}
             className={`rounded-md border p-2 ${
               isNext
-                ? "border-violet-400 bg-violet-50"
-                : "border-gray-100 bg-gray-50"
+                ? "border-[#A5D48C] bg-[#A5D48C]/15"
+                : "border-[#363236]/10 bg-[#F7B558]/5"
             }`}
           >
             <div className="flex justify-between gap-2">
-              <span className="text-xs font-semibold">
+              <span className="text-xs font-semibold text-[#363236]">
                 → {candidate.node_id}
               </span>
 
               {isNext && (
-                <span className="text-[10px] font-bold text-violet-700">
-                  NEXT
+                <span className="text-[10px] font-bold text-[#A5D48C]">
+                  TIẾP
                 </span>
               )}
             </div>
@@ -125,18 +112,15 @@ function CandidateComparison({
             {kind === "bfs" || kind === "dfs" ? (
               <div className="mt-1 text-[10px] text-gray-500">
                 {kind === "bfs"
-                  ? `Queue position: ${index + 1}`
-                  : `Stack position: ${index + 1}`}
+                  ? `Vị trí hàng đợi: ${index + 1}`
+                  : `Vị trí ngăn xếp: ${index + 1}`}
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-1.5 text-[11px]">
                 <span className="text-gray-500">g(n)</span>
-                <span className="text-right">
-                  {formatNumber(candidate.g)}
-                </span>
+                <span className="text-right">{formatNumber(candidate.g)}</span>
 
-                {(kind === "astar" ||
-                  kind === "greedy") && (
+                {(kind === "astar" || kind === "greedy") && (
                   <>
                     <span className="text-gray-500">h(n)</span>
                     <span className="text-right">
@@ -162,77 +146,62 @@ function CandidateComparison({
   );
 }
 
-function ExplanationSection({
-  explanation,
-  algorithmName,
-}) {
+function ExplanationSection({ explanation, algorithmName }) {
   if (!explanation) {
     return null;
   }
 
-  const congested =
-    explanation.congested_segments || [];
+  const congested = explanation.congested_segments || [];
   const comparison = explanation.comparison;
 
   return (
-    <div className="mt-4 pt-4 border-t border-gray-200">
-      <div className="flex items-center gap-2 mb-3">
-        <Lightbulb className="w-4 h-4 text-blue-600" />
-        <h4 className="text-sm font-semibold text-gray-900">
-          Why this route?
-        </h4>
+    <div className="mt-4">
+      <div className="rounded-lg bg-[#F7B558] p-3 mb-3 shadow-sm">
+        <div className="flex items-center gap-2">
+          <Lightbulb className="w-4 h-4" />
+          <h4 className="text-sm font-bold text-[#363236]">
+            Vì sao tuyến đường này?
+          </h4>
+        </div>
       </div>
 
       <div className="space-y-3 text-[11px]">
-        <div className="rounded-md bg-blue-50 border border-blue-100 p-3 text-gray-700 leading-5">
+        <div className="rounded-lg bg-[#A5D48C]/15 border border-[#A5D48C]/50 p-3 text-[#363236]/80 leading-5 text-xs">
           {explanation.why_selected}
         </div>
 
         <div>
-          <div className="font-semibold text-gray-800 mb-1">
-            Optimization
-          </div>
-          <div className="text-gray-500">
-            {explanation.headline}
-          </div>
+          <div className="font-semibold text-gray-800 mb-1">Tối ưu hóa</div>
+          <div className="text-gray-500">{explanation.headline}</div>
         </div>
 
         <div>
-          <div className="font-semibold text-gray-800 mb-1">
-            Optimality
-          </div>
-          <div className="text-gray-500">
-            {explanation.optimality}
-          </div>
+          <div className="font-semibold text-gray-800 mb-1">Tính tối ưu</div>
+          <div className="text-gray-500">{explanation.optimality}</div>
         </div>
 
         {congested.length > 0 && (
           <div>
-            <div className="font-semibold text-gray-800 mb-1">
-              Congested segments
-            </div>
+            <div className="font-semibold text-gray-800 mb-1">Đoạn kẹt xe</div>
 
             <div className="space-y-1.5">
-              {congested.slice(0, 4).map(
-                (segment, index) => (
-                  <div
-                    key={`${segment.from}-${segment.to}-${index}`}
-                    className="rounded bg-gray-50 p-2"
-                  >
-                    <div className="font-medium text-gray-700">
-                      {segment.from} → {segment.to}
-                    </div>
-
-                    <div className="text-gray-500">
-                      Congestion {segment.congestion}
-                      {segment.risk &&
-                      segment.risk !== "none"
-                        ? ` · ${segment.risk}`
-                        : ""}
-                    </div>
+              {congested.slice(0, 4).map((segment, index) => (
+                <div
+                  key={`${segment.from}-${segment.to}-${index}`}
+                  className="rounded bg-gray-50 p-2"
+                >
+                  <div className="font-medium text-gray-700">
+                    {segment.from} → {segment.to}
                   </div>
-                )
-              )}
+
+                  <div className="text-gray-500">
+                    Kẹt xe {segment.congestion}
+                    {segment.risk && segment.risk !== "none"
+                      ? ` · ${segment.risk}`
+                      : ""}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -240,41 +209,29 @@ function ExplanationSection({
         {comparison && (
           <div>
             <div className="font-semibold text-gray-800 mb-1">
-              Compared with baseline
+              So với mức nền
             </div>
 
             <div className="rounded bg-gray-50 p-2 space-y-1">
               <div className="flex justify-between">
-                <span className="text-gray-500">
-                  Distance
-                </span>
+                <span className="text-gray-500">Khoảng cách</span>
                 <span className="font-medium">
-                  {formatDistance(
-                    comparison.distance_difference
-                  )}
+                  {formatDistance(comparison.distance_difference)}
                 </span>
               </div>
 
               <div className="flex justify-between">
-                <span className="text-gray-500">
-                  Time
-                </span>
+                <span className="text-gray-500">Thời gian</span>
                 <span className="font-medium">
-                  {formatTime(
-                    comparison.time_difference
-                  )}
+                  {formatTime(comparison.time_difference)}
                 </span>
               </div>
 
               {comparison.cost_difference != null && (
                 <div className="flex justify-between">
-                  <span className="text-gray-500">
-                    Cost
-                  </span>
+                  <span className="text-gray-500">Chi phí</span>
                   <span className="font-medium">
-                    {formatNumber(
-                      comparison.cost_difference
-                    )}
+                    {formatNumber(comparison.cost_difference)}
                   </span>
                 </div>
               )}
@@ -303,69 +260,71 @@ export default function StatsPanel({
   executionTimeMs,
   simulation,
 }) {
-  const kind = getAlgorithmKind(
-    algorithm,
-    algorithmName
-  );
+  const kind = getAlgorithmKind(algorithm, algorithmName);
 
   const metrics = simulation?.metrics || {};
-  const frontierNodes =
-    simulation?.frontierNodes || [];
+  const frontierNodes = simulation?.frontierNodes || [];
 
   return (
     <div className="w-full min-h-full bg-white p-4">
-      <h3 className="text-sm font-semibold text-gray-900 mb-3">
-        Route Statistics
-      </h3>
+      <div className="rounded-xl bg-[#F7B558] p-3 mb-4 shadow-sm">
+        <h3 className="text-sm font-bold flex items-center gap-2 text-[#363236]">
+          <Compass className="w-4 h-4" />
+          Thống kê tuyến đường
+        </h3>
+        <p className="text-[10px] text-[#363236]/70 mt-0.5">
+          Chi tiết tuyến đường đã chọn
+        </p>
+      </div>
 
-      <div className="space-y-2.5">
-        <div className="flex items-center gap-2">
-          <Route className="w-3.5 h-3.5 text-blue-600" />
-          <span className="text-xs text-gray-500 flex-1">
-            Distance
-          </span>
-          <span className="text-xs font-semibold">
+      <div className="grid grid-cols-2 gap-2">
+        <div className="rounded-lg border-2 border-[#A5D48C] bg-[#A5D48C]/10 p-2.5">
+          <div className="flex items-center gap-1.5 text-[10px] text-[#363236]/70 mb-1">
+            <MapPin className="w-3 h-3 text-[#A5D48C]" />
+            Khoảng cách
+          </div>
+          <div className="text-sm font-bold text-[#363236]">
             {formatDistance(distance)}
-          </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Clock className="w-3.5 h-3.5 text-emerald-600" />
-          <span className="text-xs text-gray-500 flex-1">
-            Time
-          </span>
-          <span className="text-xs font-semibold">
+        <div className="rounded-lg border-2 border-[#F7B558] bg-[#F7B558]/10 p-2.5">
+          <div className="flex items-center gap-1.5 text-[10px] text-[#363236]/70 mb-1">
+            <Timer className="w-3 h-3 text-[#F7B558]" />
+            Thời gian
+          </div>
+          <div className="text-sm font-bold text-[#363236]">
             {formatTime(time)}
-          </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <DollarSign className="w-3.5 h-3.5 text-amber-600" />
-          <span className="text-xs text-gray-500 flex-1">
-            Cost
-          </span>
-          <span className="text-xs font-semibold">
+        <div className="rounded-lg border-2 border-[#363236]/15 bg-white p-2.5">
+          <div className="flex items-center gap-1.5 text-[10px] text-[#363236]/70 mb-1">
+            <Wallet className="w-3 h-3 text-[#363236]/70" />
+            Chi phí
+          </div>
+          <div className="text-sm font-bold text-[#363236]">
             {cost == null ? "N/A" : formatNumber(cost)}
-          </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Search className="w-3.5 h-3.5 text-purple-600" />
-          <span className="text-xs text-gray-500 flex-1">
-            Explored
-          </span>
-          <span className="text-xs font-semibold">
+        <div className="rounded-lg border-2 border-[#A5D48C] bg-[#A5D48C]/10 p-2.5">
+          <div className="flex items-center gap-1.5 text-[10px] text-[#363236]/70 mb-1">
+            <Radar className="w-3 h-3 text-[#A5D48C]" />
+            Đã khám phá
+          </div>
+          <div className="text-sm font-bold text-[#363236]">
             {exploredCount ?? 0}
-          </span>
+          </div>
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-gray-100">
-        <div className="text-[11px] text-gray-500">
-          Algorithm
+      <div className="mt-4 rounded-lg border border-[#363236]/10 bg-white p-3">
+        <div className="text-[10px] text-[#363236]/50 uppercase tracking-wide mb-1">
+          Thuật toán
         </div>
 
-        <div className="text-sm font-semibold text-gray-900">
+        <div className="text-sm font-bold text-[#363236]">
           {algorithmName || algorithm || "—"}
         </div>
       </div>
@@ -373,26 +332,20 @@ export default function StatsPanel({
       {simulation && (
         <div className="mt-4 pt-3 border-t border-gray-100">
           <div className="flex items-center gap-2 mb-2">
-            <CircleDot className="w-3.5 h-3.5 text-violet-600" />
-            <h4 className="text-xs font-semibold">
-              Simulation
-            </h4>
+            <CircleDot className="w-3.5 h-3.5 text-[#A5D48C]" />
+            <h4 className="text-xs font-semibold text-[#363236]">Mô phỏng</h4>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-md bg-gray-50 p-2">
-              <div className="text-[10px] text-gray-500">
-                Current
-              </div>
+              <div className="text-[10px] text-gray-500">Hiện tại</div>
               <div className="text-[11px] font-semibold">
                 {simulation.current || "—"}
               </div>
             </div>
 
             <div className="rounded-md bg-gray-50 p-2">
-              <div className="text-[10px] text-gray-500">
-                Frontier
-              </div>
+              <div className="text-[10px] text-gray-500">Biên</div>
               <div className="text-[11px] font-semibold">
                 {frontierNodes.length}
               </div>
@@ -403,7 +356,7 @@ export default function StatsPanel({
             Object.keys(metrics).length > 0 && (
               <div className="mt-2 grid grid-cols-3 gap-1">
                 {metrics.g != null && (
-                  <div className="rounded bg-blue-50 p-1.5 text-center">
+                  <div className="rounded bg-[#A5D48C]/15 p-1.5 text-center">
                     <div className="text-[9px] text-gray-500">g</div>
                     <div className="text-[10px] font-semibold">
                       {formatNumber(metrics.g)}
@@ -411,33 +364,31 @@ export default function StatsPanel({
                   </div>
                 )}
 
-                {["astar", "greedy"].includes(kind) &&
-                  metrics.h != null && (
-                    <div className="rounded bg-violet-50 p-1.5 text-center">
-                      <div className="text-[9px] text-gray-500">h</div>
-                      <div className="text-[10px] font-semibold">
-                        {formatNumber(metrics.h)}
-                      </div>
+                {["astar", "greedy"].includes(kind) && metrics.h != null && (
+                  <div className="rounded bg-[#F7B558]/15 p-1.5 text-center">
+                    <div className="text-[9px] text-gray-500">h</div>
+                    <div className="text-[10px] font-semibold">
+                      {formatNumber(metrics.h)}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                {kind === "astar" &&
-                  metrics.f != null && (
-                    <div className="rounded bg-red-50 p-1.5 text-center">
-                      <div className="text-[9px] text-gray-500">f</div>
-                      <div className="text-[10px] font-semibold">
-                        {formatNumber(metrics.f)}
-                      </div>
+                {kind === "astar" && metrics.f != null && (
+                  <div className="rounded bg-[#363236]/10 p-1.5 text-center">
+                    <div className="text-[9px] text-gray-500">f</div>
+                    <div className="text-[10px] font-semibold">
+                      {formatNumber(metrics.f)}
                     </div>
-                  )}
+                  </div>
+                )}
               </div>
             )}
 
           <div className="mt-3">
             <div className="flex items-center gap-2 mb-2">
-              <GitBranch className="w-3.5 h-3.5 text-violet-600" />
-              <h4 className="text-xs font-semibold">
-                Candidate Comparison
+              <GitBranch className="w-3.5 h-3.5 text-[#A5D48C]" />
+              <h4 className="text-xs font-semibold text-[#363236]">
+                So sánh ứng viên
               </h4>
             </div>
 
@@ -458,9 +409,7 @@ export default function StatsPanel({
 
       <div className="mt-4 pt-3 border-t border-gray-100">
         <div className="flex justify-between">
-          <span className="text-xs text-gray-500">
-            Search time
-          </span>
+          <span className="text-xs text-gray-500">Thời gian tìm kiếm</span>
 
           <span className="text-xs font-semibold">
             {executionTimeMs != null
