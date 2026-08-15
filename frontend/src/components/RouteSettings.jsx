@@ -1,35 +1,82 @@
 import React from "react";
-import { Check, ChevronDown } from "lucide-react";
 
-const OPTIMIZATION_OPTIONS = [
-  { label: "Default", value: "default" },
-  { label: "Time", value: "time" },
-  { label: "Distance", value: "distance" },
-  { label: "Cost", value: "cost" },
+const ALGORITHM_OPTIONS = [
+  {
+    value: "bfs",
+    label: "Breadth-first Search",
+  },
+  {
+    value: "dfs",
+    label: "Depth-first Search",
+  },
+  {
+    value: "ucs",
+    label: "Uniform-cost Search",
+  },
+  {
+    value: "dijkstra",
+    label: "Dijkstra's Algorithm",
+  },
+  {
+    value: "astar",
+    label: "A* Search",
+  },
+  {
+    value: "greedy",
+    label: "Greedy Best-first Search",
+  },
 ];
 
-export default function RouteSettings({ optimization, setOptimization, algorithm, setAlgorithm }) {
+const OPTIMIZATION_OPTIONS = [
+  {
+    value: "time",
+    label: "Time",
+  },
+  {
+    value: "distance",
+    label: "Distance",
+  },
+  {
+    value: "mixed",
+    label: "Mixed",
+  },
+];
+
+export default function RouteSettings({
+  optimization,
+  setOptimization,
+  algorithm,
+  setAlgorithm,
+}) {
   return (
-    <section>
-      <h2 className="text-sm font-semibold text-gray-900 mb-3">Settings</h2>
+    <div className="mt-5">
+      <h3 className="font-semibold text-gray-900 mb-3">
+        Settings
+      </h3>
 
       <div className="mb-4">
-        <label className="block text-xs text-gray-500 mb-1.5">Optimization Method</label>
-        <div className="flex rounded-md border border-gray-300 overflow-hidden text-xs">
-          {OPTIMIZATION_OPTIONS.map((option, idx) => {
-            const isActive = optimization === option.value;
-            console.log("optimization =", optimization);
+        <label className="block text-xs text-gray-500 mb-1">
+          Optimization Method
+        </label>
+
+        <div className="flex border border-gray-300 rounded-md overflow-hidden">
+          {OPTIMIZATION_OPTIONS.map((option, index) => {
+            const active = optimization === option.value;
+
             return (
               <button
                 key={option.value}
+                type="button"
                 onClick={() => setOptimization(option.value)}
-                className={`flex-1 flex items-center justify-center gap-1 py-1.5 px-1.5 transition-colors ${
-                  isActive
+                className={`flex-1 py-2 text-xs transition-colors ${
+                  active
                     ? "bg-gray-100 text-gray-900 font-medium"
                     : "bg-white text-gray-500 hover:bg-gray-50"
-                } ${idx !== 0 ? "border-l border-gray-300" : ""}`}
+                } ${
+                  index > 0 ? "border-l border-gray-300" : ""
+                }`}
               >
-                {isActive && <Check className="w-3 h-3" />}
+                {active && <span className="mr-1">✓</span>}
                 {option.label}
               </button>
             );
@@ -37,22 +84,44 @@ export default function RouteSettings({ optimization, setOptimization, algorithm
         </div>
       </div>
 
-      <div className="mb-4">
-        <label className="block text-xs text-gray-500 mb-1.5">Algorithm</label>
-        <div className="relative">
-          <select
-            value={algorithm}
-            onChange={(e) => setAlgorithm(e.target.value)}
-            className="w-full appearance-none rounded-md border border-blue-400 ring-1 ring-blue-100 px-3 py-2 pr-8 text-sm text-gray-700 outline-none bg-white cursor-pointer"
-          >
-            <option>Depth-first Search</option>
-            <option>Breadth-first Search</option>
-            <option>Dijkstra's Algorithm</option>
-            <option>A* Search</option>
-          </select>
-          <ChevronDown className="w-4 h-4 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-        </div>
+      <div>
+        <label className="block text-xs text-gray-500 mb-1">
+          Algorithm
+        </label>
+
+        <select
+          value={algorithm}
+          onChange={(event) =>
+            setAlgorithm(event.target.value)
+          }
+          className="
+            w-full
+            h-10
+            rounded-md
+            border
+            border-gray-300
+            bg-white
+            px-3
+            text-sm
+            text-gray-700
+            outline-none
+            focus:border-blue-500
+            focus:ring-1
+            focus:ring-blue-500
+          "
+        >
+          {ALGORITHM_OPTIONS.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
-    </section>
+    </div>
   );
 }
+
+export { ALGORITHM_OPTIONS, OPTIMIZATION_OPTIONS };

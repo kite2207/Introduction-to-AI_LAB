@@ -53,6 +53,8 @@ class SearchResponse(BaseModel):
     path_coordinates: List[Coordinate] = []
     start_name: str = ""
     end_name: str = ""
+    steps: list[dict] = []
+    explanation: dict = {}
 
 
 class GraphInfoResponse(BaseModel):

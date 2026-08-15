@@ -1,44 +1,51 @@
 import { useMemo, useState } from "react";
 
-import nodesData from "./data/nodes.json";
-import edgesData from "./data/edges.json";
+import trafficData from "./data/hcm_traffic_data.json";
 
 import Sidebar from "./components/Sidebar";
 import HCMMap from "./components/HCMMap";
+import StatsPanel from "./components/StatsPanel";
 
-
+const API_URL = "http://localhost:8000/api/search";
 
 export default function App() {
   const { nodes, edges, nodeMap } = useMemo(() => {
-
-    const nodes = nodesData.map((node) => ({
-      id: node.node_id,
+    const nodes = Object.entries(trafficData).map(([id, node]) => ({
+      id,
       name: node.name,
       lat: node.lat,
       lng: node.lng,
-      type: node.node_type,
+      type: node.type,
     }));
 
-    const edges = edgesData.map((edge) => ({
-      source: edge.source_id,
-      target: edge.target_id,
-      distance: edge.distance,
-      estimatedTime: edge.estimated_time,
-      congestion: edge.congestion_level,
-      direction: edge.direction,
-      risk: edge.risk_factors,
-      geometry: null,
-    }));
+    const edges = [];
+
+    Object.entries(trafficData).forEach(([sourceId, node]) => {
+      node.connected_to.forEach((edge) => {
+        edges.push({
+          source: sourceId,
+          target: edge.target_node,
+          distance: edge.distance,
+          estimatedTime: edge.estimated_time,
+          congestion: edge.congestion_level,
+          direction: edge.direction,
+          risk: edge.risk_factors,
+          geometry: Array.isArray(edge.geometry)
+            ? edge.geometry.map((point) =>
+                Array.isArray(point)
+                  ? [point[0], point[1]]
+                  : [point.lat, point.lng]
+              )
+            : null,
+        });
+      });
+    });
 
     const nodeMap = Object.fromEntries(
-      nodes.map((node) => [node.id, node]),
+      nodes.map((node) => [node.id, node])
     );
 
-    return {
-      nodes,
-      edges,
-      nodeMap,
-    };
+    return { nodes, edges, nodeMap };
   }, []);
 
   const nodeOptions = useMemo(
@@ -47,156 +54,292 @@ export default function App() {
         value: node.id,
         label: node.name || node.id,
       })),
-    [nodes],
+    [nodes]
   );
 
-
   const [start, setStart] = useState(null);
-
   const [end, setEnd] = useState(null);
-
   const [waypoints, setWaypoints] = useState([]);
-
   const [addingStop, setAddingStop] = useState(false);
 
   const [path, setPath] = useState([]);
+  const [routePositions, setRoutePositions] = useState([]);
+  const [pathNodeNames, setPathNodeNames] = useState([]);
+  const [exploredNodes, setExploredNodes] = useState([]);
+  const [simulationSteps, setSimulationSteps] = useState([]);
+  const [routeExplanation, setRouteExplanation] = useState(null);
 
-  const [algorithm, setAlgorithm] = useState("A*");
-
-  const [optimization, setOptimization] = useState("default");
+  const [algorithm, setAlgorithm] = useState("astar");
+  const [algorithmName, setAlgorithmName] = useState("");
+  const [optimization, setOptimization] = useState("mixed");
 
   const [hasSearched, setHasSearched] = useState(false);
-
   const [loading, setLoading] = useState(false);
-
   const [step, setStep] = useState(0);
 
-  const TOTAL_STEPS = 10;
+  const [routeStats, setRouteStats] = useState({
+    distance: null,
+    time: null,
+    cost: null,
+    exploredCount: 0,
+    executionTimeMs: 0,
+  });
 
-  // Click node trên map
+  const totalSteps = simulationSteps.length;
+
+  const resetSearchResult = () => {
+    setHasSearched(false);
+    setPath([]);
+    setRoutePositions([]);
+    setPathNodeNames([]);
+    setExploredNodes([]);
+    setSimulationSteps([]);
+    setRouteExplanation(null);
+    setStep(0);
+    setRouteStats({
+      distance: null,
+      time: null,
+      cost: null,
+      exploredCount: 0,
+      executionTimeMs: 0,
+    });
+  };
 
   const handleNodeClick = (id) => {
-    // đang ở chế độ thêm điểm dừng
     if (addingStop) {
-      if (id !== start && id !== end && !waypoints.includes(id)) {
-        setWaypoints([...waypoints, id]);
+      if (
+        id !== start &&
+        id !== end &&
+        !waypoints.includes(id)
+      ) {
+        setWaypoints((prev) => [...prev, id]);
       }
-      setAddingStop(false);
 
+      setAddingStop(false);
+      resetSearchResult();
       return;
     }
 
-    // chọn start
     if (start === null) {
       setStart(id);
-
+      resetSearchResult();
       return;
     }
 
-    // chọn end
     if (end === null && id !== start) {
       setEnd(id);
-
-      return;
+      resetSearchResult();
     }
-
-    return;
   };
 
   const removeWaypoint = (id) => {
-    setWaypoints(waypoints.filter((w) => w !== id));
-
-    setHasSearched(false);
-
-    setPath([]);
+    setWaypoints((prev) => prev.filter((nodeId) => nodeId !== id));
+    resetSearchResult();
   };
 
-  const handleSearch = async () => {
-    if (!start || !end) return;
+  const callSearchApi = async (from, to) => {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        start: String(from),
+        end: String(to),
+        algorithm,
+        optimization,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data?.detail || `Search failed (${response.status})`
+      );
+    }
+
+    return data;
+  };
+
+  const searchRoute = async () => {
+    if (!start || !end || loading) {
+      return;
+    }
 
     setLoading(true);
+    setHasSearched(false);
 
+    try {
+      // Current backend API accepts start/end only.
+      // When waypoints exist, search each leg sequentially:
+      // start -> waypoint 1 -> ... -> waypoint N -> end.
+      const stops = [start, ...waypoints, end];
 
+      const results = [];
 
-
-
-
-    const res = await fetch(
-      "http://localhost:8000/search",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-
-          start: start,
-
-          end: end,
-
-          algorithm: algorithm,
-
-          optimization: optimization
-
-        })
-
+      for (let i = 0; i < stops.length - 1; i += 1) {
+        results.push(
+          await callSearchApi(stops[i], stops[i + 1])
+        );
       }
-    );
 
+      const combinedPath = [];
+      const combinedCoordinates = [];
+      const combinedNames = [];
+      const explored = [];
+      const combinedSteps = [];
+      const explanations = [];
 
-    const data = await res.json();
+      let totalDistance = 0;
+      let totalTime = 0;
+      let totalCost = 0;
+      let hasCost = true;
+      let totalExploredCount = 0;
+      let totalExecutionTime = 0;
 
+      results.forEach((result) => {
+        const segmentPath = result.path || [];
+        const segmentCoordinates = result.path_coordinates || [];
+        const segmentNames = result.path_node_names || [];
 
-    setPath(data.path);
+        combinedPath.push(
+          ...(
+            combinedPath.length > 0
+              ? segmentPath.slice(1)
+              : segmentPath
+          )
+        );
 
+        combinedCoordinates.push(
+          ...(
+            combinedCoordinates.length > 0
+              ? segmentCoordinates.slice(1)
+              : segmentCoordinates
+          )
+        );
 
+        combinedNames.push(
+          ...(
+            combinedNames.length > 0
+              ? segmentNames.slice(1)
+              : segmentNames
+          )
+        );
 
+        explored.push(...(result.explored_nodes || []));
 
-    // TEST TẠM
-    // nối thẳng start -> end
+        if (result.explanation) {
+          explanations.push(result.explanation);
+        }
 
-    setPath([start, ...waypoints, end]);
+        const segmentSteps = result.steps || [];
+        const stepOffset = combinedSteps.length;
 
-    setLoading(false);
+        segmentSteps.forEach((traceStep, index) => {
+          const previousExploredEdges =
+            index > 0
+              ? segmentSteps[index - 1]?.exploredEdges || []
+              : combinedSteps.length > 0
+                ? combinedSteps[combinedSteps.length - 1]?.exploredEdges || []
+                : [];
 
-    setHasSearched(true);
+          combinedSteps.push({
+            ...traceStep,
+            step: stepOffset + index,
+            previousExploredEdges,
+          });
+        });
 
-    console.log({
-      start,
+        totalDistance += Number(result.total_distance || 0);
+        totalTime += Number(result.total_time || 0);
 
-      end,
+        if (result.total_cost == null) {
+          hasCost = false;
+        } else {
+          totalCost += Number(result.total_cost);
+        }
 
-      algorithm,
+        totalExploredCount += Number(result.explored_count || 0);
+        totalExecutionTime += Number(
+          result.execution_time_ms || 0
+        );
+      });
 
-      optimization,
-    });
+      setAlgorithmName(
+        results[results.length - 1]?.algorithm_name ||
+          algorithm
+      );
+
+      setPath(combinedPath);
+      setRoutePositions(combinedCoordinates);
+      setPathNodeNames(combinedNames);
+      setExploredNodes([...new Set(explored)]);
+      setSimulationSteps(combinedSteps);
+      setStep(0);
+
+      setRouteExplanation(
+        explanations.length === 1
+          ? explanations[0]
+          : explanations.length > 1
+            ? {
+                headline: "Optimization across multiple route legs.",
+                why_selected: explanations
+                  .map(
+                    (item, index) =>
+                      `Leg ${index + 1}: ${item?.why_selected || ""}`
+                  )
+                  .join(" "),
+                optimality: explanations
+                  .map(
+                    (item, index) =>
+                      `Leg ${index + 1}: ${item?.optimality || ""}`
+                  )
+                  .join(" "),
+                congested_segments: explanations.flatMap(
+                  (item) => item?.congested_segments || []
+                ),
+                comparison: null,
+                comparison_note:
+                  "Multiple legs were searched because waypoints were selected.",
+                algorithm:
+                  explanations[0]?.algorithm || algorithm,
+              }
+            : null
+      );
+
+      setRouteStats({
+        distance: totalDistance,
+        time: totalTime,
+        cost: hasCost ? totalCost : null,
+        exploredCount: totalExploredCount,
+        executionTimeMs: totalExecutionTime,
+      });
+
+      setHasSearched(true);
+    } catch (error) {
+      console.error("Search error:", error);
+      alert(error.message || "Không thể tìm đường.");
+      resetSearchResult();
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSettingChange = (setter) => (value) => {
     setter(value);
-
-    // bắt search lại
-    setHasSearched(false);
-
-    // xóa đường cũ
-    setPath([]);
+    resetSearchResult();
   };
 
   const handleReset = () => {
     setStart(null);
     setEnd(null);
     setWaypoints([]);
-
     setAddingStop(false);
-
-    setAlgorithm("A*");
-    setOptimization("default");
-
-    setPath([]);
-    setHasSearched(false);
-    setStep(0);
+    setAlgorithm("astar");
+    setAlgorithmName("");
+    setOptimization("mixed");
+    resetSearchResult();
   };
 
   return (
@@ -220,8 +363,14 @@ export default function App() {
           nodeOptions={nodeOptions}
           start={start}
           end={end}
-          setStart={setStart}
-          setEnd={setEnd}
+          setStart={(value) => {
+            setStart(value);
+            resetSearchResult();
+          }}
+          setEnd={(value) => {
+            setEnd(value);
+            resetSearchResult();
+          }}
           addingStop={addingStop}
           setAddingStop={setAddingStop}
           setWaypoints={setWaypoints}
@@ -232,25 +381,48 @@ export default function App() {
           setOptimization={handleSettingChange(setOptimization)}
           algorithm={algorithm}
           setAlgorithm={handleSettingChange(setAlgorithm)}
+          algorithmName={algorithmName}
+          routeExplanation={routeExplanation}
           hasSearched={hasSearched}
-          onSearch={handleSearch}
+          onSearch={searchRoute}
           step={step}
-          totalSteps={TOTAL_STEPS}
+          totalSteps={totalSteps}
           onStepBack={() => {
-            setStep(Math.max(0, step - 1));
+            setStep((prev) => Math.max(0, prev - 1));
           }}
           onStepForward={() => {
-            setStep(Math.min(TOTAL_STEPS, step + 1));
+            setStep((prev) => Math.min(totalSteps, prev + 1));
           }}
-          onSkipToStart={() => {
-            setStep(0);
-          }}
-          onSkipToEnd={() => {
-            setStep(TOTAL_STEPS);
-          }}
+          onSkipToStart={() => setStep(0)}
+          onSkipToEnd={() => setStep(totalSteps)}
           onReset={handleReset}
         />
       </div>
+
+      {hasSearched && (
+        <div
+          style={{
+            width: "260px",
+            minWidth: "260px",
+            height: "100vh",
+            background: "#fff",
+            borderRight: "1px solid #ddd",
+            overflowY: "auto",
+          }}
+        >
+          <StatsPanel
+            algorithm={algorithm}
+            algorithmName={algorithmName}
+            simulation={simulationSteps[step - 1] || null}
+            distance={routeStats.distance}
+            time={routeStats.time}
+            cost={routeStats.cost}
+            exploredCount={routeStats.exploredCount}
+            executionTimeMs={routeStats.executionTimeMs}
+            pathNodeNames={pathNodeNames}
+          />
+        </div>
+      )}
 
       <div
         style={{
@@ -263,10 +435,16 @@ export default function App() {
           nodeMap={nodeMap}
           nodes={nodes}
           edges={edges}
+          routePositions={routePositions}
           start={start}
           end={end}
           waypoints={waypoints}
           path={path}
+          // Chỉ hiển thị explored nodes khi người dùng đang xem lại thuật toán.
+          // step = 0 => không hiển thị explored nodes.
+          exploredNodes={
+            step > 0 ? exploredNodes.slice(0, step) : []
+          }
           onNodeClick={handleNodeClick}
         />
       </div>
