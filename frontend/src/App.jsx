@@ -34,16 +34,14 @@ export default function App() {
             ? edge.geometry.map((point) =>
                 Array.isArray(point)
                   ? [point[0], point[1]]
-                  : [point.lat, point.lng]
+                  : [point.lat, point.lng],
               )
             : null,
         });
       });
     });
 
-    const nodeMap = Object.fromEntries(
-      nodes.map((node) => [node.id, node])
-    );
+    const nodeMap = Object.fromEntries(nodes.map((node) => [node.id, node]));
 
     return { nodes, edges, nodeMap };
   }, []);
@@ -54,7 +52,7 @@ export default function App() {
         value: node.id,
         label: node.name || node.id,
       })),
-    [nodes]
+    [nodes],
   );
 
   const [start, setStart] = useState(null);
@@ -107,11 +105,7 @@ export default function App() {
 
   const handleNodeClick = (id) => {
     if (addingStop) {
-      if (
-        id !== start &&
-        id !== end &&
-        !waypoints.includes(id)
-      ) {
+      if (id !== start && id !== end && !waypoints.includes(id)) {
         setWaypoints((prev) => [...prev, id]);
       }
 
@@ -154,9 +148,7 @@ export default function App() {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(
-        data?.detail || `Search failed (${response.status})`
-      );
+      throw new Error(data?.detail || `Search failed (${response.status})`);
     }
 
     return data;
@@ -179,9 +171,7 @@ export default function App() {
       const results = [];
 
       for (let i = 0; i < stops.length - 1; i += 1) {
-        results.push(
-          await callSearchApi(stops[i], stops[i + 1])
-        );
+        results.push(await callSearchApi(stops[i], stops[i + 1]));
       }
 
       const combinedPath = [];
@@ -204,27 +194,17 @@ export default function App() {
         const segmentNames = result.path_node_names || [];
 
         combinedPath.push(
-          ...(
-            combinedPath.length > 0
-              ? segmentPath.slice(1)
-              : segmentPath
-          )
+          ...(combinedPath.length > 0 ? segmentPath.slice(1) : segmentPath),
         );
 
         combinedCoordinates.push(
-          ...(
-            combinedCoordinates.length > 0
-              ? segmentCoordinates.slice(1)
-              : segmentCoordinates
-          )
+          ...(combinedCoordinates.length > 0
+            ? segmentCoordinates.slice(1)
+            : segmentCoordinates),
         );
 
         combinedNames.push(
-          ...(
-            combinedNames.length > 0
-              ? segmentNames.slice(1)
-              : segmentNames
-          )
+          ...(combinedNames.length > 0 ? segmentNames.slice(1) : segmentNames),
         );
 
         explored.push(...(result.explored_nodes || []));
@@ -261,14 +241,11 @@ export default function App() {
         }
 
         totalExploredCount += Number(result.explored_count || 0);
-        totalExecutionTime += Number(
-          result.execution_time_ms || 0
-        );
+        totalExecutionTime += Number(result.execution_time_ms || 0);
       });
 
       setAlgorithmName(
-        results[results.length - 1]?.algorithm_name ||
-          algorithm
+        results[results.length - 1]?.algorithm_name || algorithm,
       );
 
       setPath(combinedPath);
@@ -283,29 +260,28 @@ export default function App() {
           ? explanations[0]
           : explanations.length > 1
             ? {
-                headline: "Optimization across multiple route legs.",
+                headline: "Tối ưu hóa qua nhiều chặng đường.",
                 why_selected: explanations
                   .map(
                     (item, index) =>
-                      `Leg ${index + 1}: ${item?.why_selected || ""}`
+                      `Chặng ${index + 1}: ${item?.why_selected || ""}`,
                   )
                   .join(" "),
                 optimality: explanations
                   .map(
                     (item, index) =>
-                      `Leg ${index + 1}: ${item?.optimality || ""}`
+                      `Chặng ${index + 1}: ${item?.optimality || ""}`,
                   )
                   .join(" "),
                 congested_segments: explanations.flatMap(
-                  (item) => item?.congested_segments || []
+                  (item) => item?.congested_segments || [],
                 ),
                 comparison: null,
                 comparison_note:
-                  "Multiple legs were searched because waypoints were selected.",
-                algorithm:
-                  explanations[0]?.algorithm || algorithm,
+                  "Đã tìm kiếm nhiều chặng vì bạn đã chọn điểm dừng.",
+                algorithm: explanations[0]?.algorithm || algorithm,
               }
-            : null
+            : null,
       );
 
       setRouteStats({
@@ -318,7 +294,7 @@ export default function App() {
 
       setHasSearched(true);
     } catch (error) {
-      console.error("Search error:", error);
+      console.error("Lỗi tìm kiếm:", error);
       alert(error.message || "Không thể tìm đường.");
       resetSearchResult();
     } finally {
@@ -435,16 +411,13 @@ export default function App() {
           nodeMap={nodeMap}
           nodes={nodes}
           edges={edges}
-          routePositions={routePositions}
           start={start}
           end={end}
           waypoints={waypoints}
           path={path}
-          // Chỉ hiển thị explored nodes khi người dùng đang xem lại thuật toán.
-          // step = 0 => không hiển thị explored nodes.
-          exploredNodes={
-            step > 0 ? exploredNodes.slice(0, step) : []
-          }
+          // Simulation snapshot for the current visualizer step.
+          // step = 0 => no explored nodes/edges shown yet.
+          simulation={simulationSteps[step - 1] || null}
           onNodeClick={handleNodeClick}
         />
       </div>
