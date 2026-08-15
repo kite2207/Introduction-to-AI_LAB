@@ -1,0 +1,831 @@
+\documentclass[12pt,a4paper,oneside]{report}
+
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\setmonofont{Consolas}
+\usepackage[top=2.2cm,bottom=2.2cm,left=3cm,right=2cm,headheight=15pt]{geometry}
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,tabularx,array,longtable,multirow}
+\usepackage{setspace}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit}
+\usepackage{hyperref}
+
+\definecolor{hcmusblue}{HTML}{173A7A}
+\definecolor{accentblue}{HTML}{2867C7}
+\definecolor{lightblue}{HTML}{EAF2FF}
+\definecolor{lightgray}{HTML}{F4F6F8}
+\definecolor{darkgray}{HTML}{374151}
+\definecolor{goodgreen}{HTML}{207A4B}
+\definecolor{warnorange}{HTML}{A45A00}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=hcmusblue,
+  citecolor=hcmusblue,
+  urlcolor=accentblue,
+  pdftitle={Technical Report - Vietnamese Traffic Route Optimization},
+  pdfauthor={Group 314}
+}
+
+\onehalfspacing
+\setlength{\parindent}{1.1cm}
+\setlength{\parskip}{3pt}
+\setlength{\emergencystretch}{2em}
+\raggedbottom
+\setlist{noitemsep,topsep=4pt,leftmargin=1.4cm}
+
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\color{hcmusblue}}
+  {\filleft\Large CHAPTER \thechapter}
+  {0.4ex}{\titlerule[1.2pt]\vspace{1ex}\Huge}
+\titlespacing*{\chapter}{0pt}{-18pt}{24pt}
+\titleformat{\section}{\Large\bfseries\color{hcmusblue}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\large\bfseries\color{darkgray}}{\thesubsection}{0.7em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Introduction to Artificial Intelligence - Lab 1}
+\fancyhead[R]{\small Group 314}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\lstset{
+  backgroundcolor=\color{lightgray},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{accentblue}\bfseries,
+  commentstyle=\color{goodgreen},
+  stringstyle=\color{warnorange},
+  numbers=left,
+  numberstyle=\tiny\color{darkgray},
+  numbersep=9pt,
+  frame=single,
+  rulecolor=\color{gray!45},
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4
+}
+
+\newcommand{\completed}{\textcolor{goodgreen}{\textbf{Completed}}}
+\newcommand{\partialstatus}{\textcolor{warnorange}{\textbf{Prototype / partial}}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\begin{document}
+
+% -----------------------------------------------------------------------------
+% COVER PAGE - follows the supplied visual reference
+% -----------------------------------------------------------------------------
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{center}
+{\bfseries\large TRƯỜNG ĐẠI HỌC KHOA HỌC TỰ NHIÊN - ĐHQG TP.HCM}\\[-1pt]
+{\bfseries\large KHOA CÔNG NGHỆ THÔNG TIN}\\[0.75cm]
+
+\includegraphics[width=4.2cm]{hcmus-logo.png}\\[0.45cm]
+
+{\large NHẬP MÔN TRÍ TUỆ NHÂN TẠO}\\[2pt]
+{\large BÁO CÁO LAB 01}\\[0.75cm]
+
+{\bfseries\LARGE VIETNAMESE TRAFFIC ROUTE}\\[2pt]
+{\bfseries\LARGE OPTIMIZATION}\\[0.3cm]
+{\large Search Algorithms on a Ho Chi Minh City Road Graph}
+
+\vfill
+
+\begin{tabular}{>{\bfseries}rl}
+Giảng viên: & Bùi Tiến Lên \\
+Giảng viên: & Bùi Duy Đăng \\
+Giảng viên: & Võ Nhật Tân \\
+\end{tabular}\\[0.18cm]
+{\small ----------oOo----------}
+
+\vfill
+
+{\bfseries Sinh viên thực hiện}\\[0.2cm]
+\begin{tabular}{p{7.2cm}r}
+Dương Trung Hiếu & 24127040 \\
+Nguyễn Hoàng Bảo Long & 24127201 \\
+Trần Vũ Ánh Kiệt & 24127196 \\
+\end{tabular}
+
+\vfill
+{Thành phố Hồ Chí Minh, tháng 8 năm 2026}
+\end{center}
+\end{titlepage}
+
+\pagenumbering{roman}
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+This technical report describes a traffic route optimization application for a
+directed road graph in Ho Chi Minh City. The dataset contains 212 geographic
+vertices and 1,129 directed adjacency entries after two-way roads are expanded.
+Road segments store distance, nominal travel time, congestion, direction, road
+type, and risk factors. The project implements DFS, BFS, UCS, Dijkstra, A*, and
+Greedy Best-First Search for two-location routing, together with prototype
+Nearest-Neighbor and Held-Karp methods for multi-location routing. A FastAPI
+backend exposes graph and search operations, while a React and Leaflet interface
+displays the network and route controls.
+
+Experiments on a reachable 28-hop test case show that UCS, Dijkstra, and A*
+produce the same minimum distance-mode cost. A* expands 158 vertices instead of
+198 for UCS, while Greedy Best-First expands only 34 but returns a route whose
+cost is 6.1 percent higher. In a five-location cycle, Held-Karp reduces mixed
+cost by 11.32 percent relative to the supplied visit order and by 26.04 percent
+relative to Nearest Neighbor. The report also records integration gaps found in
+the current repository so that completion claims remain reproducible.
+
+\noindent\textbf{Keywords:} graph search, traffic routing, A*, Dijkstra,
+multi-location optimization, FastAPI, React, Ho Chi Minh City.
+
+\chapter*{Document Conformance}
+\addcontentsline{toc}{chapter}{Document Conformance}
+This report is organized directly from Section 4.9, ``Technical Report,'' of
+the Lab 1 specification. Chapters 1 through 10 correspond to items (a) through
+(j): group introduction, problem context, modeling, dataset, algorithm
+principles, program flow, comparison, multi-location optimization, program
+instructions, and limitations/future work. The assessment in Chapter 1 is based
+on the repository state inspected on August 15, 2026.
+
+\tableofcontents
+\listoffigures
+\listoftables
+\clearpage
+\pagenumbering{arabic}
+
+% -----------------------------------------------------------------------------
+\chapter{Group Introduction}
+
+\section{Group Information}
+The project is prepared by Group 314 for Lab 1 of Introduction to Artificial
+Intelligence. Table~\ref{tab:members} records the submitted member list.
+
+\begin{table}[H]
+\centering
+\caption{Group members}
+\label{tab:members}
+\begin{tabular}{cll}
+\toprule
+\textbf{No.} & \textbf{Student} & \textbf{Student ID}\\
+\midrule
+1 & Nguyễn Trường Sơn & 24127233\\
+2 & Lê Nguyễn Quốc Học & 24127044\\
+3 & Nguyễn Hoàng Bảo Long & 24127201\\
+4 & Trần Vũ Ánh Kiệt & 24127196\\
+5 & Tạ Văn Đức & 23127528\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Member Contributions}
+Work was divided by technical area, with joint review of integration and the
+final demonstration.
+
+\begin{table}[H]
+\centering
+\caption{Specific contribution of each member}
+\label{tab:contributions}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{4.1cm}X}
+\toprule
+\textbf{Member} & \textbf{Main contribution}\\
+\midrule
+Nguyễn Trường Sơn & Problem analysis, experiment design, test-case review, and report coordination.\\
+Lê Nguyễn Quốc Học & DFS/BFS principles, algorithm comparison, validation cases, and presentation preparation.\\
+Nguyễn Hoàng Bảo Long & Traffic-data generation and cleaning, geographic node/edge preparation, and map visualization.\\
+Trần Vũ Ánh Kiệt & Cost evaluator, informed search algorithms, FastAPI schemas/endpoints, and backend integration.\\
+Tạ Văn Đức & React interface, interaction controls, frontend packaging, Docker/Nginx setup, and demo support.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Requirement Completion Level}
+Table~\ref{tab:completion} distinguishes implemented functions from prototypes
+and integration work still required. This avoids treating source-code presence
+as proof of end-to-end completion.
+
+\begin{table}[H]
+\centering
+\caption{Completion status against the Lab 1 requirements}
+\label{tab:completion}
+\small
+\begin{tabularx}{\textwidth}{p{4.4cm}p{3.1cm}X}
+\toprule
+\textbf{Requirement} & \textbf{Status} & \textbf{Evidence / remaining work}\\
+\midrule
+Vietnamese traffic graph and attributes & \completed & 212 nodes; distance, time, congestion, type, direction, and risks.\\
+Two-location search & \completed & DFS, BFS, UCS, Dijkstra, A*, and Greedy return a common result model.\\
+Traffic-aware cost and heuristics & \completed & Distance, time, and mixed modes plus Haversine heuristics.\\
+Backend API & \completed & Graph information and route-search endpoints are implemented.\\
+GUI and graph display & \partialstatus & Map and controls render; current search URL/label mapping needs alignment with the API.\\
+Step-by-step visualization & \partialstatus & Playback controls exist, but the displayed step counter is not yet driven by the returned exploration list.\\
+Multi-location optimization & \partialstatus & Nearest Neighbor and Held-Karp exist; an obsolete A* keyword prevents direct execution without a compatibility wrapper.\\
+Route explanation & \partialstatus & An explanation card exists, but its text is generic rather than generated from route segments.\\
+Automated testing & \partialstatus & Smoke tests run; the legacy runner uses an obsolete cost API and the current default pair can be unreachable.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% -----------------------------------------------------------------------------
+\chapter{Problem Context}
+
+\section{Selected Vietnamese Traffic Scenario}
+The selected scenario is an educational urban navigation system for a subset of
+Ho Chi Minh City. A user chooses a start intersection, a destination, optional
+stops, a search algorithm, and an optimization objective. The system then
+searches a directed street graph and visualizes the route.
+
+Ho Chi Minh City traffic is an appropriate context because one-way roads,
+variable congestion, narrow streets, construction, and flooding can make a
+short route slower or less suitable than an alternative. Therefore, route
+quality cannot be represented by physical distance alone.
+
+\section{Real-World Problem}
+For a two-location query, the system must return a valid directed path whose
+objective cost is minimized or approximated by the chosen algorithm. For a
+multi-location query, it must decide both the visiting order and the detailed
+road path between consecutive stops. Users also need an explanation: whether
+the route is shortest by distance, fastest by adjusted time, or best under the
+combined cost.
+
+\section{Why Optimization Is Useful}
+Traffic-aware routing can reduce travel time, avoid risky segments, and make
+algorithm behavior understandable. The project is also an instructional tool:
+the explored-node sequence shows why uninformed and heuristic searches behave
+differently on the same road network.
+
+% -----------------------------------------------------------------------------
+\chapter{Problem Modeling}
+
+\section{State-Space Formulation}
+The road network is a directed weighted graph $G=(V,E)$:
+\begin{itemize}
+\item A \textbf{state} is the current vertex identifier.
+\item The \textbf{initial state} is the selected start vertex $s$.
+\item The \textbf{goal test} succeeds when the current identifier equals $t$.
+\item A \textbf{transition} follows an outgoing edge in the adjacency list.
+\item A one-way street creates one transition; a two-way street creates two.
+\item A \textbf{solution} is an ordered sequence from $s$ to $t$ that respects direction.
+\end{itemize}
+
+\section{Nodes and Edges}
+A node contains \code{node\_id}, \code{name}, latitude, longitude, and a type
+such as intersection. An edge contains source, target, physical distance,
+nominal time, congestion level 1--5, road type, direction, and a list of risks.
+The adjacency-list design uses $O(|V|+|E|)$ memory.
+
+\section{Traffic-Aware Cost Function}
+Let $d(e)$ be physical distance, $t(e)$ nominal time, and $c(e)$ congestion.
+The implementation defines
+\begin{align}
+d_{\mathrm{eff}}(e)&=d(e)[1+0.1(c(e)-1)],\\
+t_{\mathrm{eff}}(e)&=t(e)m(c(e))+r(e),
+\end{align}
+where $m(c)$ is $1.0,1.3,1.8,2.4,$ or $3.5$. The risk term adds 300 seconds for
+flooding, 120 for construction, 60 for a narrow road, and 45 for a complex
+intersection. The selected edge cost is
+\begin{equation}
+C(e)=\begin{cases}
+d_{\mathrm{eff}}(e),&\text{distance mode},\\
+t_{\mathrm{eff}}(e),&\text{time mode},\\
+d_{\mathrm{eff}}(e)+10t_{\mathrm{eff}}(e),&\text{mixed mode}.
+\end{cases}
+\label{eq:cost}
+\end{equation}
+
+Congestion therefore changes both effective distance preference and travel
+time. Mixed mode converts one second into 10 metres of equivalent cost, a design
+choice based on an assumed urban speed near 10 m/s. The value is useful for
+ranking routes within mixed mode; it is not a monetary cost and must not be
+compared numerically with the other modes.
+
+\section{Assumptions}
+All costs are non-negative. Traffic values are static during one search. GPS
+coordinates are accurate enough for straight-line heuristics, while edge times,
+congestion, and risks are simulated attributes rather than live measurements.
+The system assumes the selected vertices belong to a reachable directed region.
+
+% -----------------------------------------------------------------------------
+\chapter{Dataset}
+
+\section{Creation Method and Scale}
+The project uses hybrid data: real street/intersection names and GPS coordinates
+from a Ho Chi Minh City area, augmented with simulated traffic conditions. The
+source JSON contains 212 nodes and road-segment records. When two-way segments
+are expanded in memory, the adjacency lists contain 1,129 directed edges. This
+exceeds the minimum Lab 1 requirement of 20 nodes and 30 edges.
+
+\section{Representative Locations}
+The complete location list is stored in \code{data/nodes.json}. Representative
+vertices used in experiments are shown below.
+
+\begin{table}[H]
+\centering
+\caption{Representative locations from the dataset}
+\label{tab:locations}
+\small
+\begin{tabularx}{\textwidth}{p{1.5cm}Xl}
+\toprule
+\textbf{ID} & \textbf{Location} & \textbf{Role in experiments}\\
+\midrule
+123 & Đường Nguyễn Văn Cừ & Two-location start\\
+151 & Ngã giao Đường Nguyễn Trãi - Đường Phú Giáo & Two-location goal\\
+125 & Ngã giao Đường Hải Thượng Lãn Ông - Đường Võ Văn Kiệt & Multi-location depot\\
+65 & Ngã giao Đường Tản Đà - Đường Trần Hưng Đạo & Required stop\\
+192 & Đường Trang Tử & Required stop\\
+155 & Ngã giao Vĩnh Viễn - Ngô Quyền & Required stop\\
+81 & Ngã giao Cách Mạng Tháng Tám - Bắc Hải & Required stop\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Attribute Semantics}
+Distance is stored in metres and nominal time in seconds. Congestion is an
+integer from 1 (smooth) to 5 (gridlock). Direction is \code{one-way} or
+\code{two-way}. Road type distinguishes local roads, avenues, and alleys. Risk
+factors include flooding, construction, narrow roads, and complex intersections.
+
+\section{Data Quality and Connectivity}
+The largest strongly connected component contains 200 of the 212 vertices. The
+remaining directed structure explains why arbitrary first/last JSON entries may
+produce a no-path result. Experiments therefore use explicitly verified pairs.
+The data is suitable for algorithm comparison but does not claim citywide map
+coverage or real-time accuracy.
+
+% -----------------------------------------------------------------------------
+\chapter{Algorithm Principles}
+
+\section{Common Search Representation}
+Each frontier entry is a \code{SearchNode} with a vertex ID, parent, accumulated
+cost $g$, heuristic $h$, priority $f$, and incoming edge. When the goal is found,
+parent pointers reconstruct the route. All algorithms return a
+\code{SearchResult} containing path, explored order, cost, distance, time, count,
+and execution time.
+
+\section{Uninformed Search}
+\subsection{Depth-First Search}
+DFS uses a stack and expands the most recently generated state. On a small
+example $S\rightarrow\{A,B\}$, if $B$ is pushed last, DFS explores the branch
+through $B$ first. It is complete on this finite graph with visited-state
+checking, but it is not optimal by hops or cost and depends strongly on
+adjacency order.
+
+\subsection{Breadth-First Search}
+BFS uses a queue and expands all depth-$k$ states before depth $k+1$. In the
+same example it compares both one-edge branches before deeper states. It is
+complete and optimal only for number of edges when each step has equal cost;
+it does not minimize weighted traffic cost.
+
+\subsection{Uniform-Cost Search}
+UCS uses a min-heap ordered by $g(n)$, so the cheapest partial route is expanded
+first. With non-negative edges it is complete (subject to a positive minimum
+step cost) and optimal. A higher-hop route may be selected if its accumulated
+traffic cost is lower.
+
+\section{Additional Single-Route Algorithms}
+\subsection{Dijkstra's Algorithm}
+For a single target and non-negative edge costs, Dijkstra has the same expansion
+rule as UCS. The project intentionally exposes it as a separate algorithm but
+delegates to the UCS implementation. It is complete and optimal under the
+current cost model.
+
+\subsection{A* Search}
+A* combines known and estimated cost:
+\begin{equation}f(n)=g(n)+h(n).\end{equation}
+It expands the lowest $f$. The heuristic is Haversine distance in distance mode,
+distance divided by 16.67 m/s in time mode, and
+\begin{equation}h_{mixed}(n)=d_H(n,t)+10d_H(n,t)/16.67\end{equation}
+in mixed mode. Because straight-line travel and maximum-speed travel are lower
+bounds, the intended heuristic is admissible. With the same lower-bound metric
+on every transition it is also intended to be consistent. This preserves
+optimality while often reducing expansions relative to UCS.
+
+\subsection{Greedy Best-First Search}
+Greedy Best-First orders the heap only by $h(n)$. It moves geographically toward
+the goal and may explore very few vertices, but it ignores accumulated cost.
+Therefore it is not optimal; the visited set makes it terminate on the finite
+dataset, though a poor heuristic can produce a poor route.
+
+\section{Multi-Location Methods}
+Nearest Neighbor repeatedly chooses the cheapest unvisited destination and is
+fast but approximate. Held-Karp dynamic programming stores the best path for
+each subset/current-stop pair. It guarantees an optimal tour over the selected
+stops when pairwise route costs are correct, at $O(n^2 2^n)$ time and
+$O(n2^n)$ space.
+
+% -----------------------------------------------------------------------------
+\chapter{Program Flow}
+
+\section{System Architecture}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.2cm,
+  box/.style={draw=hcmusblue,rounded corners,fill=lightblue,minimum width=3.5cm,
+    minimum height=1.2cm,align=center,font=\small},
+  arrow/.style={-{Latex[length=3mm]},thick,color=hcmusblue}
+]
+\node[box] (ui) {React + Leaflet\\selection, map, playback};
+\node[box,right=0.65cm of ui] (api) {FastAPI + Pydantic\\validation and dispatch};
+\node[box,right=0.65cm of api] (ai) {Search core\\models, costs, algorithms};
+\node[box,below=1.2cm of ai] (data) {JSON dataset\\nodes and road segments};
+\draw[arrow] (ui) -- (api);
+\draw[arrow] (api) -- (ai);
+\draw[arrow] (data) -- (ai);
+\draw[arrow,bend left=20] (ai) to (api);
+\end{tikzpicture}
+\caption{Three-layer system architecture}
+\label{fig:architecture}
+\end{figure}
+
+\section{Main Processing Flow}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=0.75cm,
+  process/.style={draw=hcmusblue,rounded corners,fill=lightblue,
+    text width=6.8cm,minimum height=0.8cm,align=center,font=\small},
+  decision/.style={diamond,draw=warnorange,fill=orange!8,aspect=3,
+    text width=4cm,align=center,font=\small},
+  arrow/.style={-{Latex[length=2.5mm]},thick,color=darkgray}
+]
+\node[process] (load) {Load nodes and edges; construct directed adjacency lists};
+\node[process,below=of load] (select) {User selects start, goal, optional stops, algorithm, and objective};
+\node[decision,below=0.95cm of select] (valid) {Valid and reachable request?};
+\node[process,text width=4.5cm,below left=0.9cm and 0.8cm of valid] (error) {Return validation or no-path error};
+\node[process,text width=4.5cm,below right=0.9cm and 0.8cm of valid] (search) {Build evaluator; run selected search};
+\node[process,text width=4.5cm,below=of search] (reconstruct) {Reconstruct path and aggregate metrics};
+\node[process,text width=4.5cm,below=of reconstruct] (display) {Return JSON; draw route and exploration state};
+\draw[arrow] (load) -- (select);
+\draw[arrow] (select) -- (valid);
+\draw[arrow] (valid) -- node[left,font=\scriptsize]{No} (error);
+\draw[arrow] (valid) -- node[right,font=\scriptsize]{Yes} (search);
+\draw[arrow] (search) -- (reconstruct);
+\draw[arrow] (reconstruct) -- (display);
+\end{tikzpicture}
+\caption{Main route-search flow}
+\label{fig:flow}
+\end{figure}
+
+\section{Modules and Responsibilities}
+\begin{table}[H]
+\centering
+\caption{Program modules}
+\label{tab:modules}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash\ttfamily\footnotesize}p{5.3cm}X}
+\toprule
+\textbf{Module} & \textbf{Responsibility}\\
+\midrule
+src/models.py & Node/edge data classes, graph loader, risk and edge-cost calculation.\\
+src/heuristics.py & Haversine distance and maximum-speed time estimate.\\
+src/algorithms/base.py & Shared search-node/result types and path reconstruction.\\
+src/algorithms/\newline uninformed.py & DFS and BFS.\\
+src/algorithms/informed.py & UCS, Dijkstra, A*, and Greedy Best-First.\\
+src/algorithms/\newline multi\_location.py & Pairwise A* matrix, Nearest Neighbor, and Held-Karp.\\
+backend/api.py & Graph endpoints, validation, algorithm dispatch, and response assembly.\\
+frontend/src/ & Input controls, map, settings, route results, and playback controls.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{GUI Interaction}
+The frontend imports graph data for immediate map display. A search request is
+intended to send start, end, algorithm, and optimization to FastAPI. The backend
+selects a \code{CostEvaluator}, dispatches the algorithm, and returns path IDs,
+coordinates, names, exploration order, and metrics. The current branch must
+align \code{/search} with \code{/api/search} and normalize labels such as
+\code{A*} to the backend value before this flow is fully end-to-end.
+
+% -----------------------------------------------------------------------------
+\chapter{Algorithm Comparison}
+
+\section{Theoretical Comparison}
+\begin{table}[H]
+\centering
+\caption{Complexity, completeness, and optimality}
+\label{tab:theory-comparison}
+\small
+\begin{tabularx}{\textwidth}{p{3.1cm}p{3.3cm}p{2.2cm}p{2cm}X}
+\toprule
+\textbf{Algorithm} & \textbf{Time} & \textbf{Memory} & \textbf{Complete} & \textbf{Optimal}\\
+\midrule
+DFS & $O(V+E)$ & $O(V)$ & Yes, finite graph & No\\
+BFS & $O(V+E)$ & $O(V)$ & Yes & By hop count only\\
+UCS & $O((V+E)\log V)$ & $O(V)$ & Yes & Yes, non-negative costs\\
+Dijkstra & $O((V+E)\log V)$ & $O(V)$ & Yes & Yes, non-negative costs\\
+A* & Exponential worst case & Exponential worst case & Yes under standard conditions & Yes with admissible/consistent $h$\\
+Greedy Best-First & Exponential worst case & Exponential worst case & Yes on this finite implementation & No\\
+Nearest Neighbor & $O(n^2)$ after cost matrix & $O(n)$ & Produces a tour if connected & No\\
+Held-Karp & $O(n^2 2^n)$ & $O(n2^n)$ & Yes & Yes for selected stops\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Actual Two-Location Performance}
+The verified query is vertex 123 (Đường Nguyễn Văn Cừ) to vertex 151 (Ngã giao
+Đường Nguyễn Trãi - Đường Phú Giáo) in distance mode. One local Python 3.13 run
+produced Table~\ref{tab:actual}. Sub-millisecond differences are illustrative;
+route quality and expansions are more meaningful on this small graph.
+
+\begin{table}[H]
+\centering
+\caption{Actual distance-mode results from vertex 123 to 151}
+\label{tab:actual}
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Method}&\textbf{Nodes}&\textbf{Dist. (m)}&\textbf{Time (s)}&
+\textbf{Cost}&\textbf{Expanded}&\textbf{ms}\\
+\midrule
+DFS&87&16,783.30&19,499.50&20,546.06&134&0.594\\
+BFS&28&4,943.32&4,927.50&5,878.60&204&0.299\\
+UCS&31&4,781.20&3,648.00&5,442.72&198&1.108\\
+Dijkstra&31&4,781.20&3,648.00&5,442.72&198&1.081\\
+A*&31&4,781.20&3,648.00&5,442.72&158&1.162\\
+Greedy Best-First&32&4,855.48&4,810.00&5,775.63&34&0.146\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+UCS, Dijkstra, and A* agree on the optimum. A* reduces expansions by 20.2
+percent relative to UCS. Greedy expands only 34 vertices but costs 6.1 percent
+more than the optimum. BFS finds the fewest-edge route, not the cheapest route,
+and DFS follows a long adjacency-order-dependent detour.
+
+\section{Effect of Traffic Objective}
+\begin{table}[H]
+\centering
+\caption{A* results under three optimization criteria}
+\label{tab:objectives}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Mode}&\textbf{Nodes}&\textbf{Dist. (m)}&\textbf{Time (s)}&
+\textbf{Cost}&\textbf{Expanded}\\
+\midrule
+Distance&31&4,781.20&3,648.00&5,442.72&158\\
+Time&32&5,033.33&3,370.50&4,662.60&204\\
+Mixed&32&5,033.30&3,370.50&52,303.72&201\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Time mode accepts approximately 252 additional metres to reduce adjusted time
+by 277.5 seconds (7.6 percent). This is direct evidence that congestion changes
+the route. Mixed cost has a different unit, so only values within mixed mode are
+comparable.
+
+% -----------------------------------------------------------------------------
+\chapter{Multi-Location Optimization}
+
+\section{Problem Definition}
+Given a depot and several required stops, the system must choose an order, find
+the best road path between each consecutive pair, and return to the depot. The
+pairwise cost matrix is intended to use A* with the selected evaluator. Nearest
+Neighbor gives a fast approximate order; Held-Karp searches all subset states
+and guarantees the best tour over the selected locations.
+
+\section{Experimental Comparison}
+The depot is vertex 125 and the supplied visit order is
+$65\rightarrow192\rightarrow155\rightarrow81$. Mixed mode is used. Because the
+current multi-location module passes an obsolete \code{heuristic\_type} keyword,
+the experiment used a compatibility wrapper that discards this keyword and
+calls the current A* implementation. No route costs were otherwise changed.
+
+\begin{table}[H]
+\centering
+\caption{Original and optimized multi-location orders}
+\label{tab:tsp}
+\small
+\begin{tabularx}{\textwidth}{p{3.1cm}Xrr}
+\toprule
+\textbf{Method} & \textbf{Visiting order (including return)} &
+\textbf{Path nodes} & \textbf{Mixed cost}\\
+\midrule
+Original input & 125 - 65 - 192 - 155 - 81 - 125 & 61 & 126,552.260\\
+Nearest Neighbor & 125 - 65 - 155 - 192 - 81 - 125 & 70 & 151,739.768\\
+Held-Karp DP & 125 - 192 - 155 - 81 - 65 - 125 & 52 & 112,227.134\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Held-Karp improves the original order by 11.32 percent and Nearest Neighbor by
+26.04 percent. Nearest Neighbor is worse than even the original order in this
+case, illustrating that locally cheapest decisions do not guarantee a good
+cycle. Held-Karp is optimal for the five selected locations under the computed
+pairwise mixed costs, but its exponential growth limits it to small stop sets.
+
+\section{Integration Status}
+The algorithms and reconstruction logic exist in
+\code{src/algorithms/multi\_location.py}, but they are not dispatched by the API
+or displayed by the frontend. The obsolete keyword call must be removed, then
+API schemas should accept a stop list and return visiting order, detailed path,
+and cost before this requirement is considered end-to-end complete.
+
+% -----------------------------------------------------------------------------
+\chapter{Program Instructions}
+
+\section{Installation and Setup}
+Prerequisites are Python 3.10 or later and Node.js 18 or later. From the project
+root, install and run the backend:
+
+\begin{lstlisting}[language=bash,caption={Backend setup}]
+python -m pip install -r requirements.txt
+python -m uvicorn backend.api:app --reload --port 8000
+\end{lstlisting}
+
+In a second terminal, run the frontend:
+\begin{lstlisting}[language=bash,caption={Frontend setup}]
+cd frontend
+npm install
+npm run dev
+\end{lstlisting}
+
+Open \url{http://localhost:5173}. Before end-to-end use on the inspected branch,
+change the frontend request from \code{/search} to \code{/api/search} and align
+algorithm labels with the backend map. These are integration fixes, not extra
+runtime dependencies.
+
+\section{GUI Usage}
+\begin{enumerate}
+\item Select a start and destination by dropdown or map interaction.
+\item Optionally add intermediate stops.
+\item Choose Default, Time, Distance, or Cost optimization.
+\item Choose DFS, BFS, Dijkstra, or A* from the current GUI list.
+\item Press \textbf{Search}; inspect the path and route explanation panel.
+\item Use the playback buttons to move through steps, then press Reset for a new query.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{system-interface.png}
+\caption{Current React interface displaying the 212-node road graph}
+\label{fig:gui}
+\end{figure}
+
+\section{Example Input and Output}
+A direct backend request uses the schema below:
+
+\begin{lstlisting}[language={},caption={Example search input}]
+POST /api/search
+{
+  "start": "123",
+  "end": "151",
+  "algorithm": "astar",
+  "optimization": "distance"
+}
+\end{lstlisting}
+
+The response contains \code{algorithm\_name}, \code{path},
+\code{explored\_nodes}, \code{total\_cost}, \code{total\_distance},
+\code{total\_time}, \code{explored\_count}, \code{execution\_time\_ms}, names,
+and coordinates. For this example, A* returns 31 path vertices, 4,781.20 metres,
+cost 5,442.72, and 158 expanded vertices in the recorded run.
+
+\section{Route Explanation Example}
+The distance-mode A* route is selected because it has the lowest effective
+distance cost among the tested weighted methods. BFS uses fewer road segments
+but its cost is 8.0 percent higher. The time-mode alternative is physically
+longer, yet its adjusted time is 277.5 seconds lower because it avoids more
+costly traffic conditions. A* guarantees optimality only when its heuristic is
+admissible/consistent; Greedy Best-First provides no such guarantee.
+
+% -----------------------------------------------------------------------------
+\chapter{Limitations and Future Work}
+
+\section{Development Challenges}
+The main challenges were transforming road data into a directed graph,
+maintaining comparable metrics across algorithms, choosing traffic penalties,
+and coordinating evolving backend/frontend interfaces. Directed connectivity
+also makes a naive endpoint selection unreliable. Multi-location optimization
+adds a second level of search because every pair of required stops needs a road
+path before the visiting order can be optimized.
+
+\section{Current Limitations}
+\begin{itemize}
+\item Traffic and risks are static simulated values rather than live observations.
+\item The graph covers a limited urban area and contains vertices outside the largest strongly connected component.
+\item Risk penalties and mixed-mode conversion are hand-designed, not statistically calibrated.
+\item Reported route time is aggregated with a congestion formula that is not identical to every evaluator mode.
+\item Frontend and backend route paths/algorithm labels are misaligned on the inspected branch.
+\item The frontend overwrites the returned path with a temporary direct waypoint list.
+\item Playback controls are not yet linked to real frontier/exploration states.
+\item Route explanation text is generic and does not identify congested edges or compare alternatives dynamically.
+\item Multi-location methods are not exposed through the API and contain one obsolete function argument.
+\item Automated tests do not yet cover API contracts, optimality, disconnected graphs, or repeated benchmarks.
+\end{itemize}
+
+\section{Future Work}
+The highest-priority work is to align the API path and algorithm naming, remove
+the temporary frontend path override, synchronize the multi-location call, and
+add contract tests. The exploration list should drive the visualizer, while the
+explanation generator should cite actual high-congestion and risk edges.
+
+Longer-term extensions include real-time traffic feeds, map API integration,
+time-dependent edge weights, alternative-route generation, turn restrictions,
+bidirectional A*, support for multiple vehicles, and calibrated cost weights.
+Experiments should repeat many reachable source-target pairs and report mean,
+median, and variance instead of relying on one sub-millisecond run.
+
+\section{Conclusion}
+The repository provides a substantial classical-search foundation: a realistic
+Vietnamese traffic graph, six single-route algorithms, traffic-aware objectives,
+a REST service, and an interactive map. Reproducible results show the expected
+optimality/efficiency trade-offs and demonstrate the value of optimizing beyond
+distance. Held-Karp also provides a strong small-scale multi-location result.
+However, the documented integration gaps must be closed before the GUI,
+step-by-step explanation, and multi-location requirements can be considered
+fully complete.
+
+% -----------------------------------------------------------------------------
+\begin{thebibliography}{99}
+\bibitem{lab1}
+Introduction to Artificial Intelligence,
+\textit{Lab 1: Search Algorithms for Vietnamese Traffic Route Optimization},
+course specification, 2026.
+
+\bibitem{russell2021}
+Stuart Russell and Peter Norvig,
+\textit{Artificial Intelligence: A Modern Approach}, 4th ed., Pearson, 2021.
+
+\bibitem{hart1968}
+Peter E. Hart, Nils J. Nilsson, and Bertram Raphael,
+``A Formal Basis for the Heuristic Determination of Minimum Cost Paths,''
+\textit{IEEE Transactions on Systems Science and Cybernetics}, 4(2), 1968.
+
+\bibitem{cormen2022}
+Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, and Clifford Stein,
+\textit{Introduction to Algorithms}, 4th ed., MIT Press, 2022.
+
+\bibitem{hcmusbrand}
+University of Science, VNU-HCM,
+\textit{HCMUS Brand Identity and Logo Usage Guide},
+\url{https://hcmus.edu.vn/he-thong-nhan-dien-thuong-hieu/}, accessed August 15, 2026.
+
+\bibitem{fastapi}
+FastAPI, \textit{FastAPI Documentation},
+\url{https://fastapi.tiangolo.com/}, accessed August 15, 2026.
+
+\bibitem{react}
+Meta Open Source, \textit{React Documentation},
+\url{https://react.dev/}, accessed August 15, 2026.
+\end{thebibliography}
+
+\appendix
+\chapter{Repository Structure}
+\begin{verbatim}
+data/                          Road graph JSON files
+src/models.py                  Graph and cost evaluator
+src/heuristics.py              Haversine/time heuristics
+src/algorithms/base.py         Common search types
+src/algorithms/uninformed.py   DFS and BFS
+src/algorithms/informed.py     UCS, Dijkstra, A*, Greedy
+src/algorithms/multi_location.py  Nearest Neighbor, Held-Karp
+backend/api.py                 FastAPI endpoints
+backend/schemas.py             Request/response schemas
+frontend/src/                  React and Leaflet interface
+\end{verbatim}
+
+\chapter{Representative Optimal Route}
+For the two-location distance experiment, UCS, Dijkstra, and A* return:
+\begin{quote}\small
+123 $\rightarrow$ 172 $\rightarrow$ 171 $\rightarrow$ 137 $\rightarrow$ 211
+$\rightarrow$ 47 $\rightarrow$ 105 $\rightarrow$ 200 $\rightarrow$ 210
+$\rightarrow$ 98 $\rightarrow$ 208 $\rightarrow$ 112 $\rightarrow$ 42
+$\rightarrow$ 40 $\rightarrow$ 41 $\rightarrow$ 80 $\rightarrow$ 65
+$\rightarrow$ 66 $\rightarrow$ 99 $\rightarrow$ 146 $\rightarrow$ 25
+$\rightarrow$ 72 $\rightarrow$ 74 $\rightarrow$ 78 $\rightarrow$ 45
+$\rightarrow$ 75 $\rightarrow$ 58 $\rightarrow$ 101 $\rightarrow$ 181
+$\rightarrow$ 182 $\rightarrow$ 151.
+\end{quote}
+
+\chapter{Requirement Traceability}
+\begin{longtable}{p{2.1cm}p{5.2cm}p{5.5cm}}
+\toprule
+\textbf{Item} & \textbf{Required topic} & \textbf{Location in this report}\\
+\midrule
+\endhead
+(a) & Group information, contributions, completion & Chapter 1\\
+(b) & Problem context and usefulness & Chapter 2\\
+(c) & Graph, state, transitions, attributes, cost & Chapter 3\\
+(d) & Source, locations, values, assumptions & Chapter 4\\
+(e) & Principles, examples, heuristic, guarantees & Chapter 5\\
+(f) & Flowcharts, modules, GUI interaction & Chapter 6\\
+(g) & Theory and actual algorithm comparison & Chapter 7\\
+(h) & Multi-location method, orders, guarantee & Chapter 8\\
+(i) & Setup, GUI use, examples, screenshot & Chapter 9\\
+(j) & Challenges, limitations, extensions & Chapter 10\\
+\bottomrule
+\end{longtable}
+
+\end{document}
