@@ -29,7 +29,7 @@ def compute_distance_matrix(
             loc_b = locations[j]
             
             # Use A* to find the optimal path under the current cost evaluator
-            res = astar_search(graph, loc_a, loc_b, cost_evaluator, heuristic_type="time")
+            res = astar_search(graph, loc_a, loc_b, cost_evaluator, collect_steps=False)
             
             if res.path:
                 cost_matrix[(loc_a, loc_b)] = res.total_cost

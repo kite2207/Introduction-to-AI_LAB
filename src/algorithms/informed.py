@@ -5,81 +5,320 @@ from src.models import TrafficGraph, CostEvaluator, Node
 from src.algorithms.base import SearchNode, SearchResult, reconstruct_path
 from src.heuristics import haversine_distance, get_time_scaled_heuristic
 
-def ucs_search(graph: TrafficGraph, start_id: str, target_id: str, cost_evaluator: CostEvaluator) -> SearchResult:
+
+def _frontier_snapshot(frontier):
+    """Return node IDs currently waiting in the priority queue."""
+    return list(dict.fromkeys(
+        item[2].node_id
+        for item in frontier
+        if len(item) >= 3
+    ))
+
+
+def _path_ids(search_node):
+    """Return the current parent-chain as node IDs."""
+    if search_node is None:
+        return []
+
+    return [
+        node.node_id
+        for node in reconstruct_path(search_node)
+    ]
+
+
+
+def _frontier_candidates(
+    frontier,
+    explored_set,
+    current_node,
+    best_costs,
+    selection_metric=None,
+):
     """
-    Uniform Cost Search (UCS) expands nodes in order of increasing path cost g(n).
-    Guarantees the optimal path.
+    Return only unexpanded nodes currently in the frontier.
+
+    Candidates are sorted by the same criterion that the algorithm will use
+    for its next selection:
+      - g: UCS / Dijkstra
+      - f: A*
+      - h: Greedy
     """
+    candidates = {}
+
+    for item in frontier:
+        if len(item) < 3:
+            continue
+
+        node = item[2]
+        node_id = node.node_id
+
+        if node_id in explored_set:
+            continue
+
+        candidate = {
+            "node_id": node_id,
+            "g": node.g_cost,
+            "h": node.h_cost,
+            "f": node.f_cost,
+            "edge_cost": (
+                node.g_cost -
+                (current_node.g_cost if current_node else 0.0)
+            ),
+        }
+
+        previous = candidates.get(node_id)
+
+        if (
+            previous is None
+            or candidate["g"] < previous["g"]
+        ):
+            candidates[node_id] = candidate
+
+    result = list(candidates.values())
+
+    if selection_metric == "g":
+        result.sort(key=lambda x: (x["g"], str(x["node_id"])))
+    elif selection_metric == "f":
+        result.sort(key=lambda x: (x["f"], str(x["node_id"])))
+    elif selection_metric == "h":
+        result.sort(key=lambda x: (x["h"], str(x["node_id"])))
+
+    return result
+
+
+def _next_frontier_candidate(candidates):
+    """Return the candidate that the current algorithm will select next."""
+    if not candidates:
+        return None
+    return candidates[0].get("node_id")
+
+
+def _record_step(
+    steps,
+    current_node,
+    explored_nodes,
+    frontier,
+    explored_edges,
+    *,
+    metrics=None,
+    candidates=None,
+    selection_metric=None,
+):
+    candidates = list(candidates or [])
+
+    if selection_metric in {"g", "f", "h"}:
+        key = {
+            "g": "g",
+            "f": "f",
+            "h": "h",
+        }[selection_metric]
+
+        candidates.sort(
+            key=lambda x: (
+                x.get(key, float("inf")),
+                str(x.get("node_id")),
+            )
+        )
+
+    steps.append({
+        "step": len(steps),
+        "current": (
+            current_node.node_id
+            if current_node
+            else None
+        ),
+        "exploredNodes": list(explored_nodes),
+        "frontierNodes": _frontier_snapshot(frontier),
+        "exploredEdges": [
+            dict(edge)
+            for edge in explored_edges
+        ],
+        "pathSoFar": _path_ids(current_node),
+        "metrics": dict(metrics or {}),
+        "candidates": candidates,
+        "nextSelected": _next_frontier_candidate(
+            candidates
+        ),
+        "selectionMetric": selection_metric,
+    })
+
+
+def _attach_steps(result, steps):
+    """
+    Keep backward compatibility with the existing SearchResult dataclass.
+
+    SearchResult currently does not declare a `steps` field, so attach it
+    dynamically instead of changing the constructor used throughout the
+    project. The API layer can read `result.steps`.
+    """
+    result.steps = steps
+    return result
+
+
+def ucs_search(
+    graph: TrafficGraph,
+    start_id: str,
+    target_id: str,
+    cost_evaluator: CostEvaluator,
+) -> SearchResult:
+    """Uniform Cost Search: priority = g(n)."""
+
     start_time = time.perf_counter()
     explored_nodes = []
-    
-    if start_id not in graph.nodes or target_id not in graph.nodes:
-        return SearchResult("UCS", [], [], 0.0, 0.0, 0.0, 0, 0.0)
+    explored_edges = []
+    steps = []
+    explored_set = set()
 
-    # Priority queue: list of (g_cost, counter, SearchNode)
+    if start_id not in graph.nodes or target_id not in graph.nodes:
+        result = SearchResult(
+            "UCS", [], [], 0.0, 0.0, 0.0, 0, 0.0
+        )
+        return _attach_steps(result, steps)
+
     counter = 0
-    start_node = SearchNode(node_id=start_id, g_cost=0.0, f_cost=0.0)
+    start_node = SearchNode(
+        node_id=start_id,
+        g_cost=0.0,
+        f_cost=0.0,
+    )
     frontier = [(0.0, counter, start_node)]
-    
-    # Store the minimum cost to reach each node
     best_costs = {start_id: 0.0}
     final_node = None
 
     while frontier:
         current_g, _, current_node = heapq.heappop(frontier)
         node_id = current_node.node_id
-        
-        # Skip if we already found a cheaper path to this node before we popped it
-        if current_g > best_costs.get(node_id, float('inf')):
+
+        if current_g > best_costs.get(
+            node_id,
+            float("inf"),
+        ):
             continue
-            
+
         explored_nodes.append(node_id)
-        
+        explored_set.add(node_id)
+
         if node_id == target_id:
             final_node = current_node
+            _record_step(
+                steps,
+                current_node,
+                explored_nodes,
+                frontier,
+                explored_edges,
+                metrics={"g": current_node.g_cost},
+                candidates=_frontier_candidates(
+                    frontier,
+                    explored_set,
+                    current_node,
+                    best_costs,
+                    selection_metric="g",
+                ),
+                selection_metric="g",
+            )
             break
-            
+
         for edge in graph.get_neighbors(node_id):
             neighbor_id = edge.target_id
+
+            if neighbor_id in explored_set:
+                continue
+
             edge_cost = cost_evaluator.calculate_cost(edge)
             new_g = current_g + edge_cost
-            
-            if new_g < best_costs.get(neighbor_id, float('inf')):
+
+            if new_g < best_costs.get(
+                neighbor_id,
+                float("inf"),
+            ):
                 best_costs[neighbor_id] = new_g
                 counter += 1
+
                 neighbor_node = SearchNode(
                     node_id=neighbor_id,
                     parent=current_node,
                     g_cost=new_g,
-                    f_cost=new_g, # In UCS, f(n) = g(n)
-                    edge_taken=edge
+                    f_cost=new_g,
+                    edge_taken=edge,
                 )
-                heapq.heappush(frontier, (new_g, counter, neighbor_node))
 
-    end_time = time.perf_counter()
-    exec_time = (end_time - start_time) * 1000.0
+                heapq.heappush(
+                    frontier,
+                    (new_g, counter, neighbor_node),
+                )
+
+                explored_edges.append({
+                    "source": node_id,
+                    "target": neighbor_id,
+                })
+
+        _record_step(
+            steps,
+            current_node,
+            explored_nodes,
+            frontier,
+            explored_edges,
+            metrics={"g": current_node.g_cost},
+            candidates=_frontier_candidates(
+                frontier,
+                explored_set,
+                current_node,
+                best_costs,
+                selection_metric="g",
+            ),
+            selection_metric="g",
+        )
+
+    exec_time = (
+        time.perf_counter() - start_time
+    ) * 1000.0
 
     if final_node is None:
-        return SearchResult("UCS", [], explored_nodes, 0.0, 0.0, 0.0, len(explored_nodes), exec_time)
+        result = SearchResult(
+            "UCS",
+            [],
+            explored_nodes,
+            0.0,
+            0.0,
+            0.0,
+            len(explored_nodes),
+            exec_time,
+        )
+        return _attach_steps(result, steps)
 
     path_nodes = reconstruct_path(final_node)
-    path_ids = [n.node_id for n in path_nodes]
-    
-    total_dist = sum(n.edge_taken.distance for n in path_nodes if n.edge_taken)
-    total_time = sum(n.edge_taken.estimated_time * (1.0 + (n.edge_taken.congestion_level - 1) * 0.5) 
-                     for n in path_nodes if n.edge_taken)
-    total_cost = final_node.g_cost
+    path_ids = [node.node_id for node in path_nodes]
 
-    return SearchResult(
+    total_dist = sum(
+        node.edge_taken.distance
+        for node in path_nodes
+        if node.edge_taken
+    )
+
+    total_time = sum(
+        node.edge_taken.estimated_time
+        * (
+            1.0
+            + (node.edge_taken.congestion_level - 1)
+            * 0.5
+        )
+        for node in path_nodes
+        if node.edge_taken
+    )
+
+    result = SearchResult(
         algorithm_name="UCS",
         path=path_ids,
         explored_nodes=explored_nodes,
-        total_cost=total_cost,
+        total_cost=final_node.g_cost,
         total_distance=total_dist,
         total_time=total_time,
         explored_count=len(explored_nodes),
-        execution_time_ms=exec_time
+        execution_time_ms=exec_time,
     )
+
+    return _attach_steps(result, steps)
+
 
 
 def dijkstra_search(graph: TrafficGraph, start_id: str, target_id: str, cost_evaluator: CostEvaluator) -> SearchResult:
@@ -104,9 +343,15 @@ def astar_search(
     """
     start_time = time.perf_counter()
     explored_nodes = []
-    
+    explored_edges = []
+    steps = []
+    explored_set = set()
+
     if start_id not in graph.nodes or target_id not in graph.nodes:
-        return SearchResult("A*", [], [], 0.0, 0.0, 0.0, 0, 0.0)
+        return _attach_steps(
+            SearchResult("A*", [], [], 0.0, 0.0, 0.0, 0, 0.0),
+            steps,
+        )
 
     target_node = graph.nodes[target_id]
 
@@ -149,9 +394,30 @@ def astar_search(
             continue
             
         explored_nodes.append(node_id)
+        explored_set.add(node_id)
         
         if node_id == target_id:
             final_node = current_node
+            _record_step(
+                steps,
+                current_node,
+                explored_nodes,
+                frontier,
+                explored_edges,
+                metrics={
+                    "g": current_node.g_cost,
+                    "h": current_node.h_cost,
+                    "f": current_node.f_cost,
+                },
+                candidates=_frontier_candidates(
+                    frontier,
+                    explored_set,
+                    current_node,
+                    best_costs,
+                    selection_metric="f",
+                ),
+                selection_metric="f",
+            )
             break
             
         for edge in graph.get_neighbors(node_id):
@@ -174,12 +440,49 @@ def astar_search(
                     edge_taken=edge
                 )
                 heapq.heappush(frontier, (new_f, counter, neighbor_node))
+                explored_edges.append({
+                    "source": node_id,
+                    "target": neighbor_id,
+                })
+
+        _record_step(
+            steps,
+            current_node,
+            explored_nodes,
+            frontier,
+            explored_edges,
+            metrics={
+                "g": current_node.g_cost,
+                "h": current_node.h_cost,
+                "f": current_node.f_cost,
+            },
+            candidates=_frontier_candidates(
+                frontier,
+                explored_set,
+                current_node,
+                best_costs,
+                selection_metric="f",
+            ),
+            selection_metric="f",
+        )
 
     end_time = time.perf_counter()
     exec_time = (end_time - start_time) * 1000.0
 
     if final_node is None:
-        return SearchResult("A*", [], explored_nodes, 0.0, 0.0, 0.0, len(explored_nodes), exec_time)
+        return _attach_steps(
+            SearchResult(
+                "A*",
+                [],
+                explored_nodes,
+                0.0,
+                0.0,
+                0.0,
+                len(explored_nodes),
+                exec_time,
+            ),
+            steps,
+        )
 
     path_nodes = reconstruct_path(final_node)
     path_ids = [n.node_id for n in path_nodes]
@@ -189,15 +492,18 @@ def astar_search(
                      for n in path_nodes if n.edge_taken)
     total_cost = final_node.g_cost
 
-    return SearchResult(
-        algorithm_name=f"A* ({cost_evaluator.optimization})",
-        path=path_ids,
-        explored_nodes=explored_nodes,
-        total_cost=total_cost,
-        total_distance=total_dist,
-        total_time=total_time,
-        explored_count=len(explored_nodes),
-        execution_time_ms=exec_time
+    return _attach_steps(
+        SearchResult(
+            algorithm_name=f"A* ({cost_evaluator.optimization})",
+            path=path_ids,
+            explored_nodes=explored_nodes,
+            total_cost=total_cost,
+            total_distance=total_dist,
+            total_time=total_time,
+            explored_count=len(explored_nodes),
+            execution_time_ms=exec_time,
+        ),
+        steps,
     )
 
 
@@ -213,9 +519,24 @@ def greedy_best_first_search(
     """
     start_time = time.perf_counter()
     explored_nodes = []
-    
+    explored_edges = []
+    steps = []
+    explored_set = set()
+
     if start_id not in graph.nodes or target_id not in graph.nodes:
-        return SearchResult("Greedy Best-First", [], [], 0.0, 0.0, 0.0, 0, 0.0)
+        return _attach_steps(
+            SearchResult(
+                "Greedy Best-First",
+                [],
+                [],
+                0.0,
+                0.0,
+                0.0,
+                0,
+                0.0,
+            ),
+            steps,
+        )
 
     target_node = graph.nodes[target_id]
 
@@ -243,9 +564,28 @@ def greedy_best_first_search(
         node_id = current_node.node_id
         
         explored_nodes.append(node_id)
+        explored_set.add(node_id)
         
         if node_id == target_id:
             final_node = current_node
+            _record_step(
+                steps,
+                current_node,
+                explored_nodes,
+                frontier,
+                explored_edges,
+                metrics={
+                    "h": current_node.h_cost,
+                },
+                candidates=_frontier_candidates(
+                    frontier,
+                    explored_set,
+                    current_node,
+                    {},
+                    selection_metric="h",
+                ),
+                selection_metric="h",
+            )
             break
             
         for edge in graph.get_neighbors(node_id):
@@ -266,12 +606,47 @@ def greedy_best_first_search(
                     edge_taken=edge
                 )
                 heapq.heappush(frontier, (h_val, counter, neighbor_node))
+                explored_edges.append({
+                    "source": node_id,
+                    "target": neighbor_id,
+                })
+
+        _record_step(
+            steps,
+            current_node,
+            explored_nodes,
+            frontier,
+            explored_edges,
+            metrics={
+                "h": current_node.h_cost,
+            },
+            candidates=_frontier_candidates(
+                frontier,
+                explored_set,
+                current_node,
+                {},
+                selection_metric="h",
+            ),
+            selection_metric="h",
+        )
 
     end_time = time.perf_counter()
     exec_time = (end_time - start_time) * 1000.0
 
     if final_node is None:
-        return SearchResult("Greedy Best-First", [], explored_nodes, 0.0, 0.0, 0.0, len(explored_nodes), exec_time)
+        return _attach_steps(
+            SearchResult(
+                "Greedy Best-First",
+                [],
+                explored_nodes,
+                0.0,
+                0.0,
+                0.0,
+                len(explored_nodes),
+                exec_time,
+            ),
+            steps,
+        )
 
     path_nodes = reconstruct_path(final_node)
     path_ids = [n.node_id for n in path_nodes]
@@ -281,13 +656,16 @@ def greedy_best_first_search(
                      for n in path_nodes if n.edge_taken)
     total_cost = final_node.g_cost
 
-    return SearchResult(
-        algorithm_name=f"Greedy Best-First ({cost_evaluator.optimization})",
-        path=path_ids,
-        explored_nodes=explored_nodes,
-        total_cost=total_cost,
-        total_distance=total_dist,
-        total_time=total_time,
-        explored_count=len(explored_nodes),
-        execution_time_ms=exec_time
+    return _attach_steps(
+        SearchResult(
+            algorithm_name=f"Greedy Best-First ({cost_evaluator.optimization})",
+            path=path_ids,
+            explored_nodes=explored_nodes,
+            total_cost=total_cost,
+            total_distance=total_dist,
+            total_time=total_time,
+            explored_count=len(explored_nodes),
+            execution_time_ms=exec_time,
+        ),
+        steps,
     )
