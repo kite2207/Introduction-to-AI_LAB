@@ -47,20 +47,6 @@ class TrafficGraph:
         # 1. Add edge in the forward direction (source_id -> target_id)
         self.adjacency_list[edge.source_id].append(edge)
 
-        # 2. If it's a two-way street, add the reverse edge (target_id -> source_id)
-        if edge.direction == "two-way":
-            reverse_edge = Edge(
-                source_id=edge.target_id,
-                target_id=edge.source_id,
-                distance=edge.distance,
-                estimated_time=edge.estimated_time,
-                congestion_level=edge.congestion_level,
-                road_type=edge.road_type,
-                direction=edge.direction,
-                risk_factors=edge.risk_factors.copy()
-            )
-            self.adjacency_list[edge.target_id].append(reverse_edge)
-
     def load_from_json(self, nodes_path: str, edges_path: str):
         self.nodes.clear()
         self.adjacency_list.clear()
@@ -83,21 +69,16 @@ class TrafficGraph:
 
 class CostEvaluator:
     def __init__(self, optimization: str = "mixed"):
-        """
-        optimization có thể là:
-        - "distance": Tối ưu khoảng cách
-        - "time": Tối ưu thời gian
-        - "mixed": Kết hợp cả hai
-        """
         self.optimization = optimization
 
     def calculate_cost(self, edge: Edge) -> float:
-        # Hệ số nhân thời gian dựa trên mức độ kẹt xe
+        # Hệ số nhân thời gian dựa trên mức độ kẹt xe (clamp về 1 nếu level = 0 hoặc ngoài bảng)
         congestion_multipliers = {1: 1.0, 2: 1.3, 3: 1.8, 4: 2.4, 5: 3.5}
-        time_multiplier = congestion_multipliers.get(edge.congestion_level, 1.0)
+        safe_level = max(1, edge.congestion_level)  # guard against level 0
+        time_multiplier = congestion_multipliers.get(safe_level, 1.0)
         
-        # Hệ số phạt khoảng cách dựa trên kẹt xe (để ưu tiên đường thoáng dù chọn tối ưu distance)
-        distance_multiplier = 1.0 + 0.1 * (edge.congestion_level - 1)
+        # Hệ số phạt khoảng cách dựa trên kẹt xe
+        distance_multiplier = 1.0 + 0.1 * (safe_level - 1)
         
         effective_distance = edge.distance * distance_multiplier
         effective_time = edge.estimated_time * time_multiplier + edge.get_risk_penalty()
@@ -110,5 +91,5 @@ class CostEvaluator:
             
         else: # "mixed"
             # Quy đổi thời gian ra khoảng cách tương đương để cộng dồn
-            # Vận tốc trung bình ~10 m/s -> 1 giây tương đương 10 mét chi phí
-            return effective_distance + (effective_time * 10.0)
+            # Vận tốc trung bình ~10 m/s -> 1 giây tương đương 10 mét chi phí, chia trung bình.
+            return (effective_distance + (effective_time * 10.0)) / 2.0

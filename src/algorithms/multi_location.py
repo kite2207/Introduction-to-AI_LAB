@@ -1,7 +1,7 @@
 import time
 from typing import List, Dict, Tuple, Set, Optional
 from src.models import TrafficGraph, CostEvaluator
-from src.algorithms.informed import astar_search
+from src.algorithms import astar_search
 
 def compute_distance_matrix(
     graph: TrafficGraph,
@@ -29,7 +29,7 @@ def compute_distance_matrix(
             loc_b = locations[j]
             
             # Use A* to find the optimal path under the current cost evaluator
-            res = astar_search(graph, loc_a, loc_b, cost_evaluator, collect_steps=False)
+            res = astar_search(graph, loc_a, loc_b, cost_evaluator)
             
             if res.path:
                 cost_matrix[(loc_a, loc_b)] = res.total_cost

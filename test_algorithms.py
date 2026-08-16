@@ -12,8 +12,7 @@ if hasattr(sys.stdout, 'reconfigure') and sys.stdout.encoding != 'utf-8':
 sys.path.insert(0, os.path.dirname(__file__))
 
 from src.models import TrafficGraph, CostEvaluator
-from src.algorithms.uninformed import bfs_search, dfs_search
-from src.algorithms.informed import dijkstra_search, astar_search, greedy_best_first_search
+from src.algorithms import bfs_search, dfs_search, dijkstra_search, astar_search, greedy_best_first_search
 
 # ──────────────────────────────────────────────
 # 1. Load graph từ file JSON

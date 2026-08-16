@@ -25,12 +25,8 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.models import TrafficGraph, CostEvaluator
-from src.algorithms.uninformed import bfs_search, dfs_search
-from src.algorithms.informed import (
-    ucs_search,
-    dijkstra_search,
-    astar_search,
-    greedy_best_first_search,
+from src.algorithms import (
+    bfs_search, dfs_search, ucs_search, dijkstra_search, astar_search, greedy_best_first_search
 )
 from backend.schemas import (
     SearchRequest,
@@ -93,10 +89,10 @@ def make_legacy_graph_files(data: dict[str, Any]) -> tuple[Path, Path]:
                     "target_id": str(target),
                     "distance": c.get("distance", 0),
                     "estimated_time": c.get("estimated_time", 0),
-                    "congestion_level": c.get("congestion_level", 0),
+                    "congestion_level": c.get("congestion_level", 1),
                     "road_type": c.get("road_type"),
                     "direction": c.get("direction", "two-way"),
-                    "risk_factors": c.get("risk_factors", "none"),
+                    "risk_factors": c.get("risk_factors", []),
                 }
             )
 
