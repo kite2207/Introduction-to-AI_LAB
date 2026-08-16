@@ -294,6 +294,63 @@ export default function Sidebar({
                     </div>
                   </div>
 
+                  {routeExplanation.legs?.length > 0 && (
+                    <div>
+                      <div className="font-semibold mb-2">
+                        Chi tiết từng chặng
+                      </div>
+
+                      <div className="space-y-2">
+                        {routeExplanation.legs.map((leg) => (
+                          <div
+                            key={leg.index}
+                            className="rounded-md bg-[#F7B558]/10 border border-[#F7B558]/40 p-2.5"
+                          >
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <span className="text-[10px] font-semibold text-[#363236]">
+                                Chặng {leg.index}: {leg.from} → {leg.to}
+                              </span>
+                              <span className="text-[10px] text-[#363236]/60">
+                                {leg.algorithm_name}
+                              </span>
+                            </div>
+
+                            <div className="text-[#363236] leading-4 break-words">
+                              {(leg.route_names || []).join(" → ")}
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-1 mt-2 text-[10px]">
+                              <div>
+                                <div className="text-[#363236]/60">
+                                  Khoảng cách
+                                </div>
+                                <div className="font-medium">
+                                  {Number(leg.distance || 0).toFixed(0)} m
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-[#363236]/60">
+                                  Thời gian
+                                </div>
+                                <div className="font-medium">
+                                  {Number(leg.time || 0).toFixed(1)} s
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-[#363236]/60">Chi phí</div>
+                                <div className="font-medium">
+                                  {leg.cost == null
+                                    ? "—"
+                                    : Number(leg.cost).toFixed(2)}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <div className="font-semibold mb-1">Tối ưu hóa</div>
                     <div className="text-[#363236]/80">

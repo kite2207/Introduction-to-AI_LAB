@@ -272,39 +272,39 @@ def build_route_explanation(
         }
 
     criterion = {
-        "ucs": "lowest accumulated cost g(n)",
-        "dijkstra": "lowest accumulated cost g(n)",
-        "astar": "lowest estimated cost f(n) = g(n) + h(n)",
-        "greedy": "lowest heuristic h(n)",
-        "bfs": "FIFO expansion order",
-        "dfs": "LIFO expansion order",
-    }.get(algo, "its search rule")
+        "ucs": "chi phí tích lũy thấp nhất g(n)",
+        "dijkstra": "chi phí tích lũy thấp nhất g(n)",
+        "astar": "chi phí ước tính thấp nhất f(n) = g(n) + h(n)",
+        "greedy": "heuristic thấp nhất h(n)",
+        "bfs": "thứ tự mở rộng FIFO",
+        "dfs": "thứ tự mở rộng LIFO",
+    }.get(algo, "quy tắc tìm kiếm của nó")
 
     objective = {
-        "distance": "minimum distance",
-        "time": "minimum estimated travel time",
-        "mixed": "minimum traffic-aware mixed cost",
-    }.get(mode, "the selected cost objective")
+        "distance": "khoảng cách tối thiểu",
+        "time": "thời gian di chuyển ước tính tối thiểu",
+        "mixed": "chi phí hỗn hợp tối thiểu tính theo giao thông",
+    }.get(mode, "mục tiêu chi phí đã chọn")
 
     if algo in {"ucs", "dijkstra"}:
         optimality = (
-            "UCS/Dijkstra is optimal for non-negative edge costs "
-            f"under the {mode} objective."
+            "UCS/Dijkstra đảm bảo tối ưu khi chi phí cạnh không âm "
+            f"theo mục tiêu '{mode}'."
         )
     elif algo == "astar":
         optimality = (
-            "A* is optimal when its heuristic is admissible "
-            "(and consistent for graph search)."
+            "A* đảm bảo tối ưu khi heuristic là admissible "
+            "(và consistent đối với tìm kiếm trên đồ thị)."
         )
     elif algo == "bfs":
         optimality = (
-            "BFS is optimal for minimum hop count, not necessarily "
-            "for distance, time, or traffic cost."
+            "BFS đảm bảo tối ưu theo số bước tối thiểu, không nhất thiết "
+            "theo khoảng cách, thời gian hay chi phí giao thông."
         )
     else:
         optimality = (
-            f"{algorithm_name} does not guarantee an optimal route "
-            f"under the {mode} traffic cost."
+            f"{algorithm_name} không đảm bảo tìm được đường tối ưu "
+            f"theo chi phí giao thông '{mode}'."
         )
 
     congested = []
@@ -340,11 +340,11 @@ def build_route_explanation(
 
     return {
         "headline": (
-            f"The selected route is optimized for {objective}."
+            f"Tuyến đường được chọn được tối ưu theo {objective}."
         ),
         "why_selected": (
-            f"{algorithm_name} selected this route using {criterion} "
-            f"under the '{mode}' objective."
+            f"{algorithm_name} chọn tuyến đường này dựa trên {criterion} "
+            f"theo mục tiêu '{mode}'."
         ),
         "optimality": optimality,
         "optimality_reference": {
@@ -382,9 +382,9 @@ def build_route_explanation(
         "optimization": mode,
         "algorithm": algorithm_name,
         "comparison_note": (
-            "Dijkstra with the same objective is an optimality reference. "
-            "The shortest-distance and fastest-time routes are actual "
-            "alternative routes."
+            "Dijkstra với cùng mục tiêu được dùng làm tham chiếu tối ưu. "
+            "Tuyến ngắn nhất và tuyến nhanh nhất là các phương án "
+            "thay thế thực tế."
         ),
     }
 
