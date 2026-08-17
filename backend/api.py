@@ -25,9 +25,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.models import TrafficGraph, CostEvaluator
-from src.algorithms import (
-    bfs_search, dfs_search, ucs_search, dijkstra_search, astar_search, greedy_best_first_search
-)
+from src.algorithms import bfs_search, dfs_search, ucs_search, dijkstra_search, astar_search, greedy_best_first_search
 from backend.schemas import (
     SearchRequest,
     SearchResponse,
@@ -189,10 +187,6 @@ def get_graph_info():
         node_count=len(graph.nodes),
         edge_count=sum(len(v) for v in graph.adjacency_list.values()),
     )
-
-
-
-
 
 
 @app.post("/api/search", response_model=SearchResponse, tags=["Search"])

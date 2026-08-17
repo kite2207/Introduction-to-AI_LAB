@@ -476,7 +476,9 @@ export default function Sidebar({
                                   </div>
                                 </div>
                                 <div>
-                                  <div className="text-[#363236]/60">Chi phí</div>
+                                  <div className="text-[#363236]/60">
+                                    Chi phí
+                                  </div>
                                   <div className="font-medium">
                                     {route.cost == null
                                       ? "—"
@@ -516,9 +518,9 @@ export default function Sidebar({
                                     <div>
                                       {route.cost_difference == null
                                         ? "—"
-                                        : Number(
-                                            route.cost_difference,
-                                          ).toFixed(2)}
+                                        : Number(route.cost_difference).toFixed(
+                                            2,
+                                          )}
                                     </div>
                                   </div>
                                 </div>

@@ -39,11 +39,7 @@ def _reference_route(
         "algorithm": "Dijkstra",
         "optimization": optimization,
         "path": list(ref.path),
-        "route_names": [
-            graph.nodes[nid].name
-            for nid in ref.path
-            if nid in graph.nodes
-        ],
+        "route_names": [graph.nodes[nid].name for nid in ref.path if nid in graph.nodes],
         "distance": ref.total_distance,
         "time": ref.total_time,
         "cost": ref.total_cost,
@@ -82,9 +78,7 @@ def build_route_explanation(
             **ref,
             "distance_difference": total_distance - ref["distance"],
             "time_difference": total_time - ref["time"],
-            "cost_difference": (
-                None if total_cost is None else total_cost - ref["cost"]
-            ),
+            "cost_difference": (None if total_cost is None else total_cost - ref["cost"]),
         }
 
     criterion = {
@@ -103,34 +97,18 @@ def build_route_explanation(
     }.get(mode, "mục tiêu chi phí đã chọn")
 
     if algo in {"ucs", "dijkstra"}:
-        optimality = (
-            "UCS/Dijkstra đảm bảo tối ưu khi chi phí cạnh không âm "
-            f"theo mục tiêu '{mode}'."
-        )
+        optimality = f"UCS/Dijkstra đảm bảo tối ưu khi chi phí cạnh không âm theo mục tiêu '{mode}'."
     elif algo == "astar":
-        optimality = (
-            "A* đảm bảo tối ưu khi heuristic là admissible "
-            "(và consistent đối với tìm kiếm trên đồ thị)."
-        )
+        optimality = "A* đảm bảo tối ưu khi heuristic là admissible (và consistent đối với tìm kiếm trên đồ thị)."
     elif algo == "bfs":
-        optimality = (
-            "BFS đảm bảo tối ưu theo số bước tối thiểu, không nhất thiết "
-            "theo khoảng cách, thời gian hay chi phí giao thông."
-        )
+        optimality = "BFS đảm bảo tối ưu theo số bước tối thiểu, không nhất thiết theo khoảng cách, thời gian hay chi phí giao thông."
     else:
-        optimality = (
-            f"{algorithm_name} không đảm bảo tìm được đường tối ưu "
-            f"theo chi phí giao thông '{mode}'."
-        )
+        optimality = f"{algorithm_name} không đảm bảo tìm được đường tối ưu theo chi phí giao thông '{mode}'."
 
     congested = []
     for source_id, target_id in zip(path, path[1:]):
         edge = next(
-            (
-                e
-                for e in graph.get_neighbors(source_id)
-                if str(e.target_id) == str(target_id)
-            ),
+            (e for e in graph.get_neighbors(source_id) if str(e.target_id) == str(target_id)),
             None,
         )
 
@@ -141,34 +119,25 @@ def build_route_explanation(
         if isinstance(risk, list):
             risk = ", ".join(str(v) for v in risk)
 
-        congested.append({
-            "from": graph.nodes[source_id].name,
-            "to": graph.nodes[target_id].name,
-            "congestion": edge.congestion_level,
-            "risk": risk,
-        })
+        congested.append(
+            {
+                "from": graph.nodes[source_id].name,
+                "to": graph.nodes[target_id].name,
+                "congestion": edge.congestion_level,
+                "risk": risk,
+            }
+        )
 
-    same_reference = (
-        optimality_ref is not None
-        and total_cost is not None
-        and abs(total_cost - optimality_ref["cost"]) < 1e-9
-    )
+    same_reference = optimality_ref is not None and total_cost is not None and abs(total_cost - optimality_ref["cost"]) < 1e-9
 
     return {
-        "headline": (
-            f"Tuyến đường được chọn được tối ưu theo {objective}."
-        ),
-        "why_selected": (
-            f"{algorithm_name} chọn tuyến đường này dựa trên {criterion} "
-            f"theo mục tiêu '{mode}'."
-        ),
+        "headline": (f"Tuyến đường được chọn được tối ưu theo {objective}."),
+        "why_selected": (f"{algorithm_name} chọn tuyến đường này dựa trên {criterion} theo mục tiêu '{mode}'."),
         "optimality": optimality,
         "optimality_reference": {
             "algorithm": "Dijkstra",
             "optimization": mode,
-            "route_names": (
-                optimality_ref["route_names"] if optimality_ref else []
-            ),
+            "route_names": (optimality_ref["route_names"] if optimality_ref else []),
             "distance": optimality_ref["distance"] if optimality_ref else None,
             "time": optimality_ref["time"] if optimality_ref else None,
             "cost": optimality_ref["cost"] if optimality_ref else None,
@@ -188,8 +157,6 @@ def build_route_explanation(
         "optimization": mode,
         "algorithm": algorithm_name,
         "comparison_note": (
-            "Dijkstra với cùng mục tiêu được dùng làm tham chiếu tối ưu. "
-            "Tuyến ngắn nhất và tuyến nhanh nhất là các phương án "
-            "thay thế thực tế."
+            "Dijkstra với cùng mục tiêu được dùng làm tham chiếu tối ưu. Tuyến ngắn nhất và tuyến nhanh nhất là các phương án thay thế thực tế."
         ),
     }
