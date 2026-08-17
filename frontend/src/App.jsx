@@ -313,7 +313,11 @@ export default function App() {
       setHasSearched(true);
     } catch (error) {
       console.error("Lỗi tìm kiếm:", error);
-      alert(error.message || "Không thể tìm đường.");
+      const message =
+        error instanceof TypeError
+          ? "Không kết nối được backend tại http://localhost:8000. Hãy khởi động API trước khi tìm đường."
+          : error.message || "Không thể tìm đường.";
+      alert(message);
       resetSearchResult();
     } finally {
       setLoading(false);
