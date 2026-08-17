@@ -1,320 +1,195 @@
 """
-Explainable route generator for hcm_traffic_data.json.
+Explainable route generator for the HCM traffic graph.
 
-The function generate_explanation() returns JSON-serializable data that can
-be returned directly by a FastAPI route. It is deterministic and uses only
-the graph/route data; no LLM is required.
+This module is the single source of truth for the route explanation served
+by the FastAPI backend. build_route_explanation() returns JSON-serializable
+data that is consumed directly by the frontend (Sidebar.jsx):
+
+    headline, why_selected, optimality, optimality_reference,
+    route_comparison, congested_segments, comparison_note
+
+It is deterministic and uses only the graph/route data; no LLM is required.
 """
 
-from typing import Any, Callable, Dict, Optional, Sequence
+from __future__ import annotations
+
+from typing import Any
+
+from src.models import CostEvaluator
+from src.algorithms import dijkstra_search
 
 
 HIGH_CONGESTION_LEVEL = 4
 
 
-def node_name(graph: Dict[str, Any], node_id: str) -> str:
-    node = graph.get(str(node_id), {})
-    return node.get("name") or str(node_id)
+def _reference_route(
+    graph,
+    start_id: str,
+    end_id: str,
+    optimization: str,
+):
+    """Return a Dijkstra route with the same objective as an optimality reference."""
+    evaluator = CostEvaluator(optimization=optimization)
+    ref = dijkstra_search(graph, start_id, end_id, evaluator)
+
+    if not ref.path:
+        return None
+
+    return {
+        "algorithm": "Dijkstra",
+        "optimization": optimization,
+        "path": list(ref.path),
+        "route_names": [
+            graph.nodes[nid].name
+            for nid in ref.path
+            if nid in graph.nodes
+        ],
+        "distance": ref.total_distance,
+        "time": ref.total_time,
+        "cost": ref.total_cost,
+    }
 
 
-def find_edge(
-    graph: Dict[str, Any],
-    source: str,
-    target: str,
-) -> Optional[Dict[str, Any]]:
-    source = str(source)
-    target = str(target)
+def build_route_explanation(
+    graph,
+    *,
+    algo: str,
+    algorithm_name: str,
+    optimization: str,
+    start_id: str,
+    end_id: str,
+    path: list[str],
+    path_names: list[str],
+    total_cost: float | None,
+    total_distance: float,
+    total_time: float,
+) -> dict[str, Any]:
+    """Build the route-explanation JSON consumed by the frontend."""
+    mode = optimization
 
-    for edge in graph.get(source, {}).get("connected_to", []):
-        if str(edge.get("target_node")) == target:
-            return edge
+    # Same-objective Dijkstra = optimality reference.
+    optimality_ref = _reference_route(graph, start_id, end_id, mode)
 
-    # The dataset may represent a two-way road from the opposite side.
-    for edge in graph.get(target, {}).get("connected_to", []):
-        if str(edge.get("target_node")) == source:
-            return edge
+    # Actual alternatives.
+    shortest_ref = _reference_route(graph, start_id, end_id, "distance")
+    fastest_ref = _reference_route(graph, start_id, end_id, "time")
 
-    return None
+    def compare(ref):
+        if ref is None:
+            return None
 
+        return {
+            **ref,
+            "distance_difference": total_distance - ref["distance"],
+            "time_difference": total_time - ref["time"],
+            "cost_difference": (
+                None if total_cost is None else total_cost - ref["cost"]
+            ),
+        }
 
-def edge_cost(
-    edge: Dict[str, Any],
-    cost_function: Optional[Callable[[Dict[str, Any]], float]] = None,
-) -> Optional[float]:
-    if cost_function:
-        return float(cost_function(edge))
+    criterion = {
+        "ucs": "chi phí tích lũy thấp nhất g(n)",
+        "dijkstra": "chi phí tích lũy thấp nhất g(n)",
+        "astar": "chi phí ước tính thấp nhất f(n) = g(n) + h(n)",
+        "greedy": "heuristic thấp nhất h(n)",
+        "bfs": "thứ tự mở rộng FIFO",
+        "dfs": "thứ tự mở rộng LIFO",
+    }.get(algo, "quy tắc tìm kiếm của nó")
 
-    value = edge.get("cost")
-    return float(value) if value is not None else None
+    objective = {
+        "distance": "khoảng cách tối thiểu",
+        "time": "thời gian di chuyển ước tính tối thiểu",
+        "mixed": "chi phí hỗn hợp tối thiểu tính theo giao thông",
+    }.get(mode, "mục tiêu chi phí đã chọn")
 
+    if algo in {"ucs", "dijkstra"}:
+        optimality = (
+            "UCS/Dijkstra đảm bảo tối ưu khi chi phí cạnh không âm "
+            f"theo mục tiêu '{mode}'."
+        )
+    elif algo == "astar":
+        optimality = (
+            "A* đảm bảo tối ưu khi heuristic là admissible "
+            "(và consistent đối với tìm kiếm trên đồ thị)."
+        )
+    elif algo == "bfs":
+        optimality = (
+            "BFS đảm bảo tối ưu theo số bước tối thiểu, không nhất thiết "
+            "theo khoảng cách, thời gian hay chi phí giao thông."
+        )
+    else:
+        optimality = (
+            f"{algorithm_name} không đảm bảo tìm được đường tối ưu "
+            f"theo chi phí giao thông '{mode}'."
+        )
 
-def route_details(
-    path: Sequence[str],
-    graph: Dict[str, Any],
-    cost_function=None,
-) -> Dict[str, Any]:
-    segments = []
-    distance = 0.0
-    time = 0.0
-    cost = 0.0
-    has_cost = False
-    congestion = []
+    congested = []
+    for source_id, target_id in zip(path, path[1:]):
+        edge = next(
+            (
+                e
+                for e in graph.get_neighbors(source_id)
+                if str(e.target_id) == str(target_id)
+            ),
+            None,
+        )
 
-    for i in range(len(path) - 1):
-        source = str(path[i])
-        target = str(path[i + 1])
-        edge = find_edge(graph, source, target)
-
-        if edge is None:
-            segments.append({
-                "from": source,
-                "from_name": node_name(graph, source),
-                "to": target,
-                "to_name": node_name(graph, target),
-                "found": False,
-            })
+        if edge is None or edge.congestion_level < HIGH_CONGESTION_LEVEL:
             continue
 
-        d = edge.get("distance")
-        t = edge.get("estimated_time")
-        c = edge_cost(edge, cost_function)
-        level = edge.get("congestion_level")
+        risk = getattr(edge, "risk_factors", "none")
+        if isinstance(risk, list):
+            risk = ", ".join(str(v) for v in risk)
 
-        if d is not None:
-            distance += float(d)
-        if t is not None:
-            time += float(t)
-        if c is not None:
-            cost += c
-            has_cost = True
+        congested.append({
+            "from": graph.nodes[source_id].name,
+            "to": graph.nodes[target_id].name,
+            "congestion": edge.congestion_level,
+            "risk": risk,
+        })
 
-        segment = {
-            "from": source,
-            "from_name": node_name(graph, source),
-            "to": target,
-            "to_name": node_name(graph, target),
-            "distance": d,
-            "estimated_time": t,
-            "congestion_level": level,
-            "risk_factors": edge.get("risk_factors"),
-            "cost": c,
-            "found": True,
-        }
-        segments.append(segment)
-
-        if level is not None and float(level) >= HIGH_CONGESTION_LEVEL:
-            congestion.append(segment)
-
-    return {
-        "path": [str(x) for x in path],
-        "route": [node_name(graph, x) for x in path],
-        "segments": segments,
-        "metrics": {
-            "distance": round(distance, 2),
-            "time": round(time, 2),
-            "cost": round(cost, 2) if has_cost else None,
-        },
-        "high_congestion_segments": congestion,
-    }
-
-
-def optimality_info(algorithm: str) -> Dict[str, Any]:
-    a = str(algorithm).strip().lower().replace("_", "-")
-
-    if a in {"dfs", "depth-first search", "depth first search"}:
-        return {
-            "guarantees_optimality": False,
-            "statement": "DFS does not guarantee an optimal route.",
-        }
-
-    if a in {"bfs", "breadth-first search", "breadth first search"}:
-        return {
-            "guarantees_optimality": True,
-            "condition": "all edges must have equal cost",
-            "statement": (
-                "BFS is optimal for the minimum number of edges when all "
-                "edges have equal cost. It is not generally optimal for "
-                "distance or travel time."
-            ),
-        }
-
-    if a in {"ucs", "uniform-cost search", "uniform cost search", "dijkstra"}:
-        return {
-            "guarantees_optimality": True,
-            "condition": "edge costs must be non-negative",
-            "statement": (
-                "Uniform-Cost Search guarantees a minimum-cost route when "
-                "edge costs are non-negative."
-            ),
-        }
-
-    if a in {"a*", "a-star", "astar", "a star"}:
-        return {
-            "guarantees_optimality": True,
-            "condition": "the heuristic must be admissible",
-            "statement": (
-                "A* guarantees an optimal route when its heuristic is "
-                "admissible."
-            ),
-        }
-
-    if "greedy" in a:
-        return {
-            "guarantees_optimality": False,
-            "statement": (
-                "Greedy Best-First Search does not guarantee an optimal route."
-            ),
-        }
-
-    return {
-        "guarantees_optimality": None,
-        "statement": "Optimality information is not defined for this algorithm.",
-    }
-
-
-def build_reason(
-    optimization: str,
-    metrics: Dict[str, Any],
-    congestion_count: int,
-) -> str:
-    opt = str(optimization).lower()
-
-    if opt == "distance":
-        return (
-            f"The route is evaluated by total distance "
-            f"({metrics['distance']} distance units)."
-        )
-
-    if opt == "time":
-        return (
-            f"The route is evaluated by estimated travel time "
-            f"({metrics['time']} time units)."
-        )
-
-    if opt == "cost":
-        if metrics["cost"] is not None:
-            return (
-                f"The route is evaluated by total cost "
-                f"({metrics['cost']})."
-            )
-        return (
-            "The route is configured for total-cost optimization, but the "
-            "current traffic data does not contain an explicit edge cost."
-        )
-
-    if congestion_count:
-        return (
-            "The route follows the backend's default weighting and contains "
-            f"{congestion_count} high-congestion segment(s)."
-        )
-
-    return "The route follows the backend's default graph weighting."
-
-
-def compare_routes(selected: Dict[str, Any], alternative: Dict[str, Any]) -> Dict[str, Any]:
-    sm = selected["metrics"]
-    am = alternative["metrics"]
-
-    result = {
-        "alternative_path": alternative["path"],
-        "alternative_route": alternative["route"],
-        "distance_difference": None,
-        "time_difference": None,
-        "cost_difference": None,
-        "summary": None,
-    }
-
-    if sm["distance"] is not None and am["distance"] is not None:
-        result["distance_difference"] = round(am["distance"] - sm["distance"], 2)
-
-    if sm["time"] is not None and am["time"] is not None:
-        result["time_difference"] = round(am["time"] - sm["time"], 2)
-
-    if sm["cost"] is not None and am["cost"] is not None:
-        result["cost_difference"] = round(am["cost"] - sm["cost"], 2)
-
-    parts = []
-    d = result["distance_difference"]
-    t = result["time_difference"]
-
-    if d is not None:
-        parts.append(
-            "the selected route is shorter"
-            if d > 0 else
-            "the alternative route is shorter"
-            if d < 0 else
-            "both routes have the same distance"
-        )
-
-    if t is not None:
-        parts.append(
-            "the selected route is faster"
-            if t > 0 else
-            "the alternative route is faster"
-            if t < 0 else
-            "both routes have the same estimated time"
-        )
-
-    result["summary"] = (
-        "Compared with the alternative route, " + "; ".join(parts) + "."
-        if parts else
-        "There is not enough metric data for a detailed comparison."
+    same_reference = (
+        optimality_ref is not None
+        and total_cost is not None
+        and abs(total_cost - optimality_ref["cost"]) < 1e-9
     )
-    return result
 
-
-def generate_explanation(
-    path: Sequence[str],
-    graph: Dict[str, Any],
-    optimization: str = "default",
-    algorithm: str = "A*",
-    alternative_paths: Optional[Sequence[Sequence[str]]] = None,
-    cost_function=None,
-) -> Dict[str, Any]:
-    """
-    Generate the explanation required by the project specification.
-
-    alternative_paths is optional. If supplied, each alternative is compared
-    with the selected route.
-    """
-    if not path:
-        return {
-            "reason": "No route was found.",
-            "route": [],
-            "metrics": {"distance": None, "time": None, "cost": None},
-            "high_congestion_segments": [],
-            "comparison": [],
-            "optimality": optimality_info(algorithm),
-        }
-
-    selected = route_details(path, graph, cost_function)
-
-    result = {
-        "reason": build_reason(
-            optimization,
-            selected["metrics"],
-            len(selected["high_congestion_segments"]),
+    return {
+        "headline": (
+            f"Tuyến đường được chọn được tối ưu theo {objective}."
         ),
-        "optimization": optimization,
-        "algorithm": algorithm,
-        "path": selected["path"],
-        "route": selected["route"],
-        "metrics": selected["metrics"],
-        "high_congestion_segments": selected["high_congestion_segments"],
-        "segments": selected["segments"],
-        "comparison": [],
-        "optimality": optimality_info(algorithm),
+        "why_selected": (
+            f"{algorithm_name} chọn tuyến đường này dựa trên {criterion} "
+            f"theo mục tiêu '{mode}'."
+        ),
+        "optimality": optimality,
+        "optimality_reference": {
+            "algorithm": "Dijkstra",
+            "optimization": mode,
+            "route_names": (
+                optimality_ref["route_names"] if optimality_ref else []
+            ),
+            "distance": optimality_ref["distance"] if optimality_ref else None,
+            "time": optimality_ref["time"] if optimality_ref else None,
+            "cost": optimality_ref["cost"] if optimality_ref else None,
+            "same_cost_as_selected": same_reference,
+        },
+        "route_comparison": {
+            "selected": {
+                "route_names": list(path_names),
+                "distance": total_distance,
+                "time": total_time,
+                "cost": total_cost,
+            },
+            "shortest_distance": compare(shortest_ref),
+            "fastest_time": compare(fastest_ref),
+        },
+        "congested_segments": congested,
+        "optimization": mode,
+        "algorithm": algorithm_name,
+        "comparison_note": (
+            "Dijkstra với cùng mục tiêu được dùng làm tham chiếu tối ưu. "
+            "Tuyến ngắn nhất và tuyến nhanh nhất là các phương án "
+            "thay thế thực tế."
+        ),
     }
-
-    for alternative_path in alternative_paths or []:
-        if alternative_path:
-            alternative = route_details(
-                alternative_path,
-                graph,
-                cost_function,
-            )
-            result["comparison"].append(
-                compare_routes(selected, alternative)
-            )
-
-    return result

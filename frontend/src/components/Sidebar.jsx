@@ -358,165 +358,177 @@ export default function Sidebar({
                     </div>
                   </div>
 
-                  <div className="border-t border-[#363236]/10 pt-3">
-                    <div className="font-semibold mb-2">Tham chiếu tối ưu</div>
-
-                    <div className="rounded-md bg-[#F7B558]/10 border border-[#F7B558]/40 p-2.5 space-y-2">
-                      <div className="font-medium text-[#363236]">
-                        Dijkstra ·{" "}
-                        {routeExplanation.optimality_reference?.optimization}
+                  {routeExplanation.optimality_reference && (
+                    <div className="border-t border-[#363236]/10 pt-3">
+                      <div className="font-semibold mb-2">
+                        Tham chiếu tối ưu
                       </div>
 
-                      <div>
-                        <div className="text-[10px] text-[#363236]/60">
-                          Tuyến tham chiếu
+                      <div className="rounded-md bg-[#F7B558]/10 border border-[#F7B558]/40 p-2.5 space-y-2">
+                        <div className="font-medium text-[#363236]">
+                          Dijkstra ·{" "}
+                          {routeExplanation.optimality_reference.optimization}
                         </div>
-                        <div className="text-[#363236] leading-4 break-words">
-                          {(
-                            routeExplanation.optimality_reference
-                              ?.route_names || []
-                          ).join(" → ")}
+
+                        <div>
+                          <div className="text-[10px] text-[#363236]/60">
+                            Tuyến tham chiếu
+                          </div>
+                          <div className="text-[#363236] leading-4 break-words">
+                            {(
+                              routeExplanation.optimality_reference
+                                .route_names || []
+                            ).join(" → ")}
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px]">
-                        <span className="text-[#363236]/60">Chi phí</span>
-                        <span className="text-right font-medium">
-                          {routeExplanation.optimality_reference?.cost == null
-                            ? "—"
-                            : Number(
-                                routeExplanation.optimality_reference.cost,
-                              ).toFixed(2)}
-                        </span>
-                        <span className="text-[#363236]/60">Khoảng cách</span>
-                        <span className="text-right font-medium">
-                          {routeExplanation.optimality_reference?.distance ==
-                          null
-                            ? "—"
-                            : `${Number(routeExplanation.optimality_reference.distance).toFixed(0)} m`}
-                        </span>
-                        <span className="text-[#363236]/60">Thời gian</span>
-                        <span className="text-right font-medium">
-                          {routeExplanation.optimality_reference?.time == null
-                            ? "—"
-                            : `${Number(routeExplanation.optimality_reference.time).toFixed(1)} s`}
-                        </span>
-                      </div>
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px]">
+                          <span className="text-[#363236]/60">Chi phí</span>
+                          <span className="text-right font-medium">
+                            {routeExplanation.optimality_reference.cost == null
+                              ? "—"
+                              : Number(
+                                  routeExplanation.optimality_reference.cost,
+                                ).toFixed(2)}
+                          </span>
+                          <span className="text-[#363236]/60">Khoảng cách</span>
+                          <span className="text-right font-medium">
+                            {routeExplanation.optimality_reference.distance ==
+                            null
+                              ? "—"
+                              : `${Number(routeExplanation.optimality_reference.distance).toFixed(0)} m`}
+                          </span>
+                          <span className="text-[#363236]/60">Thời gian</span>
+                          <span className="text-right font-medium">
+                            {routeExplanation.optimality_reference.time == null
+                              ? "—"
+                              : `${Number(routeExplanation.optimality_reference.time).toFixed(1)} s`}
+                          </span>
+                        </div>
 
-                      <div className="pt-2 border-t border-[#F7B558]/30 font-semibold text-[#363236]">
-                        {routeExplanation.optimality_reference
-                          ?.same_cost_as_selected
-                          ? "Cùng chi phí mục tiêu với tham chiếu Dijkstra."
-                          : "Khác với tham chiếu Dijkstra."}
+                        <div className="pt-2 border-t border-[#F7B558]/30 font-semibold text-[#363236]">
+                          {routeExplanation.optimality_reference
+                            .same_cost_as_selected
+                            ? "Cùng chi phí mục tiêu với tham chiếu Dijkstra."
+                            : "Khác với tham chiếu Dijkstra."}
+                        </div>
                       </div>
                     </div>
+                  )}
 
-                    <div className="mt-2 text-[#363236]/80">
+                  <div className="border-t border-[#363236]/10 pt-3">
+                    <div className="font-semibold mb-1">Tính tối ưu</div>
+                    <div className="text-[#363236]/80">
                       {routeExplanation.optimality}
                     </div>
                   </div>
 
-                  <div className="border-t border-[#363236]/10 pt-3">
-                    <div className="font-semibold mb-2">Phương án thay thế</div>
+                  {routeExplanation.route_comparison && (
+                    <div className="border-t border-[#363236]/10 pt-3">
+                      <div className="font-semibold mb-2">
+                        Phương án thay thế
+                      </div>
 
-                    <div className="space-y-2">
-                      {[
-                        [
-                          "Tuyến đã chọn",
-                          routeExplanation.route_comparison?.selected,
-                        ],
-                        [
-                          "Tuyến ngắn nhất",
-                          routeExplanation.route_comparison?.shortest_distance,
-                        ],
-                        [
-                          "Tuyến nhanh nhất",
-                          routeExplanation.route_comparison?.fastest_time,
-                        ],
-                      ].map(([label, route]) =>
-                        route ? (
-                          <div
-                            key={label}
-                            className="rounded-md bg-white border border-[#363236]/10 p-2.5"
-                          >
-                            <div className="text-[10px] font-semibold text-[#363236]/60 mb-1">
-                              {label}
-                            </div>
-
-                            <div className="text-[#363236] leading-4 break-words">
-                              {(route.route_names || []).join(" → ")}
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-1 mt-2 text-[10px]">
-                              <div>
-                                <div className="text-[#363236]/60">
-                                  Khoảng cách
-                                </div>
-                                <div className="font-medium">
-                                  {Number(route.distance || 0).toFixed(0)} m
-                                </div>
+                      <div className="space-y-2">
+                        {[
+                          [
+                            "Tuyến đã chọn",
+                            routeExplanation.route_comparison?.selected,
+                          ],
+                          [
+                            "Tuyến ngắn nhất",
+                            routeExplanation.route_comparison
+                              ?.shortest_distance,
+                          ],
+                          [
+                            "Tuyến nhanh nhất",
+                            routeExplanation.route_comparison?.fastest_time,
+                          ],
+                        ].map(([label, route]) =>
+                          route ? (
+                            <div
+                              key={label}
+                              className="rounded-md bg-white border border-[#363236]/10 p-2.5"
+                            >
+                              <div className="text-[10px] font-semibold text-[#363236]/60 mb-1">
+                                {label}
                               </div>
-                              <div>
-                                <div className="text-[#363236]/60">
-                                  Thời gian
-                                </div>
-                                <div className="font-medium">
-                                  {Number(route.time || 0).toFixed(1)} s
-                                </div>
-                              </div>
-                              <div>
-                                <div className="text-[#363236]/60">Chi phí</div>
-                                <div className="font-medium">
-                                  {route.cost == null
-                                    ? "—"
-                                    : Number(route.cost).toFixed(2)}
-                                </div>
-                              </div>
-                            </div>
 
-                            {label !== "Tuyến đã chọn" && (
-                              <div className="mt-2 pt-2 border-t border-[#363236]/10 grid grid-cols-3 gap-1 text-[9px]">
+                              <div className="text-[#363236] leading-4 break-words">
+                                {(route.route_names || []).join(" → ")}
+                              </div>
+
+                              <div className="grid grid-cols-3 gap-1 mt-2 text-[10px]">
                                 <div>
                                   <div className="text-[#363236]/60">
-                                    Δ khoảng cách
+                                    Khoảng cách
                                   </div>
-                                  <div>
-                                    {Number(
-                                      route.distance_difference || 0,
-                                    ).toFixed(0)}{" "}
-                                    m
+                                  <div className="font-medium">
+                                    {Number(route.distance || 0).toFixed(0)} m
                                   </div>
                                 </div>
                                 <div>
                                   <div className="text-[#363236]/60">
-                                    Δ thời gian
+                                    Thời gian
                                   </div>
-                                  <div>
-                                    {Number(route.time_difference || 0).toFixed(
-                                      1,
-                                    )}{" "}
-                                    s
+                                  <div className="font-medium">
+                                    {Number(route.time || 0).toFixed(1)} s
                                   </div>
                                 </div>
                                 <div>
-                                  <div className="text-[#363236]/60">
-                                    Δ chi phí
-                                  </div>
-                                  <div>
-                                    {route.cost_difference == null
+                                  <div className="text-[#363236]/60">Chi phí</div>
+                                  <div className="font-medium">
+                                    {route.cost == null
                                       ? "—"
-                                      : Number(route.cost_difference).toFixed(
-                                          2,
-                                        )}
+                                      : Number(route.cost).toFixed(2)}
                                   </div>
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        ) : null,
-                      )}
+
+                              {label !== "Tuyến đã chọn" && (
+                                <div className="mt-2 pt-2 border-t border-[#363236]/10 grid grid-cols-3 gap-1 text-[9px]">
+                                  <div>
+                                    <div className="text-[#363236]/60">
+                                      Δ khoảng cách
+                                    </div>
+                                    <div>
+                                      {Number(
+                                        route.distance_difference || 0,
+                                      ).toFixed(0)}{" "}
+                                      m
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className="text-[#363236]/60">
+                                      Δ thời gian
+                                    </div>
+                                    <div>
+                                      {Number(
+                                        route.time_difference || 0,
+                                      ).toFixed(1)}{" "}
+                                      s
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className="text-[#363236]/60">
+                                      Δ chi phí
+                                    </div>
+                                    <div>
+                                      {route.cost_difference == null
+                                        ? "—"
+                                        : Number(
+                                            route.cost_difference,
+                                          ).toFixed(2)}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ) : null,
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {routeExplanation.congested_segments?.length > 0 && (
                     <div className="border-t border-[#363236]/10 pt-3">

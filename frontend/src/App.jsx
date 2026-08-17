@@ -263,22 +263,17 @@ export default function App() {
           : explanations.length > 1
             ? {
                 headline: "Tối ưu hóa qua nhiều chặng đường.",
-                why_selected: explanations
-                  .map(
-                    (item, index) =>
-                      `Chặng ${index + 1}: ${item?.why_selected || ""}`,
-                  )
-                  .join(" "),
-                optimality: explanations
-                  .map(
-                    (item, index) =>
-                      `Chặng ${index + 1}: ${item?.optimality || ""}`,
-                  )
-                  .join(" "),
+                why_selected: `Tuyến đường gồm ${results.length} chặng được tối ưu theo mục tiêu '${optimization}' bằng thuật toán ${
+                  explanations[0]?.algorithm || algorithm
+                }.`,
+                optimality: explanations[0]?.optimality || "",
                 congested_segments: explanations.flatMap(
                   (item) => item?.congested_segments || [],
                 ),
                 comparison: null,
+                // Multi-waypoint: không có tham chiếu Dijkstra hay phương án thay thế.
+                optimality_reference: null,
+                route_comparison: null,
                 comparison_note:
                   "Đã tìm kiếm nhiều chặng vì bạn đã chọn điểm dừng.",
                 algorithm: explanations[0]?.algorithm || algorithm,
