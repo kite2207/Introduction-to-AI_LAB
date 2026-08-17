@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 
-import trafficData from "./data/hcm_traffic_data.json";
+// Graph data is sourced from the repository root (single source of truth),
+// not from a copy inside frontend/src/data.
+import trafficData from "../../data/hcm_traffic_data.json";
 
 import Sidebar from "./components/Sidebar";
 import HCMMap from "./components/HCMMap";
@@ -261,25 +263,41 @@ export default function App() {
           : explanations.length > 1
             ? {
                 headline: "Tối ưu hóa qua nhiều chặng đường.",
-                why_selected: explanations
-                  .map(
-                    (item, index) =>
-                      `Chặng ${index + 1}: ${item?.why_selected || ""}`,
-                  )
-                  .join(" "),
-                optimality: explanations
-                  .map(
-                    (item, index) =>
-                      `Chặng ${index + 1}: ${item?.optimality || ""}`,
-                  )
-                  .join(" "),
+                why_selected: `Tuyến đường gồm ${results.length} chặng được tối ưu theo mục tiêu '${optimization}' bằng thuật toán ${
+                  explanations[0]?.algorithm || algorithm
+                }.`,
+                optimality: explanations[0]?.optimality || "",
                 congested_segments: explanations.flatMap(
                   (item) => item?.congested_segments || [],
                 ),
                 comparison: null,
+                // Multi-waypoint: không có tham chiếu Dijkstra hay phương án thay thế.
+                optimality_reference: null,
+                route_comparison: null,
                 comparison_note:
                   "Đã tìm kiếm nhiều chặng vì bạn đã chọn điểm dừng.",
                 algorithm: explanations[0]?.algorithm || algorithm,
+                // Chi tiết từng chặng để hiển thị rõ hơn.
+                legs: results.map((result, index) => ({
+                  index: index + 1,
+                  from: result.start_name || stops[index],
+                  to: result.end_name || stops[index + 1],
+                  route_names: result.path_node_names || [],
+                  distance: Number(result.total_distance || 0),
+                  time: Number(result.total_time || 0),
+                  cost:
+                    result.total_cost == null
+                      ? null
+                      : Number(result.total_cost),
+                  algorithm_name: result.algorithm_name,
+                })),
+                totals: {
+                  distance: totalDistance,
+                  time: totalTime,
+                  cost: hasCost ? totalCost : null,
+                  explored_count: totalExploredCount,
+                  execution_time_ms: totalExecutionTime,
+                },
               }
             : null,
       );

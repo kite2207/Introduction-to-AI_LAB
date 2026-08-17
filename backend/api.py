@@ -25,9 +25,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.models import TrafficGraph, CostEvaluator
-from src.algorithms import (
-    bfs_search, dfs_search, ucs_search, dijkstra_search, astar_search, greedy_best_first_search
-)
+from src.algorithms import bfs_search, dfs_search, ucs_search, dijkstra_search, astar_search, greedy_best_first_search
 from backend.schemas import (
     SearchRequest,
     SearchResponse,
@@ -35,6 +33,7 @@ from backend.schemas import (
     EdgeResponse,
     GraphInfoResponse,
 )
+from backend.explanation import build_route_explanation
 
 app = FastAPI(
     title="Route Finding API",
@@ -190,205 +189,6 @@ def get_graph_info():
     )
 
 
-
-def _reference_route(start_id: str, end_id: str, optimization: str):
-    evaluator = get_cost_evaluator(optimization)
-    ref = dijkstra_search(
-        graph,
-        start_id,
-        end_id,
-        evaluator,
-    )
-
-    if not ref.path:
-        return None
-
-    return {
-        "algorithm": "Dijkstra",
-        "optimization": optimization,
-        "path": list(ref.path),
-        "route_names": [
-            graph.nodes[nid].name
-            for nid in ref.path
-            if nid in graph.nodes
-        ],
-        "distance": ref.total_distance,
-        "time": ref.total_time,
-        "cost": ref.total_cost,
-    }
-
-
-def build_route_explanation(
-    *,
-    algo: str,
-    algorithm_name: str,
-    optimization: str,
-    start_id: str,
-    end_id: str,
-    path: list[str],
-    path_names: list[str],
-    total_cost: float | None,
-    total_distance: float,
-    total_time: float,
-):
-    mode = optimization
-
-    # Same-objective Dijkstra = optimality reference.
-    optimality_ref = _reference_route(
-        start_id,
-        end_id,
-        mode,
-    )
-
-    # Actual alternatives.
-    shortest_ref = _reference_route(
-        start_id,
-        end_id,
-        "distance",
-    )
-    fastest_ref = _reference_route(
-        start_id,
-        end_id,
-        "time",
-    )
-
-    def compare(ref):
-        if ref is None:
-            return None
-
-        return {
-            **ref,
-            "distance_difference": (
-                total_distance - ref["distance"]
-            ),
-            "time_difference": (
-                total_time - ref["time"]
-            ),
-            "cost_difference": (
-                None
-                if total_cost is None
-                else total_cost - ref["cost"]
-            ),
-        }
-
-    criterion = {
-        "ucs": "lowest accumulated cost g(n)",
-        "dijkstra": "lowest accumulated cost g(n)",
-        "astar": "lowest estimated cost f(n) = g(n) + h(n)",
-        "greedy": "lowest heuristic h(n)",
-        "bfs": "FIFO expansion order",
-        "dfs": "LIFO expansion order",
-    }.get(algo, "its search rule")
-
-    objective = {
-        "distance": "minimum distance",
-        "time": "minimum estimated travel time",
-        "mixed": "minimum traffic-aware mixed cost",
-    }.get(mode, "the selected cost objective")
-
-    if algo in {"ucs", "dijkstra"}:
-        optimality = (
-            "UCS/Dijkstra is optimal for non-negative edge costs "
-            f"under the {mode} objective."
-        )
-    elif algo == "astar":
-        optimality = (
-            "A* is optimal when its heuristic is admissible "
-            "(and consistent for graph search)."
-        )
-    elif algo == "bfs":
-        optimality = (
-            "BFS is optimal for minimum hop count, not necessarily "
-            "for distance, time, or traffic cost."
-        )
-    else:
-        optimality = (
-            f"{algorithm_name} does not guarantee an optimal route "
-            f"under the {mode} traffic cost."
-        )
-
-    congested = []
-    for source_id, target_id in zip(path, path[1:]):
-        edge = next(
-            (
-                e
-                for e in graph.get_neighbors(source_id)
-                if str(e.target_id) == str(target_id)
-            ),
-            None,
-        )
-
-        if edge is None or edge.congestion_level < 4:
-            continue
-
-        risk = getattr(edge, "risk_factors", "none")
-        if isinstance(risk, list):
-            risk = ", ".join(str(v) for v in risk)
-
-        congested.append({
-            "from": graph.nodes[source_id].name,
-            "to": graph.nodes[target_id].name,
-            "congestion": edge.congestion_level,
-            "risk": risk,
-        })
-
-    same_reference = (
-        optimality_ref is not None
-        and total_cost is not None
-        and abs(total_cost - optimality_ref["cost"]) < 1e-9
-    )
-
-    return {
-        "headline": (
-            f"The selected route is optimized for {objective}."
-        ),
-        "why_selected": (
-            f"{algorithm_name} selected this route using {criterion} "
-            f"under the '{mode}' objective."
-        ),
-        "optimality": optimality,
-        "optimality_reference": {
-            "algorithm": "Dijkstra",
-            "optimization": mode,
-            "route_names": (
-                optimality_ref["route_names"]
-                if optimality_ref else []
-            ),
-            "distance": (
-                optimality_ref["distance"]
-                if optimality_ref else None
-            ),
-            "time": (
-                optimality_ref["time"]
-                if optimality_ref else None
-            ),
-            "cost": (
-                optimality_ref["cost"]
-                if optimality_ref else None
-            ),
-            "same_cost_as_selected": same_reference,
-        },
-        "route_comparison": {
-            "selected": {
-                "route_names": list(path_names),
-                "distance": total_distance,
-                "time": total_time,
-                "cost": total_cost,
-            },
-            "shortest_distance": compare(shortest_ref),
-            "fastest_time": compare(fastest_ref),
-        },
-        "congested_segments": congested,
-        "optimization": mode,
-        "algorithm": algorithm_name,
-        "comparison_note": (
-            "Dijkstra with the same objective is an optimality reference. "
-            "The shortest-distance and fastest-time routes are actual "
-            "alternative routes."
-        ),
-    }
-
-
 @app.post("/api/search", response_model=SearchResponse, tags=["Search"])
 def search_route(req: SearchRequest):
     start_id = str(req.start)
@@ -426,6 +226,7 @@ def search_route(req: SearchRequest):
     path_coords = [{"lat": graph.nodes[nid].lat, "lng": graph.nodes[nid].lng} for nid in result.path if nid in graph.nodes]
 
     explanation = build_route_explanation(
+        graph,
         algo=algo,
         algorithm_name=result.algorithm_name,
         optimization=req.optimization,
