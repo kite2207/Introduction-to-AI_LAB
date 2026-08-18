@@ -5,15 +5,13 @@ Run from the project root:
     python -m uvicorn backend.api:app --reload --port 8000
 
 The graph source is data/hcm_traffic_data.json.
-The existing TrafficGraph/search algorithms are kept unchanged by adapting
-hcm_traffic_data.json to the existing TrafficGraph.load_from_json() interface.
+The graph is loaded directly from data/hcm_traffic_data.json.
 """
 
 from __future__ import annotations
 
 import json
 import sys
-import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -62,52 +60,9 @@ def load_hcm_data() -> dict[str, Any]:
     return data
 
 
-def make_legacy_graph_files(data: dict[str, Any]) -> tuple[Path, Path]:
-    """Adapt hcm_traffic_data.json to TrafficGraph.load_from_json()."""
-    nodes = []
-    edges = []
-
-    for node_id, node in data.items():
-        nodes.append(
-            {
-                "node_id": str(node_id),
-                "name": node.get("name", str(node_id)),
-                "lat": node.get("lat"),
-                "lng": node.get("lng"),
-                "node_type": node.get("type", "intersection"),
-            }
-        )
-
-        for c in node.get("connected_to", []):
-            target = c.get("target_node")
-            if target is None:
-                continue
-            edges.append(
-                {
-                    "source_id": str(node_id),
-                    "target_id": str(target),
-                    "distance": c.get("distance", 0),
-                    "estimated_time": c.get("estimated_time", 0),
-                    "congestion_level": c.get("congestion_level", 1),
-                    "road_type": c.get("road_type"),
-                    "direction": c.get("direction", "two-way"),
-                    "risk_factors": c.get("risk_factors", []),
-                }
-            )
-
-    temp_dir = Path(tempfile.mkdtemp(prefix="route_hcm_"))
-    nodes_path = temp_dir / "nodes.json"
-    edges_path = temp_dir / "edges.json"
-    nodes_path.write_text(json.dumps(nodes, ensure_ascii=False), encoding="utf-8")
-    edges_path.write_text(json.dumps(edges, ensure_ascii=False), encoding="utf-8")
-    return nodes_path, edges_path
-
-
 hcm_data = load_hcm_data()
-GENERATED_NODES_PATH, GENERATED_EDGES_PATH = make_legacy_graph_files(hcm_data)
-
 graph = TrafficGraph()
-graph.load_from_json(str(GENERATED_NODES_PATH), str(GENERATED_EDGES_PATH))
+graph.load_from_hcm_data(hcm_data)
 
 print(f"[API] HCM graph loaded: {len(graph.nodes)} nodes, {sum(len(v) for v in graph.adjacency_list.values())} edges")
 
@@ -187,6 +142,35 @@ def get_graph_info():
         node_count=len(graph.nodes),
         edge_count=sum(len(v) for v in graph.adjacency_list.values()),
     )
+
+
+@app.get("/api/graph", tags=["Graph"])
+def get_graph():
+    """Return the canonical graph representation used by the frontend."""
+    nodes = []
+    edges = []
+
+    for node_id, node in hcm_data.items():
+        nodes.append({
+            "id": str(node_id),
+            "name": node.get("name") or str(node_id),
+            "lat": node["lat"],
+            "lng": node["lng"],
+            "type": node.get("type") or "intersection",
+        })
+        for edge in node.get("connected_to", []):
+            edges.append({
+                "source": str(node_id),
+                "target": str(edge["target_node"]),
+                "distance": edge["distance"],
+                "estimatedTime": edge["estimated_time"],
+                "congestion": edge.get("congestion_level", 1),
+                "direction": edge.get("direction", "two-way"),
+                "risk": edge.get("risk_factors", []),
+                "geometry": edge.get("geometry"),
+            })
+
+    return {"nodes": nodes, "edges": edges}
 
 
 @app.post("/api/search", response_model=SearchResponse, tags=["Search"])

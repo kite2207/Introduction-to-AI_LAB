@@ -1,7 +1,7 @@
 """
 Pydantic schemas cho FastAPI request/response validation
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 
 
@@ -32,7 +32,7 @@ class EdgeResponse(BaseModel):
     congestion_level: int
     road_type: str
     direction: str
-    risk_factors: List[str] = []
+    risk_factors: List[str] = Field(default_factory=list)
 
 
 class Coordinate(BaseModel):
@@ -49,12 +49,12 @@ class SearchResponse(BaseModel):
     explored_count: int
     execution_time_ms: float
     # Thông tin bổ sung cho UI
-    path_node_names: List[str] = []
-    path_coordinates: List[Coordinate] = []
+    path_node_names: List[str] = Field(default_factory=list)
+    path_coordinates: List[Coordinate] = Field(default_factory=list)
     start_name: str = ""
     end_name: str = ""
-    steps: list[dict] = []
-    explanation: dict = {}
+    steps: list[dict] = Field(default_factory=list)
+    explanation: dict = Field(default_factory=dict)
 
 
 class GraphInfoResponse(BaseModel):

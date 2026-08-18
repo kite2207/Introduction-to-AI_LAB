@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Set, Optional
+from typing import Any, List, Dict
 import json
 
 @dataclass
@@ -62,6 +62,78 @@ class TrafficGraph:
             edges_data = json.load(f)
             for ed in edges_data:
                 self.add_edge_data(Edge(**ed))
+
+    def load_from_hcm_data(self, data: Dict[str, Any]):
+        """Load and validate the canonical HCM traffic-data structure."""
+        if not isinstance(data, dict):
+            raise ValueError("HCM traffic data must be a JSON object")
+
+        self.nodes.clear()
+        self.adjacency_list.clear()
+
+        for raw_node_id, raw_node in data.items():
+            node_id = str(raw_node_id)
+            if not isinstance(raw_node, dict):
+                raise ValueError(f"Node '{node_id}' must be a JSON object")
+
+            lat = raw_node.get("lat")
+            lng = raw_node.get("lng")
+            if not isinstance(lat, (int, float)) or not -90 <= lat <= 90:
+                raise ValueError(f"Node '{node_id}' has invalid latitude: {lat!r}")
+            if not isinstance(lng, (int, float)) or not -180 <= lng <= 180:
+                raise ValueError(f"Node '{node_id}' has invalid longitude: {lng!r}")
+
+            self.add_node(Node(
+                node_id=node_id,
+                name=raw_node.get("name") or node_id,
+                lat=float(lat),
+                lng=float(lng),
+                node_type=raw_node.get("type") or "intersection",
+            ))
+
+        for raw_source_id, raw_node in data.items():
+            source_id = str(raw_source_id)
+            connections = raw_node.get("connected_to", [])
+            if not isinstance(connections, list):
+                raise ValueError(f"Node '{source_id}' has invalid connected_to")
+
+            for index, connection in enumerate(connections):
+                if not isinstance(connection, dict):
+                    raise ValueError(
+                        f"Edge {source_id}[{index}] must be a JSON object"
+                    )
+
+                target = connection.get("target_node")
+                target_id = str(target) if target is not None else ""
+                if target_id not in self.nodes:
+                    raise ValueError(
+                        f"Edge {source_id}[{index}] targets unknown node '{target_id}'"
+                    )
+
+                distance = connection.get("distance")
+                estimated_time = connection.get("estimated_time")
+                congestion = connection.get("congestion_level", 1)
+                if not isinstance(distance, (int, float)) or distance < 0:
+                    raise ValueError(f"Edge {source_id}->{target_id} has invalid distance")
+                if not isinstance(estimated_time, (int, float)) or estimated_time < 0:
+                    raise ValueError(f"Edge {source_id}->{target_id} has invalid estimated_time")
+                if not isinstance(congestion, int) or not 1 <= congestion <= 5:
+                    raise ValueError(f"Edge {source_id}->{target_id} has invalid congestion_level")
+
+                risk_factors = connection.get("risk_factors", [])
+                if not isinstance(risk_factors, list):
+                    raise ValueError(f"Edge {source_id}->{target_id} has invalid risk_factors")
+
+                self.add_edge_data(Edge(
+                    source_id=source_id,
+                    target_id=target_id,
+                    distance=float(distance),
+                    estimated_time=float(estimated_time),
+                    congestion_level=congestion,
+                    road_type=connection.get("road_type") or "unknown",
+                    direction=connection.get("direction") or "two-way",
+                    risk_factors=risk_factors,
+                ))
 
     def get_neighbors(self, node_id: str) -> List[Edge]:
         return self.adjacency_list.get(node_id, [])

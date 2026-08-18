@@ -26,10 +26,8 @@ Thumbs.db
 # Vite
 .vite/
 
-# Docker
+# Docker runtime files
 .docker/
-.dockerignore
-Dockerfile
 
 # Cache
 .cache/

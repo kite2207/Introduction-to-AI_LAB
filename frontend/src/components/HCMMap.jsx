@@ -1,14 +1,12 @@
 import {
   MapContainer,
   TileLayer,
-  Marker,
+  CircleMarker,
   Popup,
   Polyline,
 } from "react-leaflet";
-import { useMap } from "react-leaflet";
-import { useEffect, useMemo } from "react";
-
-import L from "leaflet";
+import { useMap, useMapEvents } from "react-leaflet";
+import { useEffect, useMemo, useState } from "react";
 
 function FitHCM({ nodes }) {
   const map = useMap();
@@ -22,6 +20,19 @@ function FitHCM({ nodes }) {
       });
     }
   }, [nodes, map]);
+
+  return null;
+}
+
+function ViewportObserver({ onChange }) {
+  const map = useMapEvents({
+    moveend: () => onChange({ zoom: map.getZoom(), bounds: map.getBounds() }),
+    zoomend: () => onChange({ zoom: map.getZoom(), bounds: map.getBounds() }),
+  });
+
+  useEffect(() => {
+    onChange({ zoom: map.getZoom(), bounds: map.getBounds() });
+  }, [map, onChange]);
 
   return null;
 }
@@ -184,6 +195,7 @@ export default function HCMMap({
   simulation = null,
   onNodeClick,
 }) {
+  const [viewport, setViewport] = useState({ zoom: 13, bounds: null });
   const hcmBounds = [
     [10.35, 106.35],
     [11.15, 107.05],
@@ -258,6 +270,50 @@ export default function HCMMap({
   const frontierNodeIds =
     simulation?.frontierNodes || [];
 
+  const emphasizedNodeIds = useMemo(
+    () => new Set([
+      start,
+      end,
+      currentNode,
+      ...waypoints,
+      ...path,
+      ...exploredNodeIds,
+      ...frontierNodeIds,
+    ].filter((id) => id != null)),
+    [start, end, currentNode, waypoints, path, exploredNodeIds, frontierNodeIds]
+  );
+
+  const visibleNodes = useMemo(() => {
+    if (viewport.zoom < 15) {
+      return nodes.filter((node) => emphasizedNodeIds.has(node.id));
+    }
+
+    return nodes.filter(
+      (node) =>
+        emphasizedNodeIds.has(node.id) ||
+        !viewport.bounds ||
+        viewport.bounds.contains([node.lat, node.lng])
+    );
+  }, [nodes, emphasizedNodeIds, viewport]);
+
+  const visibleBaseEdges = useMemo(() => {
+    if (viewport.zoom < 16) {
+      return [];
+    }
+
+    return edges.filter((edge) => {
+      const source = nodeMap[edge.source];
+      const target = nodeMap[edge.target];
+      if (!source || !target || !viewport.bounds) {
+        return Boolean(source && target);
+      }
+      return (
+        viewport.bounds.contains([source.lat, source.lng]) ||
+        viewport.bounds.contains([target.lat, target.lng])
+      );
+    });
+  }, [edges, nodeMap, viewport]);
+
   return (
     <MapContainer
       center={[10.7769, 106.7009]}
@@ -266,6 +322,7 @@ export default function HCMMap({
       maxZoom={18}
       maxBounds={hcmBounds}
       maxBoundsViscosity={1}
+      preferCanvas
       whenReady={(e) => {
         setTimeout(() => {
           e.target.invalidateSize();
@@ -277,13 +334,14 @@ export default function HCMMap({
       }}
     >
       <FitHCM nodes={nodes} />
+      <ViewportObserver onChange={setViewport} />
 
       <TileLayer
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      {/* Base graph: always remains visible underneath. */}
-      {edges.map((edge) => {
+      {/* Base graph is shown only when zoomed in to avoid visual clutter. */}
+      {visibleBaseEdges.map((edge, index) => {
         const positions = getEdgePositions(
           edge,
           nodeMap
@@ -295,12 +353,12 @@ export default function HCMMap({
 
         return (
           <Polyline
-            key={`base-${edge.source}-${edge.target}`}
+            key={`base-${edge.source}-${edge.target}-${index}`}
             positions={positions}
             pathOptions={{
               color: "#94a3b8",
-              weight: 2,
-              opacity: 0.28,
+              weight: 1.5,
+              opacity: 0.14,
             }}
           />
         );
@@ -335,17 +393,28 @@ export default function HCMMap({
       {/* Final selected route: RED. */}
       {routeSegments.map((segment) => (
         <Polyline
+          key={`route-outline-${segment.key}`}
+          positions={segment.positions}
+          pathOptions={{
+            color: "#ffffff",
+            weight: 11,
+            opacity: 0.82,
+          }}
+        />
+      ))}
+      {routeSegments.map((segment) => (
+        <Polyline
           key={segment.key}
           positions={segment.positions}
           pathOptions={{
             color: "#dc2626",
-            weight: 9,
+            weight: 6,
             opacity: 0.96,
           }}
         />
       ))}
 
-      {nodes.map((node) => {
+      {visibleNodes.map((node) => {
         let color = "#9ca3af";
 
         if (frontierNodeIds.includes(node.id)) {
@@ -372,25 +441,19 @@ export default function HCMMap({
           color = "#dc2626";
         }
 
-        const icon = new L.DivIcon({
-          html: `
-            <div style="
-              background:${color};
-              width:15px;
-              height:15px;
-              border-radius:50%;
-              border:2px solid white;
-              box-shadow:0 1px 3px rgba(0,0,0,.35);
-            "></div>
-          `,
-          className: "",
-        });
+        const isEmphasized = emphasizedNodeIds.has(node.id);
 
         return (
-          <Marker
+          <CircleMarker
             key={node.id}
-            position={[node.lat, node.lng]}
-            icon={icon}
+            center={[node.lat, node.lng]}
+            radius={isEmphasized ? 6 : 3.5}
+            pathOptions={{
+              color: "#ffffff",
+              weight: isEmphasized ? 2 : 1,
+              fillColor: color,
+              fillOpacity: isEmphasized ? 1 : 0.68,
+            }}
             eventHandlers={{
               click: () => onNodeClick(node.id),
             }}
@@ -400,7 +463,7 @@ export default function HCMMap({
               <br />
               ID: {node.id}
             </Popup>
-          </Marker>
+          </CircleMarker>
         );
       })}
     </MapContainer>

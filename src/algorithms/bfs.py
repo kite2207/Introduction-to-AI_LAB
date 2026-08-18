@@ -37,7 +37,7 @@ def bfs_search(
 
         if node_id == target_id:
             final_node = current_node
-            candidates = _candidate_data(list(frontier), discovered)
+            candidates = _candidate_data(list(frontier), set(explored_nodes))
             _record_uninformed_step(
                 steps, current_node, explored_nodes, list(frontier),
                 explored_edges, candidates,
@@ -61,7 +61,7 @@ def bfs_search(
             frontier.append(child)
             explored_edges.append({"source": node_id, "target": neighbor_id})
 
-        candidates = _candidate_data(list(frontier), discovered)
+        candidates = _candidate_data(list(frontier), set(explored_nodes))
         _record_uninformed_step(
             steps, current_node, explored_nodes, list(frontier),
             explored_edges, candidates,

@@ -1,51 +1,52 @@
-import { useMemo, useState } from "react";
-
-// Graph data is sourced from the repository root (single source of truth),
-// not from a copy inside frontend/src/data.
-import trafficData from "../../data/hcm_traffic_data.json";
+import { useEffect, useMemo, useState } from "react";
 
 import Sidebar from "./components/Sidebar";
 import HCMMap from "./components/HCMMap";
 import StatsPanel from "./components/StatsPanel";
 
-const API_URL = "http://localhost:8000/api/search";
+// Use the same origin by default. Vite proxies /api during development and
+// Nginx proxies it in Docker, so the browser never depends on a hard-coded
+// localhost address or CORS configuration.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 export default function App() {
-  const { nodes, edges, nodeMap } = useMemo(() => {
-    const nodes = Object.entries(trafficData).map(([id, node]) => ({
-      id,
-      name: node.name,
-      lat: node.lat,
-      lng: node.lng,
-      type: node.type,
-    }));
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
+  const [graphError, setGraphError] = useState("");
 
-    const edges = [];
+  const nodeMap = useMemo(
+    () => Object.fromEntries(nodes.map((node) => [node.id, node])),
+    [nodes],
+  );
 
-    Object.entries(trafficData).forEach(([sourceId, node]) => {
-      node.connected_to.forEach((edge) => {
-        edges.push({
-          source: sourceId,
-          target: edge.target_node,
-          distance: edge.distance,
-          estimatedTime: edge.estimated_time,
-          congestion: edge.congestion_level,
-          direction: edge.direction,
-          risk: edge.risk_factors,
-          geometry: Array.isArray(edge.geometry)
-            ? edge.geometry.map((point) =>
-                Array.isArray(point)
-                  ? [point[0], point[1]]
-                  : [point.lat, point.lng],
-              )
-            : null,
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadGraph = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/graph`, {
+          signal: controller.signal,
         });
-      });
-    });
+        if (!response.ok) {
+          throw new Error(`Graph request failed (${response.status})`);
+        }
 
-    const nodeMap = Object.fromEntries(nodes.map((node) => [node.id, node]));
+        const data = await response.json();
+        setNodes(Array.isArray(data.nodes) ? data.nodes : []);
+        setEdges(Array.isArray(data.edges) ? data.edges : []);
+        setGraphError("");
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Không thể tải dữ liệu bản đồ:", error);
+          setGraphError(
+            `Không tải được dữ liệu bản đồ từ ${API_BASE_URL}. Hãy kiểm tra backend.`,
+          );
+        }
+      }
+    };
 
-    return { nodes, edges, nodeMap };
+    loadGraph();
+    return () => controller.abort();
   }, []);
 
   const nodeOptions = useMemo(
@@ -134,7 +135,7 @@ export default function App() {
   };
 
   const callSearchApi = async (from, to) => {
-    const response = await fetch(API_URL, {
+    const response = await fetch(`${API_BASE_URL}/search`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -315,7 +316,7 @@ export default function App() {
       console.error("Lỗi tìm kiếm:", error);
       const message =
         error instanceof TypeError
-          ? "Không kết nối được backend tại http://localhost:8000. Hãy khởi động API trước khi tìm đường."
+          ? `Không kết nối được backend tại ${API_BASE_URL}. Hãy khởi động API trước khi tìm đường.`
           : error.message || "Không thể tìm đường.";
       alert(message);
       resetSearchResult();
@@ -356,6 +357,26 @@ export default function App() {
           height: "100vh",
         }}
       >
+        {graphError && (
+          <div
+            role="alert"
+            style={{
+              position: "absolute",
+              zIndex: 1000,
+              top: "16px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              maxWidth: "640px",
+              padding: "10px 14px",
+              borderRadius: "8px",
+              color: "#991b1b",
+              background: "#fee2e2",
+              border: "1px solid #fecaca",
+            }}
+          >
+            {graphError}
+          </div>
+        )}
         <Sidebar
           nodeMap={nodeMap}
           nodeOptions={nodeOptions}
