@@ -116,8 +116,8 @@ Giảng viên: & Võ Nhật Tân \\
 {\bfseries Sinh viên thực hiện}\\[0.2cm]
 \begin{tabular}{p{7.2cm}r}
 Dương Trung Hiếu & 24127040 \\
-Nguyễn Hoàng Bảo Long & 24127201 \\
 Trần Vũ Anh Kiệt & 24127196 \\
+Nguyễn Hoàng Bảo Long & 24127201 \\
 \end{tabular}
 
 \vfill
@@ -180,8 +180,8 @@ Intelligence. Table~\ref{tab:members} records the submitted member list.
 \textbf{No.} & \textbf{Student} & \textbf{Student ID}\\
 \midrule
 1 & Dương Trung Hiếu & 24127040\\
-2 & Nguyễn Hoàng Bảo Long & 24127201\\
-3 & Trần Vũ Anh Kiệt & 24127196\\
+2 & Trần Vũ Anh Kiệt & 24127196\\
+3 & Nguyễn Hoàng Bảo Long & 24127201\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -199,35 +199,9 @@ final demonstration.
 \toprule
 \textbf{Member} & \textbf{Main contribution}\\
 \midrule
+Dương Trung Hiếu (Web/Local GUI) & Built the interface, map, route selection, traversal animations, route explanations and metrics, and algorithm comparison; implemented multi-location route optimization; and supported backend integration.\\
+Trần Vũ Anh Kiệt (Core Algorithms) & Designed the graph structure; implemented BFS, DFS, UCS, A*, and advanced single-route search; and optimized and debugged the algorithms.\\
 Nguyễn Hoàng Bảo Long (Data \& Model) & Curated the road dataset, defined and validated the cost model, documented the data and modeling, and finalized the report and demo materials.\\
-Trần Vũ Anh Kiệt (Core Algorithms) & Designed the graph structure; implemented BFS, DFS, UCS, A*, advanced and multi-location search; and optimized and debugged the algorithms.\\
-Dương Trung Hiếu (Web/Local GUI) & Built the interface, map, route selection, traversal animations, route explanations and metrics, compared algorithms, and supported backend integration.\\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\section{Requirement Completion Level}
-Table~\ref{tab:completion} summarizes the implemented and verified functions in
-the final repository.
-
-\begin{table}[H]
-\centering
-\caption{Completion status against the Lab 1 requirements}
-\label{tab:completion}
-\small
-\begin{tabularx}{\textwidth}{p{4.4cm}p{3.1cm}X}
-\toprule
-\textbf{Requirement} & \textbf{Status} & \textbf{Evidence / remaining work}\\
-\midrule
-Vietnamese traffic graph and attributes & \completed & 1,033 nodes and 3,914 directed segments with distance, time, congestion, type, direction, and risks.\\
-Two-location search & \completed & DFS, BFS, UCS, Dijkstra, A*, and Greedy return a common result model.\\
-Traffic-aware cost and heuristics & \completed & Distance, time, and mixed modes plus Haversine heuristics.\\
-Backend API & \completed & Graph information and route-search endpoints are implemented.\\
-GUI and graph display & \completed & React/Leaflet loads \code{/api/graph}, supports map/dropdown selection, and draws the returned route.\\
-Step-by-step visualization & \completed & Algorithm traces drive current, explored, frontier, candidate, and final-route states.\\
-Multi-location routing & \completed & The GUI executes start--waypoint--destination legs; Nearest Neighbor and optimal Held-Karp are also implemented for visit-order optimization.\\
-Route explanation & \completed & The backend derives congestion/risk summaries, optimality notes, and a Dijkstra reference comparison from the returned route.\\
-Build and smoke verification & \completed & Backend imports the canonical graph and the production Vite build completes successfully.\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -237,7 +211,7 @@ Build and smoke verification & \completed & Backend imports the canonical graph 
 
 \section{Selected Vietnamese Traffic Scenario}
 The selected scenario is an educational urban navigation system for a subset of
-Ho Chi Minh City. A user chooses a start intersection, a destination, optional
+Ho Chi Minh City. A user chooses a start location, a destination, optional
 stops, a search algorithm, and an optimization objective. The system then
 searches a directed street graph and visualizes the route.
 
@@ -275,10 +249,45 @@ The road network is a directed weighted graph $G=(V,E)$:
 \end{itemize}
 
 \section{Nodes and Edges}
-A node contains \code{node\_id}, \code{name}, latitude, longitude, and a type
-such as intersection. An edge contains source, target, physical distance,
-nominal time, congestion level 1--5, road type, direction, and a list of risks.
-The adjacency-list design uses $O(|V|+|E|)$ memory.
+
+\titleformat{\subsection}{\large\bfseries\color{hcmusblue}}{\thesubsection}{0.7em}{}
+\subsection{Nodes}
+Each node represents a location or intersection in the road network. A node has
+the following attributes:
+\begin{itemize}
+\item \code{node\_id}: the unique identifier of the node, derived from the key
+of the corresponding object in the JSON dataset.
+\item \code{name}: the human-readable street or intersection name displayed in
+the user interface.
+\item \code{lat}: the latitude of the location.
+\item \code{lng}: the longitude of the location.
+\item \code{type}: the node category, such as \code{intersection}.
+\end{itemize}
+
+\subsection{Edges}
+Each edge represents a directed road segment from one node to another. An edge
+has the following attributes:
+\begin{itemize}
+\item \code{source\_id}: the identifier of the source node, derived from the
+node that owns the \code{connected\_to} list.
+\item \code{target\_node}: the identifier of the destination node.
+\item \code{distance}: the physical length of the road segment in metres.
+\item \code{estimated\_time}: the nominal travel time in seconds under normal
+traffic conditions.
+\item \code{congestion\_level}: the simulated traffic level from 1 (smooth) to
+5 (gridlock).
+\item \code{road\_type}: the road classification, for example
+\code{primary}, \code{secondary}, or \code{residential}.
+\item \code{direction}: whether the road is \code{one-way} or \code{two-way}.
+\item \code{risk\_factors}: a list of possible risks, such as flooding,
+construction, narrow roads, or complex intersections.
+\item \code{geometry}: the ordered latitude--longitude points used to draw the
+road segment on the map.
+\end{itemize}
+
+The graph stores these directed edges in an adjacency list. This representation
+supports efficient neighbor lookup and uses $O(|V|+|E|)$ memory.
+\titleformat{\subsection}{\large\bfseries\color{darkgray}}{\thesubsection}{0.7em}{}
 
 \section{Traffic-Aware Cost Function}
 Let $d(e)$ be physical distance, $t(e)$ nominal time, and $c(e)$ congestion.
@@ -526,34 +535,51 @@ Held-Karp & $O(n^2 2^n)$ & $O(n2^n)$ & Yes & Yes for selected stops\\
 
 \section{Actual Two-Location Performance}
 The verified query is vertex 0 (Đường Hồng Bàng - Đường Đặng Thái Thân) to
-vertex 880 (Ngô Gia Tự) in distance mode. One local Python 3.13 run
-produced Table~\ref{tab:actual}. Sub-millisecond differences are illustrative;
-route quality and expansions are more meaningful on this small graph.
+vertex 2 (An Dương Vương - Đường Hồng Bàng) in mixed-cost mode. The results
+recorded from the graphical interface are summarized in Table~\ref{tab:actual}.
+Because this is a very short route, the measured execution times are mainly
+illustrative; route quality and the number of explored vertices are more
+meaningful for comparison.
 
 \begin{table}[H]
 \centering
-\caption{Actual distance-mode results from vertex 0 to 880}
+\caption{Actual mixed-mode results from vertex 0 to vertex 2}
 \label{tab:actual}
 \small
-\begin{tabular}{lrrrrrr}
+\begin{tabular}{lrrrrr}
 \toprule
-\textbf{Method}&\textbf{Nodes}&\textbf{Dist. (m)}&\textbf{Time (s)}&
-\textbf{Cost}&\textbf{Expanded}&\textbf{ms}\\
+\textbf{Method}&\textbf{Dist. (m)}&\textbf{Time (min)}&
+\textbf{Cost}&\textbf{Explored}&\textbf{ms}\\
 \midrule
-DFS&340&36,329.18&35,533.10&43,507.72&512&86.215\\
-BFS&18&2,430.24&1,567.80&2,782.52&590&38.883\\
-UCS&26&1,978.48&2,039.70&2,149.45&561&41.674\\
-Dijkstra&26&1,978.48&2,039.70&2,149.45&561&42.902\\
-A*&26&1,978.48&2,039.70&2,149.45&173&8.171\\
-Greedy Best-First&20&2,552.25&2,171.60&3,028.28&26&0.767\\
+A* (mixed)&128&1.1&383.92&2&0.19\\
+BFS&128&1.1&383.92&3&0.08\\
+DFS&296&4.6&1,564.24&4&0.16\\
+UCS&128&1.1&383.92&3&0.15\\
+Dijkstra&128&1.1&383.92&3&0.15\\
+Greedy Best-First (mixed)&128&1.1&383.92&2&0.13\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-UCS, Dijkstra, and A* agree on the optimum. A* reduces expansions by 69.2
-percent relative to UCS. Greedy expands only 26 vertices but costs 40.9 percent
-more than the optimum. BFS finds the fewest-edge route, not the cheapest route,
-and DFS follows a long adjacency-order-dependent detour.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{images/route-comparison-0-to-2.png}
+\caption{GUI results for the route from Đường Hồng Bàng - Đường Đặng Thái
+Thân to An Dương Vương - Đường Hồng Bàng: (a) A* in mixed mode, (b) BFS,
+(c) DFS, (d) UCS, (e) Dijkstra, and (f) Greedy Best-First in mixed mode.}
+\label{fig:route-comparison-0-to-2}
+\end{figure}
+
+\paragraph{Conclusion.}
+A*, BFS, UCS, Dijkstra, and Greedy Best-First all find the same 128-metre route,
+with an estimated travel time of 1.1 minutes and a mixed cost of 383.92. A* and
+Greedy Best-First are the most search-efficient in this experiment, exploring
+only two vertices, while BFS has the lowest measured execution time at
+0.08~ms. DFS is strongly affected by adjacency order: it explores four
+vertices and returns a 296-metre detour taking 4.6 minutes, with a cost of
+1,564.24. Therefore, the informed and cost-based methods provide substantially
+better route quality than DFS for this query; the tiny timing differences are
+not large enough to establish a general runtime ranking.
 
 \section{Effect of Traffic Objective}
 \begin{table}[H]
@@ -782,18 +808,6 @@ backend/api.py                 FastAPI endpoints
 backend/schemas.py             Request/response schemas
 frontend/src/                  React and Leaflet interface
 \end{verbatim}
-
-\chapter{Representative Optimal Route}
-For the two-location distance experiment, UCS, Dijkstra, and A* return:
-\begin{quote}\small
-0 $\rightarrow$ 2 $\rightarrow$ 751 $\rightarrow$ 752 $\rightarrow$ 508
-$\rightarrow$ 390 $\rightarrow$ 753 $\rightarrow$ 391 $\rightarrow$ 288
-$\rightarrow$ 1016 $\rightarrow$ 966 $\rightarrow$ 849 $\rightarrow$ 841
-$\rightarrow$ 43 $\rightarrow$ 33 $\rightarrow$ 31 $\rightarrow$ 46
-$\rightarrow$ 824 $\rightarrow$ 825 $\rightarrow$ 879 $\rightarrow$ 41
-$\rightarrow$ 885 $\rightarrow$ 39 $\rightarrow$ 881 $\rightarrow$ 882
-$\rightarrow$ 880.
-\end{quote}
 
 \chapter{Requirement Traceability}
 \begin{longtable}{p{2.1cm}p{5.2cm}p{5.5cm}}
