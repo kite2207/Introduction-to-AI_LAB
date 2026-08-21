@@ -1,7 +1,6 @@
-import time
 from typing import List, Dict, Tuple, Set, Optional
 from src.models import TrafficGraph, CostEvaluator
-from src.algorithms import astar_search
+from src.algorithms.astar import astar_search
 
 def compute_distance_matrix(
     graph: TrafficGraph,
@@ -40,29 +39,32 @@ def compute_distance_matrix(
                 
     return cost_matrix, path_matrix
 
-
 def solve_tsp_nearest_neighbor(
     graph: TrafficGraph,
     start_id: str,
     visit_ids: List[str],
-    cost_evaluator: CostEvaluator
+    cost_evaluator: CostEvaluator,
+    end_id: Optional[str] = None,
 ) -> Tuple[List[str], List[str], float]:
     """
     Solves the TSP using the Nearest Neighbor heuristic.
-    Visits all target locations starting and returning to start_id.
+    Visits all target locations starting at start_id. By default the tour
+    returns to start_id; when end_id is supplied, it finishes at end_id.
     Returns:
       - visiting_order: Order of the target locations visited (including start and end).
       - full_path: Concat of all road segment node IDs.
       - total_cost: Combined path cost.
     """
-    start_time = time.perf_counter()
-    all_locations = [start_id] + list(visit_ids)
+    destination = start_id if end_id is None else end_id
+    all_locations = list(dict.fromkeys([start_id, *visit_ids, destination]))
     
     # Compute the pairwise distance (cost) matrix
     cost_matrix, path_matrix = compute_distance_matrix(graph, all_locations, cost_evaluator)
     
     visiting_order = [start_id]
-    unvisited = set(visit_ids)
+    # Keep the input order as a deterministic tie-breaker. A set here would
+    # make equal-cost choices depend on Python's hash iteration order.
+    unvisited = list(dict.fromkeys(visit_ids))
     current = start_id
     
     while unvisited:
@@ -84,8 +86,7 @@ def solve_tsp_nearest_neighbor(
         visiting_order.append(next_node)
         current = next_node
         
-    # Return to start node to complete the loop
-    visiting_order.append(start_id)
+    visiting_order.append(destination)
     
     # Reconstruct the full path
     full_path = []
@@ -110,7 +111,8 @@ def solve_tsp_dynamic_programming(
     graph: TrafficGraph,
     start_id: str,
     visit_ids: List[str],
-    cost_evaluator: CostEvaluator
+    cost_evaluator: CostEvaluator,
+    end_id: Optional[str] = None,
 ) -> Tuple[List[str], List[str], float]:
     """
     Solves the TSP optimally using Dynamic Programming (Held-Karp algorithm).
@@ -121,19 +123,25 @@ def solve_tsp_dynamic_programming(
       - full_path: Concat of all road segment node IDs.
       - total_cost: Optimal combined path cost.
     """
-    all_locations = [start_id] + list(visit_ids)
+    destination = start_id if end_id is None else end_id
+    waypoints = list(dict.fromkeys(visit_ids))
+    # DP indices contain start + waypoints. The fixed destination is handled
+    # in the base case and is not a visitable state.
+    all_locations = [start_id] + waypoints
+    matrix_locations = list(dict.fromkeys([*all_locations, destination]))
     n = len(all_locations)
     
     # Map node ID to index
     id_to_idx = {loc: i for i, loc in enumerate(all_locations)}
     idx_to_id = {i: loc for i, loc in enumerate(all_locations)}
     
-    cost_matrix, path_matrix = compute_distance_matrix(graph, all_locations, cost_evaluator)
+    cost_matrix, path_matrix = compute_distance_matrix(graph, matrix_locations, cost_evaluator)
     
     # Convert cost matrix to index-based 2D array
     dist = [[float('inf')] * n for _ in range(n)]
     for (loc_a, loc_b), cost in cost_matrix.items():
-        dist[id_to_idx[loc_a]][id_to_idx[loc_b]] = cost
+        if loc_a in id_to_idx and loc_b in id_to_idx:
+            dist[id_to_idx[loc_a]][id_to_idx[loc_b]] = cost
         
     # DP table: memo[(mask, current_node_idx)] -> (min_cost, parent_node_idx)
     # mask: bitmask representing the set of visited nodes (from index 1 to n-1)
@@ -141,10 +149,9 @@ def solve_tsp_dynamic_programming(
     memo = {}
 
     def tsp(mask: int, u: int) -> Tuple[float, int]:
-        # If all nodes are visited (mask has all 1s except position 0)
-        # We need to return to start node (index 0)
+        # After all waypoints are visited, finish at the fixed destination.
         if mask == (1 << n) - 1:
-            return dist[u][0], 0
+            return cost_matrix.get((idx_to_id[u], destination), float('inf')), -1
             
         state = (mask, u)
         if state in memo:
@@ -168,7 +175,7 @@ def solve_tsp_dynamic_programming(
         return min_val, best_next
 
     # Solve starting from start node (index 0), mask has only node 0 visited (bit 0 set)
-    opt_cost, next_node = tsp(1, 0)
+    opt_cost, _ = tsp(1, 0)
     
     if opt_cost == float('inf'):
         # No TSP tour possible
@@ -181,7 +188,7 @@ def solve_tsp_dynamic_programming(
     
     while True:
         if mask == (1 << n) - 1:
-            visiting_order.append(start_id)
+            visiting_order.append(destination)
             break
         cost, parent = memo[(mask, current)]
         visiting_order.append(idx_to_id[parent])

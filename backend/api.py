@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -24,9 +25,16 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.models import TrafficGraph, CostEvaluator
 from src.algorithms import bfs_search, dfs_search, ucs_search, dijkstra_search, astar_search, greedy_best_first_search
+from src.algorithms.multi_location import (
+    solve_tsp_dynamic_programming,
+    solve_tsp_nearest_neighbor,
+)
 from backend.schemas import (
     SearchRequest,
     SearchResponse,
+    MultiLocationSearchRequest,
+    MultiLocationSearchResponse,
+    TSPCandidateResponse,
     NodeResponse,
     EdgeResponse,
     GraphInfoResponse,
@@ -95,6 +103,47 @@ def normalize_algorithm(value: str) -> str:
         "greedy": "greedy",
     }
     return aliases.get(raw, raw)
+
+
+def get_path_metrics(path: list[str]) -> tuple[float, float]:
+    """Return physical distance and traffic-adjusted time for a node path."""
+    total_distance = 0.0
+    total_time = 0.0
+    congestion_multipliers = {1: 1.0, 2: 1.3, 3: 1.8, 4: 2.4, 5: 3.5}
+
+    for source_id, target_id in zip(path, path[1:]):
+        edge = next(
+            (edge for edge in graph.get_neighbors(source_id) if edge.target_id == target_id),
+            None,
+        )
+        if edge is None:
+            raise ValueError(f"Missing edge in reconstructed path: {source_id}->{target_id}")
+
+        total_distance += edge.distance
+        multiplier = congestion_multipliers.get(max(1, edge.congestion_level), 1.0)
+        total_time += edge.estimated_time * multiplier + edge.get_risk_penalty()
+
+    return total_distance, total_time
+
+
+def make_tsp_candidate(
+    algorithm_name: str,
+    visiting_order: list[str],
+    path: list[str],
+    total_cost: float,
+    execution_time_ms: float,
+) -> TSPCandidateResponse:
+    total_distance, total_time = get_path_metrics(path)
+    return TSPCandidateResponse(
+        algorithm_name=algorithm_name,
+        visiting_order=visiting_order,
+        visiting_order_names=[graph.nodes[node_id].name for node_id in visiting_order],
+        path=path,
+        total_cost=total_cost,
+        total_distance=total_distance,
+        total_time=total_time,
+        execution_time_ms=execution_time_ms,
+    )
 
 
 @app.get("/api/nodes", response_model=list[NodeResponse], tags=["Graph"])
@@ -171,6 +220,101 @@ def get_graph():
             })
 
     return {"nodes": nodes, "edges": edges}
+
+
+@app.post(
+    "/api/search/multi",
+    response_model=MultiLocationSearchResponse,
+    tags=["Search"],
+)
+def search_multi_location(req: MultiLocationSearchRequest):
+    """Compare both TSP solvers and return the lower-cost open route."""
+    start_id = str(req.start)
+    end_id = str(req.end)
+    waypoint_ids = [str(node_id) for node_id in req.waypoints]
+
+    requested_ids = [start_id, *waypoint_ids, end_id]
+    missing = [node_id for node_id in requested_ids if node_id not in graph.nodes]
+    if missing:
+        raise HTTPException(404, f"Node '{missing[0]}' không tồn tại")
+    if start_id == end_id:
+        raise HTTPException(400, "Start và End phải khác nhau")
+    if len(set(requested_ids)) != len(requested_ids):
+        raise HTTPException(400, "Start, End và các waypoint không được trùng nhau")
+
+    evaluator = get_cost_evaluator(req.optimization)
+
+    nn_started = time.perf_counter()
+    nn_order, nn_path, nn_cost = solve_tsp_nearest_neighbor(
+        graph, start_id, waypoint_ids, evaluator, end_id=end_id
+    )
+    nn_ms = (time.perf_counter() - nn_started) * 1000.0
+
+    dp_started = time.perf_counter()
+    dp_order, dp_path, dp_cost = solve_tsp_dynamic_programming(
+        graph, start_id, waypoint_ids, evaluator, end_id=end_id
+    )
+    dp_ms = (time.perf_counter() - dp_started) * 1000.0
+
+    raw_candidates = [
+        ("TSP Nearest Neighbor", nn_order, nn_path, nn_cost, nn_ms),
+        ("TSP Held-Karp", dp_order, dp_path, dp_cost, dp_ms),
+    ]
+    if any(not path or cost == float("inf") for _, _, path, cost, _ in raw_candidates):
+        raise HTTPException(404, "Không tìm thấy hành trình đi qua tất cả địa điểm")
+
+    candidates = [make_tsp_candidate(*candidate) for candidate in raw_candidates]
+    # Held-Karp wins ties because it carries an optimality guarantee.
+    selected = min(
+        candidates,
+        key=lambda candidate: (
+            candidate.total_cost,
+            0 if candidate.algorithm_name == "TSP Held-Karp" else 1,
+        ),
+    )
+
+    path_names = [graph.nodes[node_id].name for node_id in selected.path]
+    comparison_data = [candidate.model_dump() for candidate in candidates]
+    explanation = {
+        "headline": "Đã so sánh hai thuật toán TSP và chọn hành trình có tổng chi phí thấp hơn.",
+        "why_selected": (
+            f"{selected.algorithm_name} được chọn với tổng chi phí "
+            f"{selected.total_cost:.2f} theo mục tiêu '{req.optimization}'."
+        ),
+        "optimality": (
+            "Held–Karp xét toàn bộ thứ tự waypoint và cho lời giải tối ưu; "
+            "Nearest Neighbor là heuristic chọn điểm gần nhất ở từng bước."
+        ),
+        "algorithm": selected.algorithm_name,
+        "optimization": req.optimization,
+        "comparison_note": "Start và End được giữ cố định; chỉ thứ tự waypoint ở giữa được tối ưu.",
+        "tsp_comparison": comparison_data,
+        "visiting_order_names": selected.visiting_order_names,
+        "optimality_reference": None,
+        "route_comparison": None,
+        "congested_segments": [],
+    }
+
+    return MultiLocationSearchResponse(
+        algorithm_name=selected.algorithm_name,
+        selected_algorithm=selected.algorithm_name,
+        visiting_order=selected.visiting_order,
+        visiting_order_names=selected.visiting_order_names,
+        path=selected.path,
+        total_cost=selected.total_cost,
+        total_distance=selected.total_distance,
+        total_time=selected.total_time,
+        execution_time_ms=nn_ms + dp_ms,
+        path_node_names=path_names,
+        path_coordinates=[
+            {"lat": graph.nodes[node_id].lat, "lng": graph.nodes[node_id].lng}
+            for node_id in selected.path
+        ],
+        start_name=graph.nodes[start_id].name,
+        end_name=graph.nodes[end_id].name,
+        explanation=explanation,
+        comparison=candidates,
+    )
 
 
 @app.post("/api/search", response_model=SearchResponse, tags=["Search"])

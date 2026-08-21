@@ -51,12 +51,11 @@
   {0.4ex}{\titlerule[1.2pt]\vspace{1ex}\Huge}
 \titlespacing*{\chapter}{0pt}{-18pt}{24pt}
 \titleformat{\section}{\Large\bfseries\color{hcmusblue}}{\thesection}{0.7em}{}
-\titleformat{\subsection}{\large\bfseries\color{darkgray}}{\thesubsection}{0.7em}{}
+\titleformat{\subsection}{\large\bfseries\color{hcmusblue}}{\thesubsection}{0.7em}{}
 
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\small Introduction to Artificial Intelligence - Lab 1}
-\fancyhead[R]{\small Group 314}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 
@@ -168,7 +167,7 @@ on the final repository state inspected on August 18, 2026.
 \chapter{Group Introduction}
 
 \section{Group Information}
-The project is prepared by Group 314 for Lab 1 of Introduction to Artificial
+The project is prepared by Group 11 for Lab 1 of Introduction to Artificial
 Intelligence. Table~\ref{tab:members} records the submitted member list.
 
 \begin{table}[H]
@@ -199,9 +198,9 @@ final demonstration.
 \toprule
 \textbf{Member} & \textbf{Main contribution}\\
 \midrule
-Dương Trung Hiếu (Web/Local GUI) & Built the interface, map, route selection, traversal animations, route explanations and metrics, and algorithm comparison; implemented multi-location route optimization; and supported backend integration.\\
-Trần Vũ Anh Kiệt (Core Algorithms) & Designed the graph structure; implemented BFS, DFS, UCS, A*, and advanced single-route search; and optimized and debugged the algorithms.\\
-Nguyễn Hoàng Bảo Long (Data \& Model) & Curated the road dataset, defined and validated the cost model, documented the data and modeling, and finalized the report and demo materials.\\
+Dương Trung Hiếu (Web/Local GUI) & Built the interface, map, route selection, traversal animations, route explanations and metrics, and algorithm comparison; implemented multi-location route optimization and video .\\
+Trần Vũ Anh Kiệt (Core Algorithms) & Designed the graph structure; implemented BFS, DFS, UCS, A*, and advanced single-route search;  and supported backend integration.\\
+Nguyễn Hoàng Bảo Long (Data \& Model) & Curated the road dataset, defined and validated the cost model, documented the data and modeling, optimized and debugged the algorithms; and finalized the report.\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -250,7 +249,6 @@ The road network is a directed weighted graph $G=(V,E)$:
 
 \section{Nodes and Edges}
 
-\titleformat{\subsection}{\large\bfseries\color{hcmusblue}}{\thesubsection}{0.7em}{}
 \subsection{Nodes}
 Each node represents a location or intersection in the road network. A node has
 the following attributes:
@@ -276,8 +274,8 @@ node that owns the \code{connected\_to} list.
 traffic conditions.
 \item \code{congestion\_level}: the simulated traffic level from 1 (smooth) to
 5 (gridlock).
-\item \code{road\_type}: the road classification, for example
-\code{primary}, \code{secondary}, or \code{residential}.
+\item \code{road\_type}: the road classification, such as \code{primary} or
+\code{secondary}.
 \item \code{direction}: whether the road is \code{one-way} or \code{two-way}.
 \item \code{risk\_factors}: a list of possible risks, such as flooding,
 construction, narrow roads, or complex intersections.
@@ -287,7 +285,6 @@ road segment on the map.
 
 The graph stores these directed edges in an adjacency list. This representation
 supports efficient neighbor lookup and uses $O(|V|+|E|)$ memory.
-\titleformat{\subsection}{\large\bfseries\color{darkgray}}{\thesubsection}{0.7em}{}
 
 \section{Traffic-Aware Cost Function}
 Let $d(e)$ be physical distance, $t(e)$ nominal time, and $c(e)$ congestion.
@@ -405,7 +402,7 @@ A* combines known and estimated cost:
 \begin{equation}f(n)=g(n)+h(n).\end{equation}
 It expands the lowest $f$. The heuristic is Haversine distance in distance mode,
 distance divided by 16.67 m/s in time mode, and
-\begin{equation}h_{mixed}(n)=d_H(n,t)+10d_H(n,t)/16.67\end{equation}
+\begin{equation}h_{mixed}(n)=\frac{d_H(n,t)+10d_H(n,t)/16.67}{2}\end{equation}
 in mixed mode. Because straight-line travel and maximum-speed travel are lower
 bounds, the intended heuristic is admissible. With the same lower-bound metric
 on every transition it is also intended to be consistent. This preserves
@@ -758,7 +755,10 @@ The final FastAPI/React flow supports route selection, waypoint legs,
 step-by-step visualization, aggregate metrics, and readable explanations.
 
 % -----------------------------------------------------------------------------
+\renewcommand{\bibname}{References}
 \begin{thebibliography}{99}
+\phantomsection
+\addcontentsline{toc}{chapter}{References}
 \bibitem{lab1}
 Introduction to Artificial Intelligence,
 \textit{Lab 1: Search Algorithms for Vietnamese Traffic Route Optimization},
@@ -776,11 +776,6 @@ Peter E. Hart, Nils J. Nilsson, and Bertram Raphael,
 \bibitem{cormen2022}
 Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, and Clifford Stein,
 \textit{Introduction to Algorithms}, 4th ed., MIT Press, 2022.
-
-\bibitem{hcmusbrand}
-University of Science, VNU-HCM,
-\textit{HCMUS Brand Identity and Logo Usage Guide},
-\url{https://hcmus.edu.vn/he-thong-nhan-dien-thuong-hieu/}, accessed August 18, 2026.
 
 \bibitem{fastapi}
 FastAPI, \textit{FastAPI Documentation},
@@ -808,24 +803,5 @@ backend/api.py                 FastAPI endpoints
 backend/schemas.py             Request/response schemas
 frontend/src/                  React and Leaflet interface
 \end{verbatim}
-
-\chapter{Requirement Traceability}
-\begin{longtable}{p{2.1cm}p{5.2cm}p{5.5cm}}
-\toprule
-\textbf{Item} & \textbf{Required topic} & \textbf{Location in this report}\\
-\midrule
-\endhead
-(a) & Group information, contributions, completion & Chapter 1\\
-(b) & Problem context and usefulness & Chapter 2\\
-(c) & Graph, state, transitions, attributes, cost & Chapter 3\\
-(d) & Source, locations, values, assumptions & Chapter 4\\
-(e) & Principles, examples, heuristic, guarantees & Chapter 5\\
-(f) & Flowcharts, modules, GUI interaction & Chapter 6\\
-(g) & Theory and actual algorithm comparison & Chapter 7\\
-(h) & Multi-location method, orders, guarantee & Chapter 8\\
-(i) & Setup, GUI use, examples, screenshot & Chapter 9\\
-(j) & Challenges, limitations, extensions & Chapter 10\\
-\bottomrule
-\end{longtable}
 
 \end{document}

@@ -14,6 +14,13 @@ class SearchRequest(BaseModel):
     optimization: Literal["distance", "time", "mixed"] = "mixed"
 
 
+class MultiLocationSearchRequest(BaseModel):
+    start: str
+    end: str
+    waypoints: List[str] = Field(min_length=1, max_length=12)
+    optimization: Literal["distance", "time", "mixed"] = "mixed"
+
+
 # ─── Response Schemas ───────────────────────────────────────
 
 class NodeResponse(BaseModel):
@@ -55,6 +62,38 @@ class SearchResponse(BaseModel):
     end_name: str = ""
     steps: list[dict] = Field(default_factory=list)
     explanation: dict = Field(default_factory=dict)
+
+
+class TSPCandidateResponse(BaseModel):
+    algorithm_name: str
+    visiting_order: List[str]
+    visiting_order_names: List[str]
+    path: List[str]
+    total_cost: float
+    total_distance: float
+    total_time: float
+    execution_time_ms: float
+
+
+class MultiLocationSearchResponse(BaseModel):
+    algorithm_name: str
+    selected_algorithm: str
+    visiting_order: List[str]
+    visiting_order_names: List[str]
+    path: List[str]
+    explored_nodes: List[str] = Field(default_factory=list)
+    total_cost: float
+    total_distance: float
+    total_time: float
+    explored_count: int = 0
+    execution_time_ms: float
+    path_node_names: List[str] = Field(default_factory=list)
+    path_coordinates: List[Coordinate] = Field(default_factory=list)
+    start_name: str = ""
+    end_name: str = ""
+    steps: list[dict] = Field(default_factory=list)
+    explanation: dict = Field(default_factory=dict)
+    comparison: List[TSPCandidateResponse]
 
 
 class GraphInfoResponse(BaseModel):
