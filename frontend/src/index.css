@@ -15,3 +15,13 @@ body,
     sans-serif;
   color: #363236;
 }
+
+/* Route direction arrow markers */
+.leaflet-div-icon.route-arrow {
+  background: transparent;
+  border: none;
+}
+
+.route-arrow svg {
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+}

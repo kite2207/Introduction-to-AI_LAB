@@ -173,7 +173,9 @@ export default function App() {
 
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data?.detail || `Multi-location search failed (${response.status})`);
+      throw new Error(
+        data?.detail || `Multi-location search failed (${response.status})`,
+      );
     }
     return data;
   };
@@ -480,6 +482,10 @@ export default function App() {
             cost={routeStats.cost}
             exploredCount={routeStats.exploredCount}
             executionTimeMs={routeStats.executionTimeMs}
+            startName={start != null ? nodeMap[start]?.name || start : ""}
+            endName={end != null ? nodeMap[end]?.name || end : ""}
+            waypointCount={waypoints.length}
+            nodeCount={pathNodeNames.length || 0}
             pathNodeNames={pathNodeNames}
           />
         </div>

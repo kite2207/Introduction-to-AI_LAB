@@ -146,6 +146,41 @@ def make_tsp_candidate(
     )
 
 
+def build_multi_location_steps(visiting_order: list[str], evaluator):
+    """
+    Concatenate each segment's A* steps into a single timeline for the UI.
+
+    Each step keeps its per-segment ``step`` index rebased onto the combined
+    timeline, and ``previousExploredEdges`` carries the explored-edge diff
+    across segment boundaries so the map's new/old edge highlighting works
+    for the whole multi-waypoint route.
+    """
+    combined = []
+    for i in range(len(visiting_order) - 1):
+        segment = astar_search(
+            graph,
+            visiting_order[i],
+            visiting_order[i + 1],
+            evaluator,
+        )
+        segment_steps = segment.steps or []
+        step_offset = len(combined)
+
+        for index, trace_step in enumerate(segment_steps):
+            previous_explored_edges = (
+                segment_steps[index - 1].get("exploredEdges", []) if index > 0 else (combined[-1].get("exploredEdges", []) if combined else [])
+            )
+            combined.append(
+                {
+                    **trace_step,
+                    "step": step_offset + index,
+                    "previousExploredEdges": previous_explored_edges,
+                }
+            )
+
+    return combined
+
+
 @app.get("/api/nodes", response_model=list[NodeResponse], tags=["Graph"])
 def get_nodes():
     return [
@@ -200,24 +235,28 @@ def get_graph():
     edges = []
 
     for node_id, node in hcm_data.items():
-        nodes.append({
-            "id": str(node_id),
-            "name": node.get("name") or str(node_id),
-            "lat": node["lat"],
-            "lng": node["lng"],
-            "type": node.get("type") or "intersection",
-        })
+        nodes.append(
+            {
+                "id": str(node_id),
+                "name": node.get("name") or str(node_id),
+                "lat": node["lat"],
+                "lng": node["lng"],
+                "type": node.get("type") or "intersection",
+            }
+        )
         for edge in node.get("connected_to", []):
-            edges.append({
-                "source": str(node_id),
-                "target": str(edge["target_node"]),
-                "distance": edge["distance"],
-                "estimatedTime": edge["estimated_time"],
-                "congestion": edge.get("congestion_level", 1),
-                "direction": edge.get("direction", "two-way"),
-                "risk": edge.get("risk_factors", []),
-                "geometry": edge.get("geometry"),
-            })
+            edges.append(
+                {
+                    "source": str(node_id),
+                    "target": str(edge["target_node"]),
+                    "distance": edge["distance"],
+                    "estimatedTime": edge["estimated_time"],
+                    "congestion": edge.get("congestion_level", 1),
+                    "direction": edge.get("direction", "two-way"),
+                    "risk": edge.get("risk_factors", []),
+                    "geometry": edge.get("geometry"),
+                }
+            )
 
     return {"nodes": nodes, "edges": edges}
 
@@ -245,15 +284,11 @@ def search_multi_location(req: MultiLocationSearchRequest):
     evaluator = get_cost_evaluator(req.optimization)
 
     nn_started = time.perf_counter()
-    nn_order, nn_path, nn_cost = solve_tsp_nearest_neighbor(
-        graph, start_id, waypoint_ids, evaluator, end_id=end_id
-    )
+    nn_order, nn_path, nn_cost = solve_tsp_nearest_neighbor(graph, start_id, waypoint_ids, evaluator, end_id=end_id)
     nn_ms = (time.perf_counter() - nn_started) * 1000.0
 
     dp_started = time.perf_counter()
-    dp_order, dp_path, dp_cost = solve_tsp_dynamic_programming(
-        graph, start_id, waypoint_ids, evaluator, end_id=end_id
-    )
+    dp_order, dp_path, dp_cost = solve_tsp_dynamic_programming(graph, start_id, waypoint_ids, evaluator, end_id=end_id)
     dp_ms = (time.perf_counter() - dp_started) * 1000.0
 
     raw_candidates = [
@@ -277,14 +312,8 @@ def search_multi_location(req: MultiLocationSearchRequest):
     comparison_data = [candidate.model_dump() for candidate in candidates]
     explanation = {
         "headline": "Đã so sánh hai thuật toán TSP và chọn hành trình có tổng chi phí thấp hơn.",
-        "why_selected": (
-            f"{selected.algorithm_name} được chọn với tổng chi phí "
-            f"{selected.total_cost:.2f} theo mục tiêu '{req.optimization}'."
-        ),
-        "optimality": (
-            "Held–Karp xét toàn bộ thứ tự waypoint và cho lời giải tối ưu; "
-            "Nearest Neighbor là heuristic chọn điểm gần nhất ở từng bước."
-        ),
+        "why_selected": (f"{selected.algorithm_name} được chọn với tổng chi phí {selected.total_cost:.2f} theo mục tiêu '{req.optimization}'."),
+        "optimality": ("Held–Karp xét toàn bộ thứ tự waypoint và cho lời giải tối ưu; Nearest Neighbor là heuristic chọn điểm gần nhất ở từng bước."),
         "algorithm": selected.algorithm_name,
         "optimization": req.optimization,
         "comparison_note": "Start và End được giữ cố định; chỉ thứ tự waypoint ở giữa được tối ưu.",
@@ -294,6 +323,19 @@ def search_multi_location(req: MultiLocationSearchRequest):
         "route_comparison": None,
         "congested_segments": [],
     }
+
+    steps = build_multi_location_steps(
+        selected.visiting_order,
+        evaluator,
+    )
+
+    explored_nodes = []
+    seen_nodes = set()
+    for step in steps:
+        for node_id in step.get("exploredNodes", []):
+            if node_id not in seen_nodes:
+                seen_nodes.add(node_id)
+                explored_nodes.append(node_id)
 
     return MultiLocationSearchResponse(
         algorithm_name=selected.algorithm_name,
@@ -305,15 +347,15 @@ def search_multi_location(req: MultiLocationSearchRequest):
         total_distance=selected.total_distance,
         total_time=selected.total_time,
         execution_time_ms=nn_ms + dp_ms,
+        explored_nodes=explored_nodes,
+        explored_count=len(explored_nodes),
         path_node_names=path_names,
-        path_coordinates=[
-            {"lat": graph.nodes[node_id].lat, "lng": graph.nodes[node_id].lng}
-            for node_id in selected.path
-        ],
+        path_coordinates=[{"lat": graph.nodes[node_id].lat, "lng": graph.nodes[node_id].lng} for node_id in selected.path],
         start_name=graph.nodes[start_id].name,
         end_name=graph.nodes[end_id].name,
         explanation=explanation,
         comparison=candidates,
+        steps=steps,
     )
 
 

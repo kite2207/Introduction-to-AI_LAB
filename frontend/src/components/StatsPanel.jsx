@@ -197,7 +197,8 @@ function ExplanationSection({ explanation, algorithmName }) {
                     <span>{formatNumber(candidate.total_cost)}</span>
                   </div>
                   <div className="text-gray-500">
-                    {formatDistance(candidate.total_distance)} · {formatTime(candidate.total_time)}
+                    {formatDistance(candidate.total_distance)} ·{" "}
+                    {formatTime(candidate.total_time)}
                   </div>
                 </div>
               ))}
@@ -289,6 +290,10 @@ export default function StatsPanel({
   exploredCount,
   executionTimeMs,
   simulation,
+  startName = "",
+  endName = "",
+  waypointCount = 0,
+  nodeCount = 0,
 }) {
   const kind = getAlgorithmKind(algorithm, algorithmName);
 
@@ -345,6 +350,51 @@ export default function StatsPanel({
           </div>
           <div className="text-sm font-bold text-[#363236]">
             {exploredCount ?? 0}
+          </div>
+        </div>
+
+        <div className="rounded-lg border-2 border-[#363236]/15 bg-white p-2.5">
+          <div className="flex items-center gap-1.5 text-[10px] text-[#363236]/70 mb-1">
+            <GitBranch className="w-3 h-3 text-[#363236]/70" />
+            Số node tuyến
+          </div>
+          <div className="text-sm font-bold text-[#363236]">
+            {nodeCount || "—"}
+          </div>
+        </div>
+
+        <div className="rounded-lg border-2 border-[#F7B558] bg-[#F7B558]/10 p-2.5">
+          <div className="flex items-center gap-1.5 text-[10px] text-[#363236]/70 mb-1">
+            <MapPin className="w-3 h-3 text-[#F7B558]" />
+            Điểm dừng
+          </div>
+          <div className="text-sm font-bold text-[#363236]">
+            {waypointCount}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-[#363236]/10 bg-white p-3">
+        <div className="text-[10px] text-[#363236]/50 uppercase tracking-wide mb-2">
+          Hành trình
+        </div>
+
+        <div className="space-y-1.5 text-xs">
+          <div className="flex justify-between gap-2">
+            <span className="text-gray-500">Bắt đầu</span>
+            <span className="font-semibold text-right">{startName || "—"}</span>
+          </div>
+
+          <div className="flex justify-between gap-2">
+            <span className="text-gray-500">Kết thúc</span>
+            <span className="font-semibold text-right">{endName || "—"}</span>
+          </div>
+
+          <div className="flex justify-between gap-2">
+            <span className="text-gray-500">Số chặng</span>
+            <span className="font-semibold text-right">
+              {Math.max(1, waypointCount + 1)}
+            </span>
           </div>
         </div>
       </div>

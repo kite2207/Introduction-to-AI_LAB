@@ -4,9 +4,11 @@ import {
   CircleMarker,
   Popup,
   Polyline,
+  Marker,
 } from "react-leaflet";
 import { useMap, useMapEvents } from "react-leaflet";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Fragment } from "react";
+import { divIcon } from "leaflet";
 
 function FitHCM({ nodes }) {
   const map = useMap();
@@ -38,9 +40,28 @@ function ViewportObserver({ onChange }) {
 }
 
 const normalizePoint = (point) =>
-  Array.isArray(point)
-    ? [point[0], point[1]]
-    : [point.lat, point.lng];
+  Array.isArray(point) ? [point[0], point[1]] : [point.lat, point.lng];
+
+const bearingFromNorth = (from, to) =>
+  (Math.atan2(to[1] - from[1], to[0] - from[0]) * 180) / Math.PI;
+
+const routeArrowIcon = (rotation) =>
+  divIcon({
+    className: "route-arrow",
+    html: `<div style="transform: rotate(${rotation}deg)">
+      <svg width="22" height="22" viewBox="0 0 22 22">
+        <path
+          d="M11 2 L18 18 L11 14 L4 18 Z"
+          fill="#ffffff"
+          stroke="#7f1d1d"
+          stroke-width="1.5"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+  });
 
 const edgeKey = (source, target) => {
   const a = String(source);
@@ -53,26 +74,23 @@ const findGraphEdge = (edges, source, target) =>
   edges.find(
     (edge) =>
       String(edge.source) === String(source) &&
-      String(edge.target) === String(target)
+      String(edge.target) === String(target),
   ) ||
   edges.find(
     (edge) =>
       String(edge.source) === String(target) &&
-      String(edge.target) === String(source)
+      String(edge.target) === String(source),
   );
 
 const getEdgePositions = (
   edge,
   nodeMap,
   source = edge.source,
-  target = edge.target
+  target = edge.target,
 ) => {
   let positions;
 
-  if (
-    Array.isArray(edge?.geometry) &&
-    edge.geometry.length > 1
-  ) {
+  if (Array.isArray(edge?.geometry) && edge.geometry.length > 1) {
     positions = edge.geometry.map(normalizePoint);
   } else {
     const from = nodeMap[source];
@@ -96,31 +114,18 @@ const getEdgePositions = (
   return positions;
 };
 
-const buildSegmentsFromTraceEdges = (
-  traceEdges,
-  edges,
-  nodeMap
-) =>
+const buildSegmentsFromTraceEdges = (traceEdges, edges, nodeMap) =>
   (traceEdges || [])
     .map((traceEdge, index) => {
       const source = traceEdge.source;
       const target = traceEdge.target;
-      const edge = findGraphEdge(
-        edges,
-        source,
-        target
-      );
+      const edge = findGraphEdge(edges, source, target);
 
       if (!edge) {
         return null;
       }
 
-      const positions = getEdgePositions(
-        edge,
-        nodeMap,
-        source,
-        target
-      );
+      const positions = getEdgePositions(edge, nodeMap, source, target);
 
       if (!positions || positions.length < 2) {
         return null;
@@ -136,11 +141,7 @@ const buildSegmentsFromTraceEdges = (
     })
     .filter(Boolean);
 
-const buildRouteSegments = (
-  path,
-  edges,
-  nodeMap
-) => {
+const buildRouteSegments = (path, edges, nodeMap) => {
   if (!path || path.length < 2) {
     return [];
   }
@@ -151,22 +152,13 @@ const buildRouteSegments = (
     const source = path[i];
     const target = path[i + 1];
 
-    const edge = findGraphEdge(
-      edges,
-      source,
-      target
-    );
+    const edge = findGraphEdge(edges, source, target);
 
     if (!edge) {
       continue;
     }
 
-    const positions = getEdgePositions(
-      edge,
-      nodeMap,
-      source,
-      target
-    );
+    const positions = getEdgePositions(edge, nodeMap, source, target);
 
     if (!positions || positions.length < 2) {
       continue;
@@ -201,86 +193,86 @@ export default function HCMMap({
     [11.15, 107.05],
   ];
 
-  const exploredEdges =
-    simulation?.exploredEdges || [];
+  const exploredEdges = simulation?.exploredEdges || [];
 
-  const previousExploredEdges =
-    simulation?.previousExploredEdges || [];
+  const previousExploredEdges = simulation?.previousExploredEdges || [];
 
-  const currentNode =
-    simulation?.current || null;
+  const currentNode = simulation?.current || null;
 
   const previousKeys = useMemo(
     () =>
       new Set(
-        previousExploredEdges.map((edge) =>
-          edgeKey(edge.source, edge.target)
-        )
+        previousExploredEdges.map((edge) => edgeKey(edge.source, edge.target)),
       ),
-    [previousExploredEdges]
+    [previousExploredEdges],
   );
 
   const newEdgeTrace = exploredEdges.filter(
     (traceEdge) =>
-      !previousKeys.has(
-        edgeKey(traceEdge.source, traceEdge.target)
-      )
+      !previousKeys.has(edgeKey(traceEdge.source, traceEdge.target)),
   );
 
-  const oldEdgeTrace = exploredEdges.filter(
-    (traceEdge) =>
-      previousKeys.has(
-        edgeKey(traceEdge.source, traceEdge.target)
-      )
+  const oldEdgeTrace = exploredEdges.filter((traceEdge) =>
+    previousKeys.has(edgeKey(traceEdge.source, traceEdge.target)),
   );
 
   const oldEdgeSegments = useMemo(
-    () =>
-      buildSegmentsFromTraceEdges(
-        oldEdgeTrace,
-        edges,
-        nodeMap
-      ),
-    [oldEdgeTrace, edges, nodeMap]
+    () => buildSegmentsFromTraceEdges(oldEdgeTrace, edges, nodeMap),
+    [oldEdgeTrace, edges, nodeMap],
   );
 
   const newEdgeSegments = useMemo(
-    () =>
-      buildSegmentsFromTraceEdges(
-        newEdgeTrace,
-        edges,
-        nodeMap
-      ),
-    [newEdgeTrace, edges, nodeMap]
+    () => buildSegmentsFromTraceEdges(newEdgeTrace, edges, nodeMap),
+    [newEdgeTrace, edges, nodeMap],
   );
 
   const routeSegments = useMemo(
-    () =>
-      buildRouteSegments(
-        path,
-        edges,
-        nodeMap
-      ),
-    [path, edges, nodeMap]
+    () => buildRouteSegments(path, edges, nodeMap),
+    [path, edges, nodeMap],
   );
 
-  const exploredNodeIds =
-    simulation?.exploredNodes || [];
+  const routeArrows = useMemo(
+    () =>
+      routeSegments.map((segment) => {
+        const pts = segment.positions;
+        const from = pts[0];
+        const to = pts[pts.length - 1];
 
-  const frontierNodeIds =
-    simulation?.frontierNodes || [];
+        return {
+          key: `route-arrow-${segment.key}`,
+          center: [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2],
+          rotation: bearingFromNorth(from, to),
+        };
+      }),
+    [routeSegments],
+  );
+
+  const exploredNodeIds = simulation?.exploredNodes || [];
+
+  const frontierNodeIds = simulation?.frontierNodes || [];
 
   const emphasizedNodeIds = useMemo(
-    () => new Set([
+    () =>
+      new Set(
+        [
+          start,
+          end,
+          currentNode,
+          ...waypoints,
+          ...path,
+          ...exploredNodeIds,
+          ...frontierNodeIds,
+        ].filter((id) => id != null),
+      ),
+    [
       start,
       end,
       currentNode,
-      ...waypoints,
-      ...path,
-      ...exploredNodeIds,
-      ...frontierNodeIds,
-    ].filter((id) => id != null)),
-    [start, end, currentNode, waypoints, path, exploredNodeIds, frontierNodeIds]
+      waypoints,
+      path,
+      exploredNodeIds,
+      frontierNodeIds,
+    ],
   );
 
   const visibleNodes = useMemo(() => {
@@ -292,7 +284,7 @@ export default function HCMMap({
       (node) =>
         emphasizedNodeIds.has(node.id) ||
         !viewport.bounds ||
-        viewport.bounds.contains([node.lat, node.lng])
+        viewport.bounds.contains([node.lat, node.lng]),
     );
   }, [nodes, emphasizedNodeIds, viewport]);
 
@@ -336,16 +328,11 @@ export default function HCMMap({
       <FitHCM nodes={nodes} />
       <ViewportObserver onChange={setViewport} />
 
-      <TileLayer
-        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
       {/* Base graph is shown only when zoomed in to avoid visual clutter. */}
       {visibleBaseEdges.map((edge, index) => {
-        const positions = getEdgePositions(
-          edge,
-          nodeMap
-        );
+        const positions = getEdgePositions(edge, nodeMap);
 
         if (!positions) {
           return null;
@@ -414,6 +401,17 @@ export default function HCMMap({
         />
       ))}
 
+      {/* Direction arrows along the selected route. */}
+      {routeArrows.map((arrow) => (
+        <Marker
+          key={arrow.key}
+          position={arrow.center}
+          icon={routeArrowIcon(arrow.rotation)}
+          interactive={false}
+          keyboard={false}
+        />
+      ))}
+
       {visibleNodes.map((node) => {
         let color = "#9ca3af";
 
@@ -442,28 +440,45 @@ export default function HCMMap({
         }
 
         const isEmphasized = emphasizedNodeIds.has(node.id);
+        const isSelectedEndpoint =
+          node.id === start || node.id === end || waypoints.includes(node.id);
 
         return (
-          <CircleMarker
-            key={node.id}
-            center={[node.lat, node.lng]}
-            radius={isEmphasized ? 6 : 3.5}
-            pathOptions={{
-              color: "#ffffff",
-              weight: isEmphasized ? 2 : 1,
-              fillColor: color,
-              fillOpacity: isEmphasized ? 1 : 0.68,
-            }}
-            eventHandlers={{
-              click: () => onNodeClick(node.id),
-            }}
-          >
-            <Popup>
-              <strong>{node.name}</strong>
-              <br />
-              ID: {node.id}
-            </Popup>
-          </CircleMarker>
+          <Fragment key={node.id}>
+            {isSelectedEndpoint && (
+              <CircleMarker
+                center={[node.lat, node.lng]}
+                radius={13}
+                pathOptions={{
+                  color,
+                  weight: 3,
+                  fillColor: color,
+                  fillOpacity: 0.22,
+                }}
+                interactive={false}
+              />
+            )}
+
+            <CircleMarker
+              center={[node.lat, node.lng]}
+              radius={isEmphasized ? 9 : 5.5}
+              pathOptions={{
+                color: "#ffffff",
+                weight: isEmphasized ? 3 : 1.5,
+                fillColor: color,
+                fillOpacity: isEmphasized ? 1 : 0.72,
+              }}
+              eventHandlers={{
+                click: () => onNodeClick(node.id),
+              }}
+            >
+              <Popup>
+                <strong>{node.name}</strong>
+                <br />
+                ID: {node.id}
+              </Popup>
+            </CircleMarker>
+          </Fragment>
         );
       })}
     </MapContainer>
