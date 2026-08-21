@@ -153,6 +153,7 @@ function ExplanationSection({ explanation, algorithmName }) {
 
   const congested = explanation.congested_segments || [];
   const comparison = explanation.comparison;
+  const tspComparison = explanation.tsp_comparison || [];
 
   return (
     <div className="mt-4">
@@ -179,6 +180,35 @@ function ExplanationSection({ explanation, algorithmName }) {
           <div className="font-semibold text-gray-800 mb-1">Tính tối ưu</div>
           <div className="text-gray-500">{explanation.optimality}</div>
         </div>
+
+        {tspComparison.length > 0 && (
+          <div>
+            <div className="font-semibold text-gray-800 mb-1">
+              So sánh hai thuật toán TSP
+            </div>
+            <div className="space-y-1.5">
+              {tspComparison.map((candidate) => (
+                <div
+                  key={candidate.algorithm_name}
+                  className="rounded bg-gray-50 p-2"
+                >
+                  <div className="flex justify-between gap-2 font-medium text-gray-700">
+                    <span>{candidate.algorithm_name}</span>
+                    <span>{formatNumber(candidate.total_cost)}</span>
+                  </div>
+                  <div className="text-gray-500">
+                    {formatDistance(candidate.total_distance)} · {formatTime(candidate.total_time)}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {explanation.visiting_order_names?.length > 0 && (
+              <div className="mt-2 text-gray-500 leading-4">
+                Thứ tự được chọn: {explanation.visiting_order_names.join(" → ")}
+              </div>
+            )}
+          </div>
+        )}
 
         {congested.length > 0 && (
           <div>

@@ -157,6 +157,27 @@ export default function App() {
     return data;
   };
 
+  const callMultiLocationApi = async () => {
+    const response = await fetch(`${API_BASE_URL}/search/multi`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        start: String(start),
+        end: String(end),
+        waypoints: waypoints.map(String),
+        optimization,
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.detail || `Multi-location search failed (${response.status})`);
+    }
+    return data;
+  };
+
   const searchRoute = async () => {
     if (!start || !end || loading) {
       return;
@@ -166,9 +187,30 @@ export default function App() {
     setHasSearched(false);
 
     try {
-      // Current backend API accepts start/end only.
-      // When waypoints exist, search each leg sequentially:
-      // start -> waypoint 1 -> ... -> waypoint N -> end.
+      if (waypoints.length > 0) {
+        // Backend runs both TSP solvers, compares total cost, and returns the
+        // better ordering while keeping start/end fixed.
+        const result = await callMultiLocationApi();
+
+        setAlgorithmName(result.algorithm_name || "TSP");
+        setPath(result.path || []);
+        setRoutePositions(result.path_coordinates || []);
+        setPathNodeNames(result.path_node_names || []);
+        setExploredNodes(result.explored_nodes || []);
+        setSimulationSteps(result.steps || []);
+        setRouteExplanation(result.explanation || null);
+        setStep(0);
+        setRouteStats({
+          distance: Number(result.total_distance || 0),
+          time: Number(result.total_time || 0),
+          cost: result.total_cost == null ? null : Number(result.total_cost),
+          exploredCount: Number(result.explored_count || 0),
+          executionTimeMs: Number(result.execution_time_ms || 0),
+        });
+        setHasSearched(true);
+        return;
+      }
+
       const stops = [start, ...waypoints, end];
 
       const results = [];
